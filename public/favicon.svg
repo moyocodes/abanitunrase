@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">ABÁNÍTÚNRASE favicon</title>
+  <desc id="desc">A minimal letter A with the ABÁNÍTÚNRASE brand name set on a straight line through the center.</desc>
+  <defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity=".45"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" fill="#000"/>
+
+  <g filter="url(#soft)">
+    <path
+      fill="#f7f7f7"
+      fill-rule="evenodd"
+      d="M76 428 226 84h60l150 344h-74l-28-66H178l-28 66H76Zm128-126h104l-52-126-52 126Z"
+    />
+  </g>
+  <path d="M82 262h348" stroke="#000" stroke-width="48" stroke-linecap="square"/>
+
+  <text
+    x="256"
+    y="262"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    fill="#f7f7f7"
+    font-family="Didot, Bodoni 72, Cormorant Garamond, Times New Roman, serif"
+    font-size="27"
+    font-weight="700"
+    letter-spacing="3.2"
+    textLength="340"
+    lengthAdjust="spacingAndGlyphs"
+  >ABÁNÍTÚNRASE</text>
+</svg>

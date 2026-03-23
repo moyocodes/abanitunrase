@@ -1,0 +1,1359 @@
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  AnimatePresence,
+} from "framer-motion";
+
+/* ─────────────────────────────────────────
+   LOOK DATA — stories + images + categories
+───────────────────────────────────────── */
+const LOOKS_DATA = [
+  {
+    id: "look-01",
+    vol: "Look 01",
+    title: "The Civil Vow",
+    sub: "Court Wedding · Lagos",
+    pkg: "Court Wedding — ₦700K",
+    cat: "Bridal",
+    catNum: "01",
+    fstop: "f/1.4",
+    col: "md:col-span-7 md:row-span-2",
+    img: "https://picsum.photos/seed/abn01/700/980",
+    story: [
+      { text: "She walked in wearing her grandmother's coral beads and a conviction that simplicity was its own kind of luxury.", time: 6 },
+      { text: "We sourced an ivory brocade from Balogun market at 7am. The vendor almost didn't open for us.", time: 6 },
+      { text: "Three shoes tried. Two discarded. One pair — cream satin kitten heels — that made the whole look land.", time: 6 },
+      { text: "The magistrate's courtroom had never seen anything like it. Neither had we, honestly.", time: 6 },
+    ],
+  },
+  {
+    id: "look-02",
+    vol: "Look 02",
+    title: "Aso Òkè, Re-Read",
+    sub: "Engagement · Ibadan",
+    pkg: "Engagement — ₦700K",
+    cat: "Bridal",
+    catNum: "01",
+    fstop: "f/2.8",
+    col: "md:col-span-5",
+    img: "https://picsum.photos/seed/abn02/600/840",
+    story: [
+      { text: "Her mother's aso-òkè had sat in a trunk for twenty-two years. We brought it back to life.", time: 6 },
+      { text: "A modern silhouette. The same ancient weave. Something old and something entirely new.", time: 6 },
+      { text: "We paired it with minimal gold — just the right weight. Nothing that competed with the fabric's story.", time: 6 },
+      { text: "She cried when she looked in the mirror. We may have too.", time: 6 },
+    ],
+  },
+  {
+    id: "look-07",
+    vol: "Look 07",
+    title: "The Owambe Arrival",
+    sub: "Party Guest · Lekki",
+    pkg: "Káseré Jáde — ₦300K",
+    cat: "Occasion",
+    catNum: "02",
+    fstop: "f/1.8",
+    col: "md:col-span-5",
+    img: "https://picsum.photos/seed/abn07/600/840",
+    story: [
+      { text: "The brief: 'I want everyone to turn and look.' We took that seriously.", time: 6 },
+      { text: "Ankara with structure. A silhouette that moved without apology. Accessories that said everything.", time: 6 },
+      { text: "She arrived forty minutes late. The party waited. It was worth it.", time: 6 },
+      { text: "Three hundred guests. Zero who didn't notice her.", time: 6 },
+    ],
+  },
+  {
+    id: "look-12",
+    vol: "Look 12",
+    title: "The Weekend Escape",
+    sub: "Cape Town · 48 Hours",
+    pkg: "Weekend Escape — ₦500K",
+    cat: "Travel",
+    catNum: "03",
+    fstop: "f/4",
+    col: "md:col-span-4",
+    img: "https://picsum.photos/seed/abn12/600/840",
+    story: [
+      { text: "Cape Town in forty-eight hours demands a wardrobe that works across wind, sun, and fine dining.", time: 6 },
+      { text: "Three looks. One carry-on. Zero compromises. We built it like a puzzle.", time: 6 },
+      { text: "The Polaroid Guide told her where to wear what. She sent pictures from the Boulders Beach penguin colony.", time: 6 },
+      { text: "She said it was the best-dressed trip she'd ever taken. We believe her.", time: 6 },
+    ],
+  },
+  {
+    id: "look-10",
+    vol: "Look 10",
+    title: "Kábosagbo",
+    sub: "Red Carpet · AMVCA",
+    pkg: "Kábosagbo — ₦1M",
+    cat: "Occasion",
+    catNum: "02",
+    fstop: "f/2",
+    col: "md:col-span-4",
+    img: "https://picsum.photos/seed/abn10/600/840",
+    story: [
+      { text: "Red carpet is not a place. It's a verdict. We prepare for verdicts.", time: 6 },
+      { text: "The designer was called at 9pm. The shoes sourced from Dubai via a friend. The bag borrowed from a collector.", time: 6 },
+      { text: "She walked. The cameras turned. Five publications ran the look the next morning.", time: 6 },
+      { text: "The best phone call we ever got was hers, from the afterparty.", time: 6 },
+    ],
+  },
+  {
+    id: "look-13",
+    vol: "Look 13",
+    title: "The Medina Edit",
+    sub: "Marrakech · 4 Looks",
+    pkg: "Mid-Week Venture — ₦700K",
+    cat: "Travel",
+    catNum: "03",
+    fstop: "f/5.6",
+    col: "md:col-span-4",
+    img: "https://picsum.photos/seed/abn13/600/840",
+    story: [
+      { text: "Marrakech is colour and texture and heat. The wardrobe had to hold all of that.", time: 6 },
+      { text: "Four looks. Linen, cotton, and one silk kaftan sourced from a boutique in the medina.", time: 6 },
+      { text: "The Polaroid Guide included our favourite riad, a hidden ceramics souk, and when the light hits the Koutoubia best.", time: 6 },
+      { text: "She said people kept stopping to ask where she bought her clothes. We said: nowhere you can find online.", time: 6 },
+    ],
+  },
+];
+
+const looksByCategory = {
+  "01": LOOKS_DATA.filter((l) => l.catNum === "01"),
+  "02": LOOKS_DATA.filter((l) => l.catNum === "02"),
+  "03": LOOKS_DATA.filter((l) => l.catNum === "03"),
+};
+
+/* ─────────────────────────────────────────
+   TYPEWRITER HOOK
+───────────────────────────────────────── */
+function useTypewriter(text, trigger, speed = 28) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!trigger) return;
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(id);
+        setDone(true);
+      }
+    }, speed);
+    return () => clearInterval(id);
+  }, [trigger, text, speed]);
+  return { displayed, done };
+}
+
+/* ─────────────────────────────────────────
+   GOOGLE FONTS + GLOBAL CSS
+───────────────────────────────────────── */
+const FontLoader = () => {
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Syncopate:wght@400;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap";
+    document.head.appendChild(link);
+    const style = document.createElement("style");
+    style.textContent = `
+      * { margin:0; padding:0; box-sizing:border-box; }
+      html { scroll-behavior:smooth; }
+      body { background:#0a0a0a; overflow-x:hidden; cursor:crosshair; -webkit-font-smoothing:antialiased; }
+      ::selection { background:#f5f3ef; color:#080808; }
+      .font-cormorant { font-family:'Cormorant Garamond',Georgia,serif; }
+      .font-syncopate { font-family:'Syncopate',sans-serif; }
+      .font-mono { font-family:'DM Mono',monospace; }
+      .scrollbar-none::-webkit-scrollbar { display:none; }
+      .scrollbar-none { scrollbar-width:none; }
+      @keyframes grain { 0%,100%{transform:translate(0,0)} 10%{transform:translate(-2%,-3%)} 20%{transform:translate(3%,2%)} 30%{transform:translate(-1%,4%)} 40%{transform:translate(4%,-1%)} 50%{transform:translate(-3%,3%)} 60%{transform:translate(2%,-4%)} 70%{transform:translate(-4%,1%)} 80%{transform:translate(1%,-2%)} 90%{transform:translate(-2%,4%)} }
+      .grain-anim { animation: grain 0.18s steps(2) infinite; }
+      @keyframes reel-spin { to { transform:rotate(360deg); } }
+      @keyframes tape-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+      .tape-scroll { animation: tape-scroll 22s linear infinite; }
+      @keyframes tape-scroll-r { from{transform:translateX(-50%)} to{transform:translateX(0)} }
+      .tape-scroll-r { animation: tape-scroll-r 18s linear infinite; }
+      @keyframes carousel-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+      .carousel-scroll { animation: carousel-scroll 28s linear infinite; }
+      .carousel-scroll:hover { animation-play-state:paused; }
+      @keyframes exposure-blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+      .exposure-blink { animation: exposure-blink 1.2s ease-in-out infinite; }
+      @keyframes shutter { 0%{transform:scaleX(0);transform-origin:left} 45%{transform:scaleX(1);transform-origin:left} 46%{transform:scaleX(1);transform-origin:right} 90%{transform:scaleX(0);transform-origin:right} 100%{transform:scaleX(0);transform-origin:right} }
+      .shutter-anim { animation: shutter 5s cubic-bezier(.4,0,.2,1) infinite 0.5s; }
+      @keyframes ken-burns-a { 0%{transform:scale(1) translate(0,0)} 100%{transform:scale(1.12) translate(-3%,-2%)} }
+      @keyframes ken-burns-b { 0%{transform:scale(1) translate(0,0)} 100%{transform:scale(1.1) translate(3%,-1%)} }
+      @keyframes ken-burns-c { 0%{transform:scale(1) translate(0,0)} 100%{transform:scale(1.08) translate(-2%,2%)} }
+      @keyframes ken-burns-d { 0%{transform:scale(1) translate(0,0)} 100%{transform:scale(1.11) translate(2%,-3%)} }
+      .kb-a { animation: ken-burns-a 8s ease-in-out forwards; }
+      .kb-b { animation: ken-burns-b 8s ease-in-out forwards; }
+      .kb-c { animation: ken-burns-c 8s ease-in-out forwards; }
+      .kb-d { animation: ken-burns-d 8s ease-in-out forwards; }
+    `;
+    document.head.appendChild(style);
+  }, []);
+  return null;
+};
+
+/* ── FILM GRAIN ── */
+const Grain = () => (
+  <div
+    className="pointer-events-none fixed inset-0 z-[9000] grain-anim opacity-[0.04]"
+    style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+      backgroundSize: "200px 200px",
+    }}
+  />
+);
+
+/* ── FILM REEL ── */
+const FilmReel = ({ size = 120, speed = "4s" }) => (
+  <svg width={size} height={size} viewBox="0 0 120 120" style={{ animation: `reel-spin ${speed} linear infinite` }}>
+    <circle cx="60" cy="60" r="58" fill="none" stroke="#2a2a2a" strokeWidth="2" />
+    <circle cx="60" cy="60" r="52" fill="#111" stroke="#222" strokeWidth="1" />
+    {[0,60,120,180,240,300].map((a) => (
+      <line key={a} x1="60" y1="60"
+        x2={60+46*Math.cos(((a-90)*Math.PI)/180)}
+        y2={60+46*Math.sin(((a-90)*Math.PI)/180)}
+        stroke="#2a2a2a" strokeWidth="1.5" />
+    ))}
+    <circle cx="60" cy="60" r="16" fill="#0a0a0a" stroke="#333" strokeWidth="1.5" />
+    <circle cx="60" cy="60" r="6" fill="#222" stroke="#444" strokeWidth="1" />
+    {[0,60,120,180,240,300].map((a) => (
+      <circle key={a}
+        cx={60+38*Math.cos(((a-90)*Math.PI)/180)}
+        cy={60+38*Math.sin(((a-90)*Math.PI)/180)}
+        r="5" fill="#0a0a0a" stroke="#333" strokeWidth="1" />
+    ))}
+    {Array.from({length:24}).map((_,i) => (
+      <circle key={i}
+        cx={60+54*Math.cos(((i*15-90)*Math.PI)/180)}
+        cy={60+54*Math.sin(((i*15-90)*Math.PI)/180)}
+        r="1.5" fill="#1e1e1e" />
+    ))}
+  </svg>
+);
+
+/* ── FILM TAPE STRIP ── */
+const FilmTape = ({ reverse=false, frames=[] }) => {
+  const defaults = ["ABÁNITÚNRASE","LAGOS ATELIER","FOUNDED","BY FIFII","BRIDAL","TRAVEL","OCCASION","2026","SS·26","EDITORIAL","ASO AṢỌ","BRIDES"];
+  const items = frames.length ? frames : defaults;
+  const doubled = [...items,...items];
+  return (
+    <div className="overflow-hidden w-full" style={{background:"#0d0d0d",borderTop:"1px solid #1c1c1c",borderBottom:"1px solid #1c1c1c"}}>
+      <div className="flex" style={{height:10,background:"#0a0a0a",borderBottom:"1px solid #1a1a1a"}}>
+        {Array.from({length:40}).map((_,i)=><div key={i} style={{width:18,height:6,margin:"2px 6px",background:"#1a1a1a",borderRadius:1,flexShrink:0,border:"0.5px solid #222"}} />)}
+      </div>
+      <div className={`flex ${reverse?"tape-scroll-r":"tape-scroll"} whitespace-nowrap`} style={{height:60}}>
+        {doubled.map((label,i)=>(
+          <div key={i} className="inline-flex items-center justify-center font-syncopate text-[8px] tracking-[0.35em] uppercase flex-shrink-0"
+            style={{width:100,borderRight:"1px solid #1c1c1c",color:"rgba(245,243,239,0.2)"}}>
+            {label}
+          </div>
+        ))}
+      </div>
+      <div className="flex" style={{height:10,background:"#0a0a0a",borderTop:"1px solid #1a1a1a"}}>
+        {Array.from({length:40}).map((_,i)=><div key={i} style={{width:18,height:6,margin:"2px 6px",background:"#1a1a1a",borderRadius:1,flexShrink:0,border:"0.5px solid #222"}} />)}
+      </div>
+    </div>
+  );
+};
+
+/* ── CUSTOM CURSOR ── */
+const Cursor = () => {
+  const x = useMotionValue(-100), y = useMotionValue(-100);
+  const sx = useSpring(x,{stiffness:200,damping:28});
+  const sy = useSpring(y,{stiffness:200,damping:28});
+  const [big, setBig] = useState(false);
+  useEffect(() => {
+    const move = (e) => { x.set(e.clientX); y.set(e.clientY); };
+    const over = (e) => { if(e.target.closest("a,button,[data-cursor]")) setBig(true); };
+    const out = () => setBig(false);
+    window.addEventListener("mousemove",move);
+    window.addEventListener("mouseover",over);
+    window.addEventListener("mouseout",out);
+    return () => { window.removeEventListener("mousemove",move); window.removeEventListener("mouseover",over); window.removeEventListener("mouseout",out); };
+  },[x,y]);
+  return (
+    <>
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full border border-white mix-blend-difference"
+        style={{x:sx,y:sy,translateX:"-50%",translateY:"-50%",width:big?36:10,height:big?36:10,transition:"width 0.2s,height 0.2s"}} />
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full bg-white mix-blend-difference"
+        style={{x,y,translateX:"-50%",translateY:"-50%",width:3,height:3}} />
+    </>
+  );
+};
+
+/* ─────────────────────────────────────────
+   STORY PLAYER — cinematic fullscreen modal
+───────────────────────────────────────── */
+const KB_CLASSES = ["kb-a","kb-b","kb-c","kb-d"];
+
+const StoryPlayer = ({ look, onClose, onBook }) => {
+  const [paused, setPaused] = useState(false);
+  const [chapter, setChapter] = useState(0);
+  const [segProgress, setSegProgress] = useState(0);
+  const timerRef = useRef(null);
+
+  const runChapter = (ch, duration) => {
+    clearInterval(timerRef.current);
+    setSegProgress(0);
+    const steps = 200;
+    const stepTime = (duration * 1000) / steps;
+    let current = 0;
+    timerRef.current = setInterval(() => {
+      current += 1;
+      setSegProgress(current);
+      if (current >= steps) {
+        clearInterval(timerRef.current);
+        if (ch < look.story.length - 1) setChapter(ch + 1);
+      }
+    }, stepTime);
+  };
+
+  useEffect(() => {
+    if (!paused) runChapter(chapter, look.story[chapter]?.time || 6);
+    else clearInterval(timerRef.current);
+    return () => clearInterval(timerRef.current);
+  }, [chapter, paused]);
+
+  const goTo = (ch) => { setChapter(ch); if (paused) setPaused(false); };
+  const kbClass = KB_CLASSES[chapter % KB_CLASSES.length];
+
+  return (
+    <motion.div className="fixed inset-0 z-[10000] overflow-hidden"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
+      <AnimatePresence mode="wait">
+        <motion.div key={`img-${chapter}`} className="absolute inset-0"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }}>
+          <img src={look.img} alt={look.title}
+            className={`absolute inset-0 w-full h-full object-cover ${kbClass}`}
+            style={{ transformOrigin: "center center" }} />
+        </motion.div>
+      </AnimatePresence>
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,0.55) 100%)" }} />
+      <div className="absolute inset-0 grain-anim opacity-[0.04]"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px" }} />
+      <div className="absolute top-0 left-0 right-0 z-10 flex gap-[3px] px-4 pt-4">
+        {look.story.map((_, i) => (
+          <button key={i} onClick={() => goTo(i)} className="flex-1 h-[2px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.25)" }}>
+            <div className="h-full rounded-full bg-white"
+              style={{ width: i < chapter ? "100%" : i === chapter ? `${(segProgress/200)*100}%` : "0%", transition: "none" }} />
+          </button>
+        ))}
+      </div>
+      <div className="absolute top-8 left-5 right-5 z-10 flex justify-between items-start">
+        <div>
+          <div className="font-mono text-[7px] tracking-[0.38em] uppercase mb-1" style={{ color: "rgba(255,255,255,0.55)" }}>
+            {look.vol} · {look.cat} · {look.fstop}
+          </div>
+          <div className="font-cormorant italic text-white text-2xl leading-tight">{look.title}</div>
+          <div className="font-mono text-[7px] tracking-[0.25em] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>{look.sub}</div>
+        </div>
+        <button onClick={onClose}
+          className="w-9 h-9 flex items-center justify-center text-white/60 hover:text-white transition-colors border border-white/20 hover:border-white/50 rounded-full font-mono text-sm"
+          aria-label="Close story">✕</button>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-6 md:px-10 pb-10 md:pb-14">
+        <AnimatePresence mode="wait">
+          <motion.p key={chapter}
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.55, ease: [0.16,1,0.3,1] }}
+            className="font-cormorant italic text-white leading-snug max-w-2xl mb-7"
+            style={{ fontSize: "clamp(22px,3.2vw,38px)" }}>
+            {look.story[chapter].text}
+          </motion.p>
+        </AnimatePresence>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => setPaused(p=>!p)}
+            className="flex items-center gap-2 font-mono text-[8px] tracking-[0.3em] uppercase px-5 py-2.5 border transition-colors"
+            style={{ borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.8)" }}
+            aria-label={paused ? "Resume story" : "Pause story"}>
+            {paused ? <><span style={{fontSize:10}}>▶</span> Resume</> : <><span style={{fontSize:10}}>⏸</span> Pause</>}
+          </button>
+          <button onClick={onBook} className="font-mono text-[8px] tracking-[0.3em] uppercase px-6 py-2.5 bg-white text-black hover:bg-[#e8e5de] transition-colors">
+            Book this Look →
+          </button>
+          <div className="flex items-center gap-2 ml-auto">
+            {look.story.map((_, i) => (
+              <button key={i} onClick={() => goTo(i)} className="rounded-full transition-all duration-300"
+                style={{ width: i===chapter?20:6, height:6, background: i===chapter?"#fff":"rgba(255,255,255,0.3)" }}
+                aria-label={`Chapter ${i+1}`} />
+            ))}
+          </div>
+        </div>
+        <div className="absolute inset-0 flex pointer-events-none" style={{ bottom: 140 }}>
+          <button className="flex-1 pointer-events-auto opacity-0" aria-label="Previous chapter"
+            onClick={() => chapter > 0 && goTo(chapter - 1)} />
+          <button className="flex-1 pointer-events-auto opacity-0" aria-label="Next chapter"
+            onClick={() => chapter < look.story.length - 1 && goTo(chapter + 1)} />
+        </div>
+      </div>
+      <div className="absolute left-0 top-0 bottom-0 w-3 flex flex-col justify-around items-center z-[5]" style={{ background: "rgba(0,0,0,0.5)" }}>
+        {Array.from({length:12}).map((_,i)=>(
+          <div key={i} className="w-2 h-1.5 rounded-sm" style={{ background:"rgba(0,0,0,0.8)", border:"0.5px solid rgba(255,255,255,0.08)" }} />
+        ))}
+      </div>
+      <div className="absolute right-0 top-0 bottom-0 w-3 flex flex-col justify-around items-center z-[5]" style={{ background: "rgba(0,0,0,0.5)" }}>
+        {Array.from({length:12}).map((_,i)=>(
+          <div key={i} className="w-2 h-1.5 rounded-sm" style={{ background:"rgba(0,0,0,0.8)", border:"0.5px solid rgba(255,255,255,0.08)" }} />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+/* ─────────────────────────────────────────
+   LOOK CAROUSEL — auto-scrolling film strip
+───────────────────────────────────────── */
+const LookCarousel = ({ looks, onPlayStory }) => {
+  const doubled = [...looks, ...looks, ...looks];
+  return (
+    <div className="relative overflow-hidden" style={{ background: "#050505", borderTop: "1px solid #1a1a1a" }}>
+      <div className="flex" style={{ height:9, background:"#0a0a0a", borderBottom:"1px solid #181818" }}>
+        {Array.from({length:50}).map((_,i)=>(
+          <div key={i} style={{ width:16, height:5, margin:"2px 5px", background:"#181818", borderRadius:1, flexShrink:0, border:"0.5px solid #222" }} />
+        ))}
+      </div>
+      <div className="flex carousel-scroll" style={{ width: "max-content" }}>
+        {doubled.map((look, i) => (
+          <div key={i} className="relative flex-shrink-0 group" style={{ width:180, height:240, borderRight:"2px solid #0a0a0a" }}>
+            <img src={look.img} alt={look.title} className="absolute inset-0 w-full h-full object-cover" style={{ opacity:0.75 }} />
+            <div className="absolute inset-0" style={{ background:"linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)" }} />
+            <div className="absolute inset-0" style={{ backgroundImage:"linear-gradient(rgba(245,243,239,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,243,239,0.03) 1px,transparent 1px)", backgroundSize:"25% 25%" }} />
+            <div className="absolute top-2 left-3 font-mono text-[6.5px] tracking-[0.3em] uppercase" style={{ color:"rgba(245,243,239,0.4)" }}>{look.vol}</div>
+            <div className="absolute top-2 right-3 font-mono text-[6px] tracking-widest" style={{ color:"rgba(245,243,239,0.25)" }}>{look.fstop}</div>
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <div className="font-cormorant text-white text-sm leading-tight mb-0.5">{look.title}</div>
+              <div className="font-mono text-[6.5px] tracking-widest uppercase" style={{ color:"rgba(245,243,239,0.4)" }}>{look.sub}</div>
+            </div>
+            <button onClick={() => onPlayStory(look)}
+              className="absolute inset-0 w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+              style={{ background:"rgba(0,0,0,0.45)" }} aria-label={`Play story: ${look.title}`} data-cursor="true">
+              <div className="text-center">
+                <div className="font-mono text-[7.5px] tracking-[0.35em] uppercase text-white border border-white/40 px-4 py-2 mb-2">▶ Play Story</div>
+                <div className="font-mono text-[6.5px] tracking-[0.25em] text-white/50">{look.pkg}</div>
+              </div>
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="flex" style={{ height:9, background:"#0a0a0a", borderTop:"1px solid #181818" }}>
+        {Array.from({length:50}).map((_,i)=>(
+          <div key={i} style={{ width:16, height:5, margin:"2px 5px", background:"#181818", borderRadius:1, flexShrink:0, border:"0.5px solid #222" }} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ── FADE IN on scroll ── */
+const FadeUp = ({ children, delay=0, className="" }) => {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setVisible(true); }, { threshold:0.1 });
+    if(ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  },[]);
+  return (
+    <motion.div ref={ref} className={className}
+      initial={{ opacity:0, y:32 }}
+      animate={visible ? {opacity:1,y:0} : {opacity:0,y:32}}
+      transition={{ duration:0.9, delay, ease:[0.16,1,0.3,1] }}>
+      {children}
+    </motion.div>
+  );
+};
+
+/* ─────────────────────────────────────────
+   INTRO SEQUENCE
+───────────────────────────────────────── */
+const FOUNDER_LINES = [
+  { text:"Iyawoooo,", italic:true, size:"text-5xl sm:text-7xl md:text-8xl" },
+  { text:"Oko Iyawoooo!", italic:true, size:"text-5xl sm:text-7xl md:text-8xl" },
+  { text:"Sé dáadáa lè wà?", italic:true, size:"text-3xl sm:text-5xl md:text-6xl", muted:true },
+  { text:"My name is Fiponmileoluwa.", italic:false, size:"text-2xl sm:text-3xl md:text-4xl" },
+  { text:"Most call me Fifii.", italic:false, size:"text-2xl sm:text-3xl md:text-4xl" },
+  { text:"Lawyer by training.", italic:false, size:"text-xl sm:text-2xl md:text-3xl", muted:true },
+  { text:"Stylist by calling.", italic:true, size:"text-2xl sm:text-3xl md:text-4xl" },
+  { text:"Mostly stylist, actually.", italic:false, size:"text-xl sm:text-2xl", muted:true },
+  { text:"I built this house with one passion:", italic:false, size:"text-lg sm:text-2xl md:text-3xl" },
+  { text:"That our clients arrive", italic:false, size:"text-2xl sm:text-3xl md:text-4xl" },
+  { text:"in looks that stand out,", italic:true, size:"text-3xl sm:text-5xl md:text-6xl" },
+  { text:"stay clean,", italic:true, size:"text-4xl sm:text-6xl md:text-7xl" },
+  { text:"and remain timeless.", italic:true, size:"text-3xl sm:text-5xl md:text-6xl" },
+  { text:"Welcome to Abánitúnrase.", italic:false, size:"text-2xl sm:text-3xl md:text-4xl" },
+];
+
+const LineReveal = ({ line, index, total, scrollProgress }) => {
+  const start = index/total;
+  const mid   = Math.min(start + 0.55/total, 0.97);
+  const midP  = Math.min(mid + 0.02, 0.985);
+  const end   = Math.min(start + 1.1/total, 1.0);
+  const opacity = useTransform(scrollProgress,[start,mid,midP,end],[0,1,1,0]);
+  const y = useTransform(scrollProgress,[start,mid],[28,0]);
+  const scale = useTransform(scrollProgress,[start,mid],[0.94,1]);
+  return (
+    <motion.div style={{opacity,y,scale}} className="will-change-transform">
+      <span className={`font-cormorant ${line.size} leading-tight block ${line.italic?"italic":""}`}
+        style={{ color:line.muted?"rgba(245,243,239,0.45)":"rgba(245,243,239,0.95)", letterSpacing:"-0.02em" }}>
+        {line.text}
+      </span>
+    </motion.div>
+  );
+};
+
+const FrameCounter = ({ progress, total }) => {
+  const [frame, setFrame] = useState(1);
+  useEffect(() => { return progress.on("change",(v)=>setFrame(Math.min(total,Math.max(1,Math.round(v*total)+1)))); },[progress,total]);
+  return (
+    <div className="absolute top-20 right-6 z-[6] text-right hidden sm:block">
+      <div className="font-mono text-[7px] tracking-[0.35em] uppercase mb-1" style={{color:"rgba(245,243,239,0.25)"}}>Frame</div>
+      <div className="font-cormorant text-2xl" style={{color:"rgba(245,243,239,0.4)"}}>{String(frame).padStart(2,"0")} / {String(total).padStart(2,"0")}</div>
+      <div className="font-mono text-[7px] tracking-[0.3em] mt-1" style={{color:"rgba(245,243,239,0.2)"}}>ISO 400 · f/1.4</div>
+    </div>
+  );
+};
+
+const ScrollHint = ({ scrollProgress }) => {
+  const opacity = useTransform(scrollProgress,[0,0.08],[1,0]);
+  return (
+    <motion.div style={{opacity}} className="absolute bottom-24 left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2">
+      <div className="font-mono text-[8px] tracking-[0.4em] uppercase" style={{color:"rgba(245,243,239,0.3)"}}>scroll to read</div>
+      <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent animate-pulse" />
+    </motion.div>
+  );
+};
+
+const BackgroundSiteFaint = () => (
+  <div className="w-full h-full overflow-hidden" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>
+    <div className="p-8 pt-16">
+      <div className="text-[80px] font-light text-white/80 leading-none" style={{letterSpacing:"-4px"}}>Dressed<br/>with<br/><em>intention.</em></div>
+      <div className="mt-8 text-lg text-white/50 max-w-md">A Lagos-based styling atelier for brides, grooms, occasions, and the global traveller.</div>
+      <div className="mt-12 flex gap-4">
+        <div className="px-6 py-3 bg-white text-black text-xs tracking-widest">Enter the Lookbook →</div>
+        <div className="px-6 py-3 border border-white/30 text-white text-xs tracking-widest">Investment</div>
+      </div>
+      <div className="mt-20 grid grid-cols-3 gap-4">
+        {["The Bridal Suite","Occasion Styling","Kájáyelo"].map(c=>(
+          <div key={c} className="border border-white/10 p-8">
+            <div className="text-4xl font-light text-white/60">{c}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const IntroSequence = ({ onComplete }) => {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target:containerRef, offset:["start start","end end"] });
+  const [done, setDone] = useState(false);
+  const [spotX, setSpotX] = useState(50);
+  const [spotX2, setSpotX2] = useState(30);
+  useEffect(() => { return scrollYProgress.on("change",(v)=>{ setSpotX(20+v*60); setSpotX2(80-v*55); }); },[scrollYProgress]);
+  useEffect(() => { return scrollYProgress.on("change",(v)=>{ if(v>0.96&&!done) setDone(true); }); },[scrollYProgress,done]);
+  useEffect(() => { if(done){ const t=setTimeout(onComplete,900); return ()=>clearTimeout(t); } },[done,onComplete]);
+  const totalLines = FOUNDER_LINES.length;
+  return (
+    <div ref={containerRef} style={{height:`${totalLines*120+200}vh`}} className="relative">
+      <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none" style={{filter:"brightness(0.07) grayscale(1)",opacity:0.85}}><BackgroundSiteFaint /></div>
+        <div className="absolute inset-0 z-[1]" style={{background:"rgba(8,8,8,0.88)"}} />
+        <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
+          <div className="absolute top-0" style={{left:`${spotX}%`,transition:"left 0.8s cubic-bezier(.4,0,.2,1)"}}>
+            <div style={{width:"1px",height:"100vh",background:"linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 40%, transparent 80%)",filter:"blur(40px)",transform:"scaleX(200)"}} />
+          </div>
+          <div className="absolute top-0" style={{left:`${spotX2}%`,transition:"left 0.8s cubic-bezier(.4,0,.2,1)"}}>
+            <div style={{width:"1px",height:"100vh",background:"linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.04) 45%, transparent 75%)",filter:"blur(55px)",transform:"scaleX(180)"}} />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0" style={{height:200,background:"linear-gradient(to top, rgba(255,255,255,0.03), transparent)",filter:"blur(30px)"}} />
+        </div>
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-[3] hidden md:block"><FilmReel size={90} speed="5s" /></div>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-[3] hidden md:block"><FilmReel size={70} speed="8s" /></div>
+        <div className="absolute left-2 top-4 z-[3] opacity-30"><FilmReel size={40} speed="3s" /></div>
+        <div className="absolute right-2 bottom-4 z-[3] opacity-30"><FilmReel size={40} speed="3.5s" /></div>
+        <div className="absolute top-0 left-0 right-0 z-[4]">
+          <FilmTape frames={["ABÁNITÚNRASE","LAGOS ATELIER","FOUNDED","BY FIFII","BRIDAL","TRAVEL","OCCASION","2026","SS·26","EDITORIAL"]} />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 z-[4]">
+          <FilmTape reverse frames={["STAND OUT","STAY CLEAN","REMAIN TIMELESS","ÌYÀWÓ","OKO ÌYÀWÓ","ÌGBÀ AYẸYẸ","KÁJÁYELO","ABÁNITÚNRASE","LAGOS","ATELIER"]} />
+        </div>
+        <FrameCounter progress={scrollYProgress} total={totalLines} />
+        <div className="absolute inset-0 z-[5] flex items-center justify-center px-6">
+          <div className="text-center max-w-3xl w-full">
+            {FOUNDER_LINES.map((line,i)=>(
+              <LineReveal key={i} line={line} index={i} total={totalLines} scrollProgress={scrollYProgress} />
+            ))}
+          </div>
+        </div>
+        <ScrollHint scrollProgress={scrollYProgress} />
+        <AnimatePresence>
+          {done && (
+            <motion.div className="absolute inset-0 z-[20] bg-[#080808]" initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.8}} />
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────
+   MAIN SITE COMPONENTS
+───────────────────────────────────────── */
+
+/* ── NAV ── */
+const Nav = () => {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY>40);
+    window.addEventListener("scroll",fn);
+    return () => window.removeEventListener("scroll",fn);
+  },[]);
+  return (
+    <motion.nav initial={{y:-80,opacity:0}} animate={{y:0,opacity:1}} transition={{duration:0.8,delay:0.3,ease:[0.16,1,0.3,1]}}
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 transition-all duration-500"
+      style={{ background:scrolled?"rgba(8,8,8,0.94)":"transparent", backdropFilter:scrolled?"blur(12px)":"none", borderBottom:scrolled?"1px solid rgba(245,243,239,0.07)":"none" }}>
+      <div className="font-syncopate text-[9px] font-bold tracking-[0.38em] text-white">ABÁNITÚNRASE</div>
+      <div className="hidden md:flex gap-8">
+        {[["Atelier","#atelier"],["Services","#categories"],["Lookbook","#lookbook"],["Rates","#rates"],["Contact","#contact"]].map(([l,h])=>(
+          <a key={l} href={h} className="font-mono text-[8px] tracking-[0.22em] uppercase transition-colors duration-300"
+            style={{color:"rgba(245,243,239,0.5)"}}
+            onMouseEnter={e=>e.target.style.color="#f5f3ef"}
+            onMouseLeave={e=>e.target.style.color="rgba(245,243,239,0.5)"}>
+            {l}
+          </a>
+        ))}
+      </div>
+      <a href="#contact" className="font-mono text-[8px] tracking-[0.22em] uppercase px-4 py-2 text-black bg-white transition-colors hover:bg-[#e8e5de]">
+        Book a Fitting
+      </a>
+    </motion.nav>
+  );
+};
+
+/* ── HERO ── */
+const Hero = ({ onOpenStory }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target:ref, offset:["start start","end start"] });
+  const y = useTransform(scrollYProgress,[0,1],[0,120]);
+  const opacity = useTransform(scrollYProgress,[0,0.7],[1,0]);
+  const [spotPos, setSpotPos] = useState({x:30,y:0});
+  useEffect(() => {
+    const fn = (e) => setSpotPos({x:(e.clientX/window.innerWidth)*100,y:(e.clientY/window.innerHeight)*100});
+    window.addEventListener("mousemove",fn);
+    return () => window.removeEventListener("mousemove",fn);
+  },[]);
+  return (
+    <section ref={ref} className="relative min-h-screen flex flex-col justify-end overflow-hidden" id="hero">
+      <div className="absolute inset-0 z-0">
+        <img src="https://picsum.photos/seed/abnhero/1400/900" alt="Atelier hero" className="w-full h-full object-cover" style={{ opacity:0.35 }} />
+        <div className="absolute inset-0" style={{ background:"linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.4) 100%)" }} />
+      </div>
+      <div className="absolute inset-0 z-[1] pointer-events-none"
+        style={{ background:`radial-gradient(ellipse 400px 500px at ${spotPos.x}% ${spotPos.y}%, rgba(255,255,255,0.06) 0%, transparent 65%)`, transition:"background 0.15s ease-out" }} />
+      <div className="absolute top-0 left-[20%] w-[2px] h-full pointer-events-none z-[1]"
+        style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.12) 0%, transparent 55%)", filter:"blur(35px)", transform:"scaleX(120)" }} />
+      <div className="absolute top-20 right-6 md:right-12 z-[2] opacity-20 hidden sm:block"><FilmReel size={100} speed="8s" /></div>
+      <div className="absolute top-0 left-0 right-0 z-[3]"><FilmTape /></div>
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-white z-[4] shutter-anim" />
+      <motion.div style={{y,opacity}} className="relative z-[5] px-6 md:px-12 pb-20 pt-36">
+        <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.5,duration:0.8}}
+          className="font-mono text-[8px] tracking-[0.45em] uppercase mb-7 flex items-center gap-3" style={{color:"rgba(245,243,239,0.5)"}}>
+          <span className="w-7 h-px bg-white/30 block" />Est. Lagos · A Styling Atelier · SS 2026
+        </motion.div>
+        <motion.h1 initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{delay:0.6,duration:1,ease:[0.16,1,0.3,1]}}
+          className="font-cormorant font-light leading-[0.88] tracking-tight text-white mb-10"
+          style={{fontSize:"clamp(72px,12vw,160px)",letterSpacing:"-3px"}}>
+          Dressed<br/>with <em>intention.</em>
+        </motion.h1>
+        <motion.p initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.75,duration:0.9,ease:[0.16,1,0.3,1]}}
+          className="font-cormorant italic text-lg md:text-xl max-w-md mb-10 leading-relaxed" style={{color:"rgba(245,243,239,0.65)"}}>
+          A Lagos-based styling atelier for brides, grooms, occasions, and the global traveller.
+        </motion.p>
+        <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.9,duration:0.8}} className="flex flex-wrap gap-3">
+          <a href="#lookbook" className="font-mono text-[9px] tracking-[0.28em] uppercase px-7 py-3 bg-white text-black hover:bg-[#e8e5de] transition-colors">
+            Enter the Lookbook →
+          </a>
+          <button onClick={() => onOpenStory(LOOKS_DATA[0])}
+            className="font-mono text-[9px] tracking-[0.28em] uppercase px-7 py-3 border text-white hover:border-white/70 transition-colors"
+            style={{borderColor:"rgba(245,243,239,0.3)"}}>
+            ▶ Play a Story
+          </button>
+          <a href="#rates" className="font-mono text-[9px] tracking-[0.28em] uppercase px-7 py-3 border text-white hover:border-white/70 transition-colors"
+            style={{borderColor:"rgba(245,243,239,0.2)"}}>
+            Investment
+          </a>
+        </motion.div>
+        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-12 pb-6 pt-4 flex flex-wrap justify-between gap-2"
+          style={{borderTop:"1px solid rgba(245,243,239,0.07)"}}>
+          {[["Bridal","Ìyàwó"],["Occasion","Ìgbà Ayẹyẹ"],["Travel","Kájáyelo"],["Editorial","Aso Aṣọ"]].map(([en,yo])=>(
+            <div key={en} className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{color:"rgba(245,243,239,0.35)"}}>
+              {en} <span style={{color:"rgba(245,243,239,0.18)"}}>/ {yo}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+      {[["top-[88px] left-6","border-t border-l"],["top-[88px] right-6","border-t border-r"],["bottom-12 left-6","border-b border-l"],["bottom-12 right-6","border-b border-r"]].map(([pos,b],i)=>(
+        <div key={i} className={`absolute ${pos} w-5 h-5 ${b} z-[5] hidden md:block`} style={{borderColor:"rgba(245,243,239,0.22)"}} />
+      ))}
+    </section>
+  );
+};
+
+/* ── ATELIER — with typewriter founder's note ── */
+const FOUNDER_NOTE = `My name is Fiponmileoluwa — most people call me Fifii. I'm the creative director of Abánitúnrase. Lawyer by training, stylist by calling. Mostly stylist, actually.
+
+We built this house with one passion: that our brides, grooms, and clients arrive in looks that stand out, stay clean, and remain timeless. Òkó iyàwó, iyàwó — I look forward to working with you.`;
+
+const Atelier = () => {
+  const sectionRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [typing, setTyping] = useState(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      { threshold: 0.25 }
+    );
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView || scrolled) return;
+    let count = 0;
+    const trigger = () => {
+      count += 1;
+      if (count >= 1) {
+        setScrolled(true);
+        setTyping(true);
+      }
+    };
+    window.addEventListener("wheel", trigger, { passive: true });
+    window.addEventListener("touchmove", trigger, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", trigger);
+      window.removeEventListener("touchmove", trigger);
+    };
+  }, [inView, scrolled]);
+
+  const { displayed, done } = useTypewriter(FOUNDER_NOTE, typing, 22);
+  const paragraphs = displayed.split("\n\n");
+
+  return (
+    <section ref={sectionRef} id="atelier" className="relative py-24 md:py-36 overflow-hidden" style={{ background: "#f8f4ee" }}>
+      <div className="absolute top-0 right-[30%] w-px h-full pointer-events-none"
+        style={{ background:"linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, transparent 60%)", filter:"blur(50px)", transform:"scaleX(80)" }} />
+      <div className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+        {/* Image side */}
+        <motion.div initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true, amount:0.2 }}
+          transition={{ duration:0.9, ease:[0.16,1,0.3,1] }}>
+          <div className="relative">
+            {[["top-[-8px] left-[-8px]","border-t border-l"],["top-[-8px] right-[-8px]","border-t border-r"],
+              ["bottom-[-8px] left-[-8px]","border-b border-l"],["bottom-[-8px] right-[-8px]","border-b border-r"]].map(([p,b],i)=>(
+              <div key={i} className={`absolute ${p} w-5 h-5 ${b}`} style={{ borderColor:"rgba(30,24,16,0.2)" }} />
+            ))}
+            <div className="relative aspect-[4/5] overflow-hidden">
+              <img src="https://picsum.photos/seed/fifii/700/900" alt="Fiponmileoluwa, Creative Director" className="w-full h-full object-cover" />
+              <div className="absolute bottom-0 left-0 right-0 px-4 py-3 flex justify-between"
+                style={{ background:"rgba(248,244,238,0.9)", borderTop:"1px solid rgba(30,24,16,0.08)" }}>
+                <span className="font-mono text-[7px] tracking-[0.25em] uppercase" style={{ color:"rgba(30,24,16,0.4)" }}>ISO 800</span>
+                <span className="font-mono text-[7px] tracking-[0.25em] uppercase" style={{ color:"rgba(30,24,16,0.4)" }}>f/2.2 · 1/160s</span>
+                <span className="font-mono text-[7px] tracking-[0.25em] uppercase" style={{ color:"rgba(30,24,16,0.4)" }}>Fiponmileoluwa</span>
+              </div>
+            </div>
+            <div className="absolute top-3 left-3 z-20 font-mono text-[7px] tracking-[0.3em] uppercase px-2 py-1"
+              style={{ background:"rgba(248,244,238,0.88)", color:"rgba(30,24,16,0.6)", border:"1px solid rgba(30,24,16,0.1)" }}>
+              Creative Director
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Text side */}
+        <motion.div initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true, amount:0.2 }}
+          transition={{ duration:0.9, delay:0.15, ease:[0.16,1,0.3,1] }}>
+          <div className="font-mono text-[8px] tracking-[0.42em] uppercase flex items-center gap-3 mb-5" style={{ color:"rgba(30,24,16,0.45)" }}>
+            <span className="w-6 h-px block" style={{ background:"rgba(30,24,16,0.3)" }} />
+            A Note from the Atelier
+          </div>
+          <blockquote className="font-cormorant italic font-light mb-6 leading-snug"
+            style={{ fontSize:"clamp(26px,3.5vw,42px)", color:"#1a1706" }}>
+            "Iyawoooo, Oko Iyawoooo! Sé dáadáa lè wà?"
+          </blockquote>
+
+          {/* TYPEWRITER BODY */}
+          <div className="relative min-h-[120px]">
+            {!typing && (
+              <div className="font-mono text-[8px] tracking-[0.32em] uppercase mb-3 flex items-center gap-2 animate-pulse"
+                style={{ color:"rgba(30,24,16,0.35)" }}>
+                <span className="w-4 h-px block" style={{ background:"rgba(30,24,16,0.3)" }} />
+                scroll to read
+                <span className="w-4 h-px block" style={{ background:"rgba(30,24,16,0.3)" }} />
+              </div>
+            )}
+            {paragraphs.map((para, pi) => (
+              <p key={pi} className="font-cormorant text-base md:text-lg leading-[1.85] mb-4" style={{ color:"rgba(30,24,16,0.65)" }}>
+                {para}
+                {!done && pi === paragraphs.length - 1 && (
+                  <span className="inline-block w-[2px] h-[1em] ml-0.5 align-middle"
+                    style={{ background:"#1a1706", animation:"exposure-blink 0.75s ease-in-out infinite" }} />
+                )}
+              </p>
+            ))}
+          </div>
+
+          {/* Signature + CTAs — fades in after typing */}
+          <AnimatePresence>
+            {done && (
+              <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.7, ease:[0.16,1,0.3,1] }}>
+                <div className="flex items-center gap-4 pt-6" style={{ borderTop:"1px solid rgba(30,24,16,0.1)" }}>
+                  <span className="font-cormorant italic text-2xl" style={{ color:"#1a1706" }}>Fiponmileoluwa</span>
+                  <div className="w-px h-4" style={{ background:"rgba(30,24,16,0.15)" }} />
+                  <span className="font-mono text-[8px] tracking-[0.3em] uppercase" style={{ color:"rgba(30,24,16,0.4)" }}>Creative Director</span>
+                </div>
+                <div className="mt-8 flex gap-3 flex-wrap">
+                  <a href="#contact" className="font-mono text-[8.5px] tracking-[0.28em] uppercase px-7 py-3 text-white transition-colors" style={{ background:"#1a1706" }}>
+                    Book a Fitting →
+                  </a>
+                  <a href="#lookbook" className="font-mono text-[8.5px] tracking-[0.28em] uppercase px-7 py-3 border transition-colors"
+                    style={{ borderColor:"rgba(30,24,16,0.3)", color:"#1a1706" }}>
+                    View the Lookbook
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+/* ── FILM TAPE NAV — between Atelier and Categories ── */
+const TAPE_NAV_ITEMS = [
+  "THE CIVIL VOW","ASO ÒKÈ","WHITE WEDDING","AFTER PARTY",
+  "OWAMBE","30TH BIRTHDAY","RED CARPET","CAPE TOWN",
+  "MARRAKECH","EDITORIAL","BRIDAL","OCCASION","TRAVEL",
+  "ABÁNITÚNRASE","SS·26","ISO 400","f/1.4",
+];
+
+const FilmTapeNav = () => {
+  const tripled = [...TAPE_NAV_ITEMS, ...TAPE_NAV_ITEMS, ...TAPE_NAV_ITEMS];
+  const scrollToLookbook = () => {
+    const el = document.getElementById("lookbook");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const Perfs = () => (
+    <div className="flex" style={{ height:10, background:"#0a0a0a" }}>
+      {Array.from({length:50}).map((_,i)=>(
+        <div key={i} style={{ width:18, height:6, margin:"2px 5px", background:"#1a1a1a", borderRadius:1, flexShrink:0, border:"0.5px solid #222" }} />
+      ))}
+    </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity:0, y:20 }}
+      whileInView={{ opacity:1, y:0 }}
+      viewport={{ once:true, amount:0.5 }}
+      transition={{ duration:0.8, ease:[0.16,1,0.3,1] }}
+      style={{ background:"#0d0d0d" }}
+    >
+      {/* Tape row 1 — forward */}
+      <div style={{ borderTop:"1px solid #1c1c1c", borderBottom:"1px solid #1c1c1c", background:"#0d0d0d" }}>
+        <Perfs />
+        <div className="flex tape-scroll whitespace-nowrap overflow-hidden" style={{ height:48 }}>
+          {tripled.map((label,i)=>(
+            <div key={i} className="inline-flex items-center justify-center font-syncopate text-[7.5px] tracking-[0.38em] uppercase flex-shrink-0"
+              style={{ width:110, borderRight:"1px solid #1c1c1c", color:"rgba(245,243,239,0.22)" }}>
+              {label}
+            </div>
+          ))}
+        </div>
+        <Perfs />
+      </div>
+
+      {/* CTA band */}
+      <div className="flex items-center justify-between gap-6 px-6 md:px-12 py-5"
+        style={{ borderBottom:"1px solid #1c1c1c", background:"#0a0a0a" }}>
+        <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+          <svg width="18" height="18" viewBox="0 0 120 120" style={{ animation:"reel-spin 6s linear infinite", flexShrink:0 }}>
+            <circle cx="60" cy="60" r="58" fill="none" stroke="#2a2a2a" strokeWidth="2" />
+            <circle cx="60" cy="60" r="52" fill="#111" stroke="#222" strokeWidth="1" />
+            {[0,60,120,180,240,300].map((a)=>(
+              <line key={a} x1="60" y1="60"
+                x2={60+46*Math.cos(((a-90)*Math.PI)/180)} y2={60+46*Math.sin(((a-90)*Math.PI)/180)}
+                stroke="#2a2a2a" strokeWidth="1.5" />
+            ))}
+            <circle cx="60" cy="60" r="16" fill="#0a0a0a" stroke="#333" strokeWidth="1.5" />
+            <circle cx="60" cy="60" r="6" fill="#222" stroke="#444" strokeWidth="1" />
+          </svg>
+          <span className="font-mono text-[7.5px] tracking-[0.38em] uppercase" style={{ color:"rgba(245,243,239,0.3)" }}>
+            06 Looks · Three Houses
+          </span>
+        </div>
+        <motion.button
+          onClick={scrollToLookbook}
+          data-cursor="true"
+          className="flex-shrink-0 mx-auto font-mono text-[8.5px] tracking-[0.35em] uppercase px-8 py-3 bg-white text-black"
+          whileHover={{ scale:1.03, backgroundColor:"#e8e5de" }}
+          whileTap={{ scale:0.97 }}
+          transition={{ type:"spring", stiffness:400, damping:20 }}>
+          ▶ Enter the Lookbook →
+        </motion.button>
+        <span className="hidden sm:block font-mono text-[7.5px] tracking-[0.38em] uppercase flex-shrink-0" style={{ color:"rgba(245,243,239,0.3)" }}>
+          Ilford HP5 · 35mm
+        </span>
+      </div>
+
+      {/* Tape row 2 — reverse */}
+      <div style={{ borderBottom:"1px solid #1c1c1c", background:"#0d0d0d" }}>
+        <Perfs />
+        <div className="flex tape-scroll-r whitespace-nowrap overflow-hidden" style={{ height:48 }}>
+          {tripled.map((label,i)=>(
+            <div key={i} className="inline-flex items-center justify-center font-syncopate text-[7.5px] tracking-[0.38em] uppercase flex-shrink-0"
+              style={{ width:110, borderRight:"1px solid #1c1c1c", color:"rgba(245,243,239,0.15)" }}>
+              {label}
+            </div>
+          ))}
+        </div>
+        <Perfs />
+      </div>
+    </motion.div>
+  );
+};
+
+/* ── APERTURE DIVIDER ── */
+const ApertureDivider = ({ label="" }) => (
+  <div className="flex items-center gap-6 px-6 md:px-12 py-2">
+    <div className="flex-1 h-px" style={{ background:"rgba(245,243,239,0.07)" }} />
+    <div className="flex-shrink-0"><FilmReel size={28} speed="10s" /></div>
+    {label&&<span className="font-mono text-[7.5px] tracking-[0.4em] uppercase whitespace-nowrap" style={{ color:"rgba(245,243,239,0.2)" }}>{label}</span>}
+    <div className="flex-shrink-0"><FilmReel size={20} speed="14s" /></div>
+    <div className="flex-1 h-px" style={{ background:"rgba(245,243,239,0.07)" }} />
+  </div>
+);
+
+/* ── CATEGORIES ── */
+const CATS = [
+  { num:"01", name:"The Bridal Suite", yoruba:"Ìyàwó & Oko Ìyàwó", looks:6, rateAnchor:"bridal-rates",
+    desc:"From court vows to white wedding to the after-party — every chapter dressed with intention. Our brides do not just wear; they arrive." },
+  { num:"02", name:"Occasion Styling", yoruba:"Ìgbà Ayẹyẹ", looks:5, rateAnchor:"occasion-rates",
+    desc:"For the days that matter outside the aisle. Birthdays, red carpets, family portraits, headshots — the party where everyone will be looking." },
+  { num:"03", name:"Kájáyelo", yoruba:"The Travel Styling Experience", looks:4, rateAnchor:"travel-rates",
+    desc:"We handle the aesthetics; you live the moments. Destination-based wardrobe curation with a physical Polaroid Guide to your trip." },
+];
+
+const Categories = ({ onPlayStory }) => (
+  <section id="categories" className="py-24 md:py-36 relative overflow-hidden" style={{ background:"#0e0e0e" }}>
+    <div className="absolute top-0 left-[40%] w-px h-full pointer-events-none"
+      style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, transparent 50%)", filter:"blur(40px)", transform:"scaleX(100)" }} />
+    <div className="px-6 md:px-12">
+      <FadeUp className="mb-14">
+        <div className="font-mono text-[8px] tracking-[0.42em] uppercase flex items-center gap-3 mb-5" style={{ color:"rgba(245,243,239,0.45)" }}>
+          <span className="w-6 h-px bg-white/30 block" /> Three Houses, One Atelier
+        </div>
+        <h2 className="font-cormorant font-light text-white leading-[0.9]" style={{ fontSize:"clamp(48px,7vw,96px)", letterSpacing:"-2px" }}>
+          What we <em>do</em>
+        </h2>
+      </FadeUp>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background:"#1c1c1c" }}>
+        {CATS.map((cat,i)=>(
+          <FadeUp key={cat.num} delay={i*0.1}>
+            <div className="relative overflow-hidden group cursor-crosshair" style={{ background:"#0a0a0a", minHeight:380 }} data-cursor="true">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 70%)", filter:"blur(30px)", transform:"translateX(-50%) scaleX(60)" }} />
+              <div className="absolute bottom-[-30px] right-[-10px] font-cormorant font-light leading-none pointer-events-none select-none"
+                style={{ fontSize:180, color:"rgba(245,243,239,0.025)", letterSpacing:"-10px" }}>{cat.num}</div>
+              <div className="relative z-10 p-9 flex flex-col" style={{ minHeight:380 }}>
+                <div className="font-mono text-[7.5px] tracking-[0.35em] uppercase mb-7" style={{ color:"rgba(245,243,239,0.25)" }}>
+                  Frame {cat.num} · {cat.name.split(" ")[0]}
+                </div>
+                <FilmReel size={32} speed={`${6+i*2}s`} />
+                <div className="mt-6">
+                  <h3 className="font-cormorant text-[28px] text-white leading-snug mb-1">{cat.name}</h3>
+                  <p className="font-cormorant italic text-sm mb-5" style={{ color:"rgba(245,243,239,0.45)" }}>{cat.yoruba}</p>
+                  <p className="font-cormorant text-sm leading-[1.75]" style={{ color:"rgba(245,243,239,0.55)" }}>{cat.desc}</p>
+                </div>
+                <div className="mt-auto pt-6 flex flex-col gap-3" style={{ borderTop:"1px solid rgba(245,243,239,0.07)" }}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-mono text-[8px] tracking-[0.28em] uppercase text-white/70">0{cat.looks} Looks</span>
+                    <motion.a href="#rates" className="font-mono text-[7.5px] tracking-[0.28em] uppercase text-white/60 hover:text-white transition-colors" whileHover={{x:4}}>
+                      View rates →
+                    </motion.a>
+                  </div>
+                  <a href="#contact" className="font-mono text-[7.5px] tracking-[0.28em] uppercase px-5 py-2 text-black bg-white/90 hover:bg-white transition-colors text-center">
+                    Book {cat.name.split(" ")[0]} →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </FadeUp>
+        ))}
+      </div>
+      {CATS.map((cat,i)=>(
+        <FadeUp key={`carousel-${cat.num}`} delay={i*0.08} className="mt-[3px]">
+          <div className="relative" style={{ borderBottom:"1px solid #1c1c1c" }}>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center gap-2">
+              <FilmReel size={16} speed={`${8+i*2}s`} />
+              <span className="font-mono text-[6.5px] tracking-[0.3em] uppercase" style={{ color:"rgba(245,243,239,0.3)" }}>{cat.name}</span>
+            </div>
+            <LookCarousel looks={looksByCategory[cat.num]} onPlayStory={onPlayStory} catNum={cat.num} />
+          </div>
+        </FadeUp>
+      ))}
+    </div>
+  </section>
+);
+
+/* ── LOOKBOOK ── */
+const LookCard = ({ look, i, onPlayStory, onBook }) => {
+  const [hov, setHov] = useState(false);
+  const shades = ["#181818","#141414","#161616","#131313","#171717","#121212"];
+  return (
+    <FadeUp delay={i*0.07} className={`${look.col} relative overflow-hidden group`} style={{ background:shades[i], minHeight:280 }}>
+      <div className="absolute inset-0 z-[1]" onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
+        <motion.div className="absolute top-0 left-1/2 w-px h-full pointer-events-none"
+          style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, transparent 65%)", filter:"blur(35px)", transform:"translateX(-50%) scaleX(70)" }}
+          animate={{ opacity:hov?1:0 }} transition={{ duration:0.5 }} />
+        <div className="absolute inset-0"
+          style={{ backgroundImage:"linear-gradient(rgba(245,243,239,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,243,239,0.025) 1px,transparent 1px)", backgroundSize:"25% 20%" }} />
+        <motion.div className="absolute inset-0"
+          style={{ background:"linear-gradient(to top, rgba(8,8,8,0.9) 0%, rgba(8,8,8,0.15) 50%, rgba(8,8,8,0.4) 100%)" }}
+          animate={{ opacity:hov?0.97:0.8 }} transition={{ duration:0.4 }} />
+      </div>
+      <img src={look.img} alt={look.title} className="absolute inset-0 w-full h-full object-cover" style={{ opacity:0.7 }} />
+      <div className="absolute left-0 top-0 bottom-0 w-4 flex flex-col justify-around items-center z-[2]" style={{ background:"rgba(8,8,8,0.4)" }}>
+        {Array.from({length:8}).map((_,j)=>(
+          <div key={j} className="w-2.5 h-1.5 rounded-sm" style={{ background:"rgba(8,8,8,0.9)", border:"0.5px solid #1e1e1e" }} />
+        ))}
+      </div>
+      <div className="absolute top-3 left-6 z-[3] font-mono text-[7px] tracking-[0.28em] uppercase px-2 py-1"
+        style={{ background:"rgba(8,8,8,0.75)", color:"rgba(245,243,239,0.7)", border:"0.5px solid rgba(255,255,255,0.1)" }}>
+        {look.vol} · {look.cat}
+      </div>
+      <div className="absolute top-3 right-4 z-[3] font-mono text-[7px] tracking-widest" style={{ color:"rgba(245,243,239,0.3)" }}>{look.fstop}</div>
+      <div className="absolute bottom-0 left-4 right-0 z-[3] p-4">
+        <div className="font-mono text-[7px] tracking-[0.3em] uppercase mb-1" style={{ color:"rgba(245,243,239,0.5)" }}>{look.sub}</div>
+        <div className="font-cormorant text-white leading-tight mb-2" style={{ fontSize:i===0?"28px":"18px" }}>{look.title}</div>
+        <motion.div className="flex flex-wrap gap-2 mt-2" animate={{ opacity:hov?1:0, y:hov?0:8 }} transition={{ duration:0.3 }}>
+          <button onClick={()=>onPlayStory(look)} data-cursor="true"
+            className="font-mono text-[7px] tracking-[0.25em] uppercase px-3 py-1.5 border text-white hover:bg-white hover:text-black transition-colors"
+            style={{ borderColor:"rgba(255,255,255,0.4)" }}>
+            ▶ Story
+          </button>
+          <button onClick={()=>onBook(look)} data-cursor="true"
+            className="font-mono text-[7px] tracking-[0.25em] uppercase px-3 py-1.5 bg-white text-black hover:bg-[#e8e5de] transition-colors">
+            Book the Look →
+          </button>
+        </motion.div>
+      </div>
+    </FadeUp>
+  );
+};
+
+const Lookbook = ({ onPlayStory, onBook }) => (
+  <section id="lookbook" className="py-24 md:py-36 relative overflow-hidden" style={{ background:"#080808" }}>
+    <div className="absolute top-0 left-[60%] w-px h-full pointer-events-none"
+      style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.07) 0%, transparent 55%)", filter:"blur(50px)", transform:"scaleX(110)" }} />
+    <div className="px-6 md:px-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end mb-14">
+        <FadeUp>
+          <h2 className="font-cormorant font-light text-white leading-[0.9]" style={{ fontSize:"clamp(48px,7vw,96px)", letterSpacing:"-2px" }}>
+            Every look,<br/><em>a story.</em>
+          </h2>
+        </FadeUp>
+        <FadeUp delay={0.1}>
+          <p className="font-cormorant italic text-lg leading-relaxed mb-5" style={{ color:"rgba(245,243,239,0.55)" }}>
+            Each photograph is a chapter. Tap any look to read the story behind the styling — what we sourced, what we tossed, who walked into the room.
+          </p>
+          <button onClick={()=>onPlayStory(LOOKS_DATA[0])} data-cursor="true"
+            className="font-mono text-[8.5px] tracking-[0.28em] uppercase px-7 py-3 border text-white hover:border-white/60 transition-colors inline-flex items-center gap-2"
+            style={{ borderColor:"rgba(245,243,239,0.25)" }}>
+            <span>▶</span> Play the First Story
+          </button>
+        </FadeUp>
+      </div>
+      <div className="mb-3"><FilmTape frames={LOOKS_DATA.map(l=>l.vol.toUpperCase())} /></div>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-[3px]" style={{ background:"#1a1a1a" }}>
+        {LOOKS_DATA.map((look,i)=>(
+          <LookCard key={look.id} look={look} i={i} onPlayStory={onPlayStory} onBook={onBook} />
+        ))}
+      </div>
+      <div className="mt-3">
+        <FilmTape reverse frames={["THE CIVIL VOW","ASO ÒKÈ","WHITE WEDDING","AFTER PARTY","OWAMBE","30TH BIRTHDAY","RED CARPET","CAPE TOWN","MARRAKECH","ITALY","MAURITIUS","EDITORIAL"]} />
+      </div>
+    </div>
+  </section>
+);
+
+/* ── BOOK THE LOOK BANNER ── */
+const BookBanner = ({ onBook }) => (
+  <section className="relative py-20 overflow-hidden" style={{ background:"#f8f4ee" }}>
+    <div className="px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-8">
+      <FadeUp>
+        <div>
+          <div className="font-mono text-[8px] tracking-[0.42em] uppercase mb-4 flex items-center gap-3" style={{ color:"rgba(30,24,16,0.45)" }}>
+            <span className="w-6 h-px block" style={{ background:"rgba(30,24,16,0.3)" }} /> Ready to Begin?
+          </div>
+          <h2 className="font-cormorant font-light leading-tight" style={{ fontSize:"clamp(38px,5vw,72px)", letterSpacing:"-2px", color:"#1a1706" }}>
+            Book the <em>Look.</em>
+          </h2>
+          <p className="font-cormorant italic text-lg mt-3 max-w-md" style={{ color:"rgba(30,24,16,0.6)" }}>
+            Every great look begins with a conversation. Let's talk about your vision.
+          </p>
+        </div>
+      </FadeUp>
+      <FadeUp delay={0.12} className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+        <a href="#contact" className="font-mono text-[9px] tracking-[0.3em] uppercase px-8 py-4 text-white transition-colors text-center" style={{ background:"#1a1706" }}>
+          Start a Conversation →
+        </a>
+        <a href="mailto:officialabanitunrase@gmail.com" className="font-mono text-[9px] tracking-[0.3em] uppercase px-8 py-4 border transition-colors text-center"
+          style={{ borderColor:"rgba(30,24,16,0.3)", color:"#1a1706" }}>
+          Email Directly
+        </a>
+      </FadeUp>
+    </div>
+    <div className="mt-10 opacity-20">
+      <FilmTape frames={["BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK","BOOK THE LOOK"]} />
+    </div>
+  </section>
+);
+
+/* ── PRICING ── */
+const PRICE_DATA = [
+  {
+    num:"01", name:"The Bridal Suite", yoruba:"Ìyàwó & Oko Ìyàwó",
+    rows:[
+      {name:"Aso Àsìkò",tier:"IV",inc:"Engagement · White Wedding",price:"₦2,500,000"},
+      {name:"Aso Ìgbáfé",tier:"V",inc:"Engagement · White Wedding · After Party",price:"₦3,000,000"},
+      {name:"Aso Ojúdé",tier:"VII",inc:"Pre-Wedding · Engagement · White · After Party",price:"₦4,000,000"},
+      {name:"Aso Àrìyá",tier:"VIII",inc:"Pre-Wedding · Civil · Engagement · White · After Party",price:"₦4,800,000"},
+    ],
+  },
+  {
+    num:"02", name:"Occasion Styling", yoruba:"Ìgbà Ayẹyẹ",
+    rows:[
+      {name:"Káseré Jáde",inc:"Party guest · Special outing · One look",price:"₦300,000"},
+      {name:"Káyáworán",inc:"Birthday · Corporate · Head-shot · One look",price:"₦500,000"},
+      {name:"Káànkò",inc:"Family photoshoot up to 3 people · One look",price:"₦1,000,000"},
+      {name:"Kábosagbo",inc:"Red carpet · Premieres · Themed celebrity events",price:"₦1,000,000"},
+    ],
+  },
+  {
+    num:"03", name:"Kájáyelo", yoruba:"Travel Styling",
+    rows:[
+      {name:"The Weekend Escape",inc:"3 Looks",price:"₦500,000"},
+      {name:"The Mid-Week Venture",inc:"4 Looks",price:"₦700,000"},
+      {name:"The Grand Tour",inc:"5 Looks",price:"₦900,000"},
+      {name:"The Elite Collection",inc:"6 Looks",price:"₦1,000,000"},
+    ],
+  },
+];
+
+const Pricing = ({ onPlayStory }) => (
+  <section id="rates" className="py-24 md:py-36 relative overflow-hidden" style={{ background:"#f8f4ee" }}>
+    <div className="absolute top-0 right-[20%] w-px h-full pointer-events-none"
+      style={{ background:"linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, transparent 60%)", filter:"blur(45px)", transform:"scaleX(90)" }} />
+    <div className="px-6 md:px-12">
+      <FadeUp className="mb-14">
+        <div className="font-mono text-[8px] tracking-[0.42em] uppercase flex items-center gap-3 mb-5" style={{ color:"rgba(30,24,16,0.45)" }}>
+          <span className="w-6 h-px block" style={{ background:"rgba(30,24,16,0.3)" }} /> Investment
+        </div>
+        <h2 className="font-cormorant font-light leading-[0.9]" style={{ fontSize:"clamp(48px,7vw,96px)", letterSpacing:"-2px", color:"#1a1706" }}>
+          The Rate <em>Cards</em>
+        </h2>
+        <p className="font-cormorant italic text-base mt-4 max-w-xl leading-relaxed" style={{ color:"rgba(30,24,16,0.5)" }}>
+          All prices in NGN. Couple, second-look, and travel logistics fees apply where relevant. Bridal bookings require an 80% commitment fee.
+        </p>
+      </FadeUp>
+      {PRICE_DATA.map((cat,ci)=>(
+        <FadeUp key={cat.num} delay={ci*0.08} className="mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-0" style={{ borderTop:"1px solid rgba(30,24,16,0.1)" }}>
+            <div className="py-10 md:py-12 pr-0 md:pr-8">
+              <div className="font-cormorant font-light text-7xl leading-none mb-3" style={{ color:"rgba(30,24,16,0.08)" }}>{cat.num}</div>
+              <div className="font-cormorant text-xl mb-1" style={{ color:"#1a1706" }}>{cat.name}</div>
+              <div className="font-cormorant italic text-xs mb-4" style={{ color:"rgba(30,24,16,0.4)" }}>{cat.yoruba}</div>
+              <div className="flex gap-1.5 mt-4">
+                {looksByCategory[cat.num].map(look=>(
+                  <button key={look.id} onClick={()=>onPlayStory(look)} data-cursor="true"
+                    className="group relative flex-1 aspect-[3/4] overflow-hidden" aria-label={`Play story: ${look.title}`}>
+                    <img src={look.img} alt={look.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background:"rgba(0,0,0,0.4)" }}>
+                      <span className="text-white text-[10px]">▶</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <a href="#contact" className="inline-block mt-4 font-mono text-[7px] tracking-[0.28em] uppercase px-4 py-2 text-white transition-colors text-center w-full"
+                style={{ background:"#1a1706" }}>
+                Book {cat.name.split(" ")[0]} →
+              </a>
+            </div>
+            <div>
+              {cat.rows.map((row,ri)=>(
+                <motion.div key={ri}
+                  className="grid grid-cols-1 sm:grid-cols-[1.3fr_2fr_1fr] gap-3 sm:gap-6 items-center py-5 transition-colors duration-300"
+                  style={{ borderBottom:ri<cat.rows.length-1?"1px solid rgba(30,24,16,0.07)":"none" }}
+                  whileHover={{ x:4, backgroundColor:"rgba(30,24,16,0.03)" }}
+                  transition={{ type:"spring", stiffness:400 }}>
+                  <div className="font-cormorant text-base" style={{ color:"#1a1706" }}>
+                    {row.name}
+                    {row.tier&&<span className="font-mono text-[7px] tracking-widest ml-2 align-super" style={{ color:"rgba(30,24,16,0.4)" }}>{row.tier}</span>}
+                  </div>
+                  <div className="font-mono text-[9px] leading-relaxed tracking-wide" style={{ color:"rgba(30,24,16,0.45)" }}>{row.inc}</div>
+                  <div className="font-cormorant text-lg sm:text-right" style={{ color:"#1a1706" }}>{row.price}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </FadeUp>
+      ))}
+      <FadeUp className="mt-12 p-7 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8" style={{ border:"1px solid rgba(30,24,16,0.1)" }}>
+        <div>
+          <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase mb-3" style={{ color:"rgba(30,24,16,0.35)" }}>Consultation</div>
+          <div className="font-cormorant text-sm leading-[1.8]" style={{ color:"rgba(30,24,16,0.6)" }}>
+            General Consultation — <span style={{ color:"#1a1706" }}>₦100,000</span><br/>
+            Couple Consultation — <span style={{ color:"#1a1706" }}>₦150,000</span><br/>
+            <em>Consultation fee is not deductible upon booking.</em>
+          </div>
+        </div>
+        <div>
+          <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase mb-3" style={{ color:"rgba(30,24,16,0.35)" }}>Booking Policy</div>
+          <div className="font-cormorant text-sm leading-[1.8]" style={{ color:"rgba(30,24,16,0.6)" }}>
+            <span style={{ color:"#1a1706" }}>80%</span> commitment fee on booking.{" "}
+            <span style={{ color:"#1a1706" }}>20%</span> balance due one week before the event. Travel bookings: at least{" "}
+            <span style={{ color:"#1a1706" }}>2 weeks</span> before departure.
+          </div>
+        </div>
+      </FadeUp>
+    </div>
+  </section>
+);
+
+/* ── CONTACT ── */
+const Contact = () => (
+  <section id="contact" className="py-24 md:py-36 relative overflow-hidden" style={{ background:"#0a0a0a" }}>
+    <div className="absolute top-0 left-[30%] w-px h-full pointer-events-none"
+      style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.11) 0%, transparent 50%)", filter:"blur(50px)", transform:"scaleX(90)" }} />
+    <div className="absolute top-0 right-[30%] w-px h-full pointer-events-none"
+      style={{ background:"linear-gradient(to bottom, rgba(255,255,255,0.09) 0%, transparent 45%)", filter:"blur(45px)", transform:"scaleX(80)" }} />
+    {[["top-8 left-6","border-t border-l"],["top-8 right-6","border-t border-r"],["bottom-8 left-6","border-b border-l"],["bottom-8 right-6","border-b border-r"]].map(([p,b],i)=>(
+      <div key={i} className={`absolute ${p} w-7 h-7 ${b} hidden md:block`} style={{ borderColor:"rgba(245,243,239,0.15)" }} />
+    ))}
+    <div className="px-6 md:px-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-14 md:gap-20 mb-20">
+        <FadeUp>
+          <div className="font-mono text-[8px] tracking-[0.42em] uppercase flex items-center gap-3 mb-5" style={{ color:"rgba(245,243,239,0.45)" }}>
+            <span className="w-6 h-px bg-white/30 block" /> Begin Here
+          </div>
+          <h2 className="font-cormorant font-light text-white leading-[0.95] mb-6" style={{ fontSize:"clamp(40px,6vw,80px)", letterSpacing:"-2px" }}>
+            We understand the <em>essence</em> of your project.
+          </h2>
+          <p className="font-cormorant italic text-lg leading-relaxed" style={{ color:"rgba(245,243,239,0.55)" }}>
+            And there's nothing we'll love more than to work on it with you. Every great look begins with a conversation.
+          </p>
+        </FadeUp>
+        <FadeUp delay={0.12}>
+          {[["Telephone","+234 812 628 6593"],["Email","officialabanitunrase@gmail.com"],["Instagram","@Abanitunrase"],["Atelier","Lagos, Nigeria"]].map(([l,v],i)=>(
+            <div key={i} className="flex justify-between items-center py-5" style={{ borderBottom:i<3?"1px solid rgba(245,243,239,0.07)":"none" }}>
+              <span className="font-mono text-[7.5px] tracking-[0.38em] uppercase" style={{ color:"rgba(245,243,239,0.35)" }}>{l}</span>
+              <span className="font-cormorant text-base text-white">{v}</span>
+            </div>
+          ))}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <motion.a href="mailto:officialabanitunrase@gmail.com"
+              className="inline-block font-mono text-[9px] tracking-[0.28em] uppercase px-8 py-4 bg-white text-black"
+              whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} transition={{ type:"spring", stiffness:400 }}>
+              Begin a Booking →
+            </motion.a>
+            <motion.a href="https://instagram.com/Abanitunrase" target="_blank" rel="noopener noreferrer"
+              className="inline-block font-mono text-[9px] tracking-[0.28em] uppercase px-8 py-4 border text-white hover:border-white/60 transition-colors"
+              style={{ borderColor:"rgba(245,243,239,0.25)" }}>
+              @Abanitunrase
+            </motion.a>
+          </div>
+        </FadeUp>
+      </div>
+      <div className="flex flex-wrap justify-between items-center gap-4 pt-7" style={{ borderTop:"1px solid rgba(245,243,239,0.07)" }}>
+        <span className="font-syncopate text-[8.5px] tracking-[0.38em] text-white">ABÁNITÚNRASE</span>
+        <div className="flex items-center gap-4">
+          <FilmReel size={20} speed="8s" />
+          <span className="font-mono text-[7px] tracking-[0.25em] uppercase" style={{ color:"rgba(245,243,239,0.25)" }}>© 2026 · A Lagos Atelier</span>
+          <span className="font-mono text-[7px] tracking-[0.25em] uppercase" style={{ color:"rgba(245,243,239,0.2)" }}>Ilford HP5 · 35mm</span>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ─────────────────────────────────────────
+   ROOT APP
+───────────────────────────────────────── */
+export default function App() {
+  const [introDone, setIntroDone] = useState(false);
+  const [selectedLook, setSelectedLook] = useState(null);
+
+  const handleOpenStory = (look) => setSelectedLook(look);
+  const handleCloseStory = () => setSelectedLook(null);
+  const handleBook = (look) => {
+    setSelectedLook(null);
+    setTimeout(() => {
+      const el = document.getElementById("contact");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 300);
+  };
+
+  return (
+    <>
+      <FontLoader />
+      <Grain />
+      <Cursor />
+
+      <AnimatePresence>
+        {selectedLook && (
+          <StoryPlayer
+            key={selectedLook.id}
+            look={selectedLook}
+            onClose={handleCloseStory}
+            onBook={() => handleBook(selectedLook)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        {!introDone ? (
+          <motion.div key="intro" className="relative z-50" exit={{opacity:0}} transition={{duration:0.7}}>
+            <IntroSequence onComplete={()=>setIntroDone(true)} />
+          </motion.div>
+        ) : (
+          <motion.div key="site" initial={{opacity:0}} animate={{opacity:1}} transition={{duration:1,ease:[0.16,1,0.3,1]}}>
+            <Nav />
+            <Hero onOpenStory={handleOpenStory} />
+            <FilmTape />
+            <Atelier />
+            <FilmTapeNav />
+            <ApertureDivider label="Three Houses · One Atelier" />
+            <Categories onPlayStory={handleOpenStory} />
+            <ApertureDivider label="The Lookbook · Every Story" />
+            <Lookbook onPlayStory={handleOpenStory} onBook={handleBook} />
+            <BookBanner onBook={handleBook} />
+            <ApertureDivider label="Investment · Rate Cards" />
+            <Pricing onPlayStory={handleOpenStory} />
+            <Contact />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

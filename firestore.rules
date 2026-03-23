@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Bookings — anyone can submit, read, or update their own booking after payment
+    // delete restricted to admin
+    match /bookings/{id} {
+      allow create, read, update: if true;
+      allow delete: if request.auth != null;
+    }
+
+    // Contacts / enquiries — anyone can submit, only auth reads
+    match /contacts/{id} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Looks — public read for site display, auth writes
+    match /looks/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Pricing — public read for site display, auth writes
+    match /pricing/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Settings (hero images, categories, site images) — public read, auth writes
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Reviews — anyone can read/create, only auth can delete
+    match /reviews/{id} {
+      allow read, create: if true;
+      allow delete: if request.auth != null;
+    }
+
+    // Gallery — public read, auth writes
+    match /gallery/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

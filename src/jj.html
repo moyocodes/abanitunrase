@@ -1,0 +1,3409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abánitúnrase — A Lagos Styling Atelier</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Syncopate:wght@400;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: #f9f6f1;
+        overflow-x: hidden;
+        cursor: default;
+        -webkit-font-smoothing: antialiased;
+        font-family: "Cormorant Garamond", Georgia, serif;
+      }
+      ::selection {
+        background: #1a1706;
+        color: #f9f6f1;
+      }
+
+      /* ── GRAIN ── */
+      #grain {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        opacity: 0.018;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 200px;
+        animation: grain 0.18s steps(2) infinite;
+      }
+      @keyframes grain {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(3%, 2%);
+        }
+        40% {
+          transform: translate(4%, -1%);
+        }
+        60% {
+          transform: translate(2%, -4%);
+        }
+        80% {
+          transform: translate(1%, -2%);
+        }
+      }
+      @keyframes go-left {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+      @keyframes go-right {
+        from {
+          transform: translateX(-50%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+      @keyframes pulse-v {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      /* ══ INTRO ══ */
+      #intro {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(249, 246, 241, 0.82);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        overflow: hidden;
+        pointer-events: auto;
+        opacity: 1;
+        transition: opacity 0.6s ease;
+      }
+      #intro.gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .intro-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        gap: 3px;
+        padding: 0 6px;
+        height: 3px;
+        align-items: center;
+        z-index: 20;
+      }
+      .ipr-seg {
+        flex: 1;
+        height: 3px;
+        background: rgba(26, 23, 6, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .ipr-fill {
+        height: 100%;
+        background: #1a1706;
+        width: 0%;
+        border-radius: 2px;
+        transition: width 0.3s ease;
+      }
+      .intro-corners .ic {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        opacity: 0.3;
+      }
+      .ic.tl {
+        top: 20px;
+        left: 24px;
+        border-top: 1px solid rgba(26, 23, 6, 0.3);
+        border-left: 1px solid rgba(26, 23, 6, 0.3);
+      }
+      .ic.tr {
+        top: 20px;
+        right: 24px;
+        border-top: 1px solid rgba(26, 23, 6, 0.3);
+        border-right: 1px solid rgba(26, 23, 6, 0.3);
+      }
+      .ic.bl {
+        bottom: 20px;
+        left: 24px;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.3);
+        border-left: 1px solid rgba(26, 23, 6, 0.3);
+      }
+      .ic.br {
+        bottom: 20px;
+        right: 24px;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.3);
+        border-right: 1px solid rgba(26, 23, 6, 0.3);
+      }
+      .intro-meta {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "DM Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        z-index: 20;
+      }
+      .intro-chapters {
+        position: relative;
+        text-align: center;
+        padding: 0 24px;
+        width: min(96vw, 1040px);
+        z-index: 20;
+        height: 340px;
+      }
+      .intro-ch {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(18px);
+        pointer-events: none;
+        transition:
+          opacity 0.55s ease,
+          transform 0.55s ease;
+      }
+      .intro-ch.active {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+      .ch-tag {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.38);
+        margin-bottom: 18px;
+      }
+      .ch-big {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(52px, 9vw, 100px);
+        color: #1a1706;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+      }
+      .ch-med {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(18px, 2.5vw, 28px);
+        color: rgba(26, 23, 6, 0.55);
+        line-height: 1.6;
+        margin-top: 14px;
+      }
+
+      /* ══ NAV ══ */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 48px;
+        border-bottom: 1px solid transparent;
+        transition:
+          background 0.5s,
+          border-color 0.5s,
+          opacity 0.4s ease,
+          transform 0.4s ease;
+      }
+      nav.scrolled {
+        background: rgba(249, 246, 241, 0.97);
+        backdrop-filter: blur(14px);
+        border-color: rgba(26, 23, 6, 0.07);
+      }
+      nav.nav-hidden {
+        opacity: 0;
+        transform: translateY(-100%);
+        pointer-events: none;
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        text-decoration: none;
+      }
+      .nav-brand {
+        font-family: "Syncopate", sans-serif;
+        font-size: 8.5px;
+        font-weight: 700;
+        letter-spacing: 0.36em;
+        color: #1a1706;
+      }
+      .nav-links {
+        display: flex;
+        gap: 28px;
+      }
+      .nav-links a {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.45);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      .nav-links a:hover {
+        color: #1a1706;
+      }
+      .nav-cta {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        padding: 8px 18px;
+        background: #1a1706;
+        color: #f5f0e6;
+        text-decoration: none;
+        transition: background 0.2s;
+        cursor: pointer;
+        border: none;
+      }
+      .nav-cta:hover {
+        background: #2a250a;
+      }
+
+      /* ══ HERO ══ */
+      #hero {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        background: #0a0a0a;
+        padding-top: 60px;
+      }
+      .hero-grid-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: absolute;
+        inset: 0;
+        justify-content: center;
+        overflow: hidden;
+        top: 60px;
+      }
+      .h-row {
+        display: flex;
+        gap: 12px;
+        width: max-content;
+      }
+      .h-row.hl {
+        animation: go-left 38s linear infinite;
+      }
+      .h-row.hr {
+        animation: go-right 38s linear infinite;
+      }
+      .h-row:hover {
+        animation-play-state: paused;
+      }
+      .h-card {
+        width: 240px;
+        height: 300px;
+        flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+      }
+      .h-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.5s;
+        opacity: 0.75;
+        filter: saturate(0.8) contrast(1.05);
+      }
+      .h-card:hover img {
+        transform: scale(1.04);
+        opacity: 0.9;
+      }
+      .h-card-over {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.7) 0%,
+          transparent 55%
+        );
+        pointer-events: none;
+      }
+      .h-card-label {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 13px;
+        font-style: italic;
+        color: rgba(245, 240, 230, 0.8);
+        line-height: 1.2;
+      }
+      .hero-scroll-cue {
+        position: absolute;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "DM Mono", monospace;
+        font-size: 6px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: rgba(245, 240, 230, 0.25);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        pointer-events: none;
+      }
+      .hero-scroll-line {
+        width: 1px;
+        height: 20px;
+        background: rgba(245, 240, 230, 0.2);
+        animation: pulse-v 2s infinite;
+      }
+
+      /* ══ FOUNDER NOTE ══ */
+      #atelier {
+        padding: 100px 56px;
+        background: #fff;
+        position: relative;
+      }
+      .atelier-content {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .sec-eyebrow {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .sec-eyebrow em {
+        display: block;
+        width: 22px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.25);
+        font-style: normal;
+      }
+      .atelier-quote {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(24px, 3vw, 38px);
+        color: #1a1706;
+        line-height: 1.25;
+        margin-bottom: 28px;
+      }
+      .founder-body {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(16px, 1.6vw, 20px);
+        color: rgba(26, 23, 6, 0.6);
+        line-height: 1.9;
+        margin-bottom: 28px;
+      }
+      .founder-body p {
+        margin-bottom: 16px;
+      }
+      .sig-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(26, 23, 6, 0.08);
+        margin-top: 8px;
+      }
+      .sig-name {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 22px;
+        color: #1a1706;
+      }
+      .sig-div {
+        width: 1px;
+        height: 14px;
+        background: rgba(26, 23, 6, 0.15);
+      }
+      .sig-title {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+      }
+
+      /* ══ CATEGORIES ══ */
+      #categories {
+        background: #f9f6f1;
+        padding: 100px 56px;
+      }
+      .cat-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 56px;
+      }
+      .cat-header-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(36px, 5vw, 64px);
+        color: #1a1706;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5px;
+        background: rgba(26, 23, 6, 0.07);
+      }
+      .cat-card {
+        background: #f9f6f1;
+        padding: 44px 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        overflow: hidden;
+        transition: background 0.35s;
+        cursor: default;
+      }
+      .cat-card:hover {
+        background: #fff;
+      }
+      .cat-num {
+        font-family: "Syncopate", sans-serif;
+        font-size: clamp(64px, 9vw, 100px);
+        font-weight: 700;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(26, 23, 6, 0.06);
+        line-height: 1;
+        position: absolute;
+        top: -12px;
+        right: 20px;
+        pointer-events: none;
+        transition:
+          color 0.35s,
+          -webkit-text-stroke 0.35s;
+      }
+      .cat-card:hover .cat-num {
+        -webkit-text-stroke-color: rgba(26, 23, 6, 0.1);
+      }
+      .cat-yoruba {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+      }
+      .cat-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: clamp(22px, 2.2vw, 30px);
+        font-weight: 300;
+        color: #1a1706;
+        line-height: 1.1;
+      }
+      .cat-desc {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(15px, 1.3vw, 18px);
+        color: rgba(26, 23, 6, 0.5);
+        line-height: 1.8;
+      }
+      .cat-looks {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.28);
+        margin-top: 8px;
+      }
+      .cat-bar {
+        width: 24px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.15);
+        margin-top: 4px;
+        transition: width 0.35s;
+      }
+      .cat-card:hover .cat-bar {
+        width: 48px;
+      }
+
+      /* ══ LOOKBOOK ══ */
+      #lookbook-section {
+        position: relative;
+      }
+      .lk-section-header {
+        background: #f9f6f1;
+        padding: 80px 64px 48px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.07);
+        position: relative;
+        z-index: 5;
+      }
+      .lk-header-left {
+      }
+      .lk-header-eyebrow {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.5em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .lk-header-eyebrow::before {
+        content: "";
+        display: block;
+        width: 28px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.2);
+      }
+      .lk-header-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(42px, 5vw, 72px);
+        color: #1a1706;
+        line-height: 1;
+        letter-spacing: -0.025em;
+      }
+      .lk-header-right {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.3);
+        text-align: right;
+        line-height: 2;
+      }
+      .lk-stack {
+        position: relative;
+      }
+      .look-card {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: stretch;
+        background: #f9f6f1;
+      }
+      .lc-left {
+        width: 42%;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 72px 56px 72px 64px;
+        position: relative;
+        z-index: 2;
+        background: #f9f6f1;
+        border-right: 1px solid rgba(26, 23, 6, 0.06);
+      }
+      .lc-top-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.06);
+      }
+      .lc-cat-tag {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.46em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .lc-cat-tag::before {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.18);
+        flex-shrink: 0;
+      }
+      .lc-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(38px, 3.8vw, 62px);
+        color: #1a1706;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin-bottom: 16px;
+      }
+      .lc-location {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.28);
+        margin-bottom: 32px;
+      }
+      .lc-divider {
+        width: 32px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.12);
+        margin-bottom: 28px;
+      }
+      .lc-desc {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(16px, 1.4vw, 20px);
+        color: rgba(26, 23, 6, 0.5);
+        line-height: 1.8;
+        margin-bottom: 40px;
+        max-width: 320px;
+      }
+      .lc-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .lc-btn-primary {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        padding: 12px 24px;
+        background: #1a1706;
+        color: #f5f0e6;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .lc-btn-primary:hover {
+        background: #2e290a;
+      }
+      .lc-btn-ghost {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.38);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .lc-btn-ghost::after {
+        content: "→";
+        font-size: 14px;
+        transition: transform 0.2s;
+      }
+      .lc-btn-ghost:hover {
+        color: #1a1706;
+      }
+      .lc-btn-ghost:hover::after {
+        transform: translateX(4px);
+      }
+      .lc-ordinal {
+        position: absolute;
+        bottom: -0.06em;
+        left: -0.03em;
+        font-family: "Syncopate", sans-serif;
+        font-size: clamp(110px, 20vw, 240px);
+        font-weight: 700;
+        line-height: 1;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(26, 23, 6, 0.035);
+        pointer-events: none;
+        user-select: none;
+        z-index: 0;
+        letter-spacing: -0.05em;
+      }
+      .lc-counter {
+        position: absolute;
+        top: 28px;
+        left: 64px;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.22);
+      }
+      .lc-right {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #1a1706;
+      }
+      .lc-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        filter: saturate(0.88) contrast(1.04);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .look-card:hover .lc-img {
+        transform: scale(1.02);
+      }
+      .lc-edge-fade {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 120px;
+        background: linear-gradient(
+          to right,
+          rgba(249, 246, 241, 0.45) 0%,
+          transparent 100%
+        );
+        pointer-events: none;
+        z-index: 2;
+      }
+      .lc-img-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(10, 8, 2, 0.65) 0%,
+          rgba(10, 8, 2, 0.2) 30%,
+          transparent 60%
+        );
+        z-index: 3;
+        pointer-events: none;
+      }
+      .lc-img-meta {
+        position: absolute;
+        bottom: 32px;
+        left: 36px;
+        z-index: 4;
+      }
+      .lc-img-meta-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 15px;
+        color: rgba(245, 240, 230, 0.65);
+        margin-bottom: 4px;
+      }
+      .lc-img-meta-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 240, 230, 0.35);
+      }
+      .lc-img-index {
+        position: absolute;
+        top: 28px;
+        right: 28px;
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 240, 230, 0.3);
+        z-index: 4;
+      }
+      .lc-expand-btn {
+        position: absolute;
+        bottom: 32px;
+        right: 28px;
+        z-index: 4;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid rgba(245, 240, 230, 0.25);
+        background: rgba(10, 8, 2, 0.3);
+        color: rgba(245, 240, 230, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.25s;
+        backdrop-filter: blur(6px);
+      }
+      .lc-expand-btn:hover {
+        background: rgba(245, 240, 230, 0.15);
+        border-color: rgba(245, 240, 230, 0.5);
+        color: #f5f0e6;
+      }
+      #lk-progress {
+        position: fixed;
+        right: 22px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 300;
+        opacity: 0;
+        transition: opacity 0.4s;
+        pointer-events: none;
+      }
+      #lk-progress.visible {
+        opacity: 1;
+      }
+      .lkp-dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: rgba(26, 23, 6, 0.15);
+        transition:
+          background 0.3s,
+          height 0.3s,
+          border-radius 0.3s;
+      }
+      .lkp-dot.active {
+        background: rgba(26, 23, 6, 0.7);
+        height: 20px;
+        border-radius: 2px;
+      }
+      #lk-counter {
+        position: fixed;
+        bottom: 26px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.22);
+        z-index: 300;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.4s;
+        pointer-events: none;
+      }
+      #lk-counter.visible {
+        opacity: 1;
+      }
+
+      /* ══ RATES ══ */
+      #rates {
+        background: #fff;
+        padding: 100px 56px;
+      }
+      .rates-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 56px;
+      }
+      .rates-header-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(36px, 5vw, 64px);
+        color: #1a1706;
+        line-height: 1;
+      }
+      .rates-note {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(15px, 1.3vw, 18px);
+        color: rgba(26, 23, 6, 0.45);
+        line-height: 1.75;
+        max-width: 380px;
+        text-align: right;
+      }
+      .rates-cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border-top: 1px solid rgba(26, 23, 6, 0.07);
+      }
+      .rates-col {
+        padding: 0 0 56px 0;
+      }
+      .rates-col:first-child {
+        padding-right: 48px;
+        border-right: 1px solid rgba(26, 23, 6, 0.07);
+      }
+      .rates-col:last-child {
+        padding-left: 48px;
+      }
+      .rates-col-title {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.44em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+        padding-top: 40px;
+        padding-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .rates-col-title em {
+        display: block;
+        width: 18px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.2);
+        font-style: normal;
+      }
+      .rate-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+        padding: 18px 0;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.06);
+        gap: 16px;
+      }
+      .rate-row:last-child {
+        border-bottom: none;
+      }
+      .rate-name {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: clamp(18px, 1.6vw, 22px);
+        color: #1a1706;
+        line-height: 1.1;
+        margin-bottom: 5px;
+      }
+      .rate-includes {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.32);
+        line-height: 1.7;
+      }
+      .rate-tier {
+        font-family: "DM Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.28);
+        margin-top: 4px;
+      }
+      .rate-price {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 300;
+        font-size: clamp(16px, 1.5vw, 20px);
+        color: #1a1706;
+        white-space: nowrap;
+        text-align: right;
+      }
+      .rate-price small {
+        display: block;
+        font-family: "DM Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.28);
+        margin-bottom: 4px;
+      }
+
+      /* Consult & Policy strip */
+      .consult-strip {
+        background: #1a1706;
+        padding: 52px 56px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: center;
+        margin-top: 0;
+      }
+      .consult-strip-left h3 {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(28px, 3vw, 42px);
+        color: #f5f0e6;
+        line-height: 1.1;
+        margin-bottom: 12px;
+      }
+      .consult-strip-left p {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(15px, 1.3vw, 18px);
+        color: rgba(245, 240, 230, 0.45);
+        line-height: 1.8;
+      }
+      .consult-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .consult-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(245, 240, 230, 0.08);
+      }
+      .consult-row:last-child {
+        border-bottom: none;
+      }
+      .consult-row-label {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(245, 240, 230, 0.38);
+      }
+      .consult-row-price {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: clamp(20px, 2vw, 26px);
+        color: #f5f0e6;
+      }
+      .policy-bar {
+        background: #f9f6f1;
+        padding: 28px 56px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-top: 1px solid rgba(26, 23, 6, 0.06);
+      }
+      .policy-cell {
+        padding: 0 24px 0 0;
+        border-right: 1px solid rgba(26, 23, 6, 0.07);
+      }
+      .policy-cell:last-child {
+        border-right: none;
+        padding-left: 24px;
+      }
+      .policy-cell:first-child {
+        padding-left: 0;
+      }
+      .policy-label {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.3);
+        margin-bottom: 6px;
+      }
+      .policy-val {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: clamp(16px, 1.5vw, 20px);
+        color: #1a1706;
+      }
+
+      /* ══ CONTACT DRAWER ══ */
+      #contact-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(26, 23, 6, 0);
+        pointer-events: none;
+        transition: background 0.45s ease;
+      }
+      #contact-overlay.open {
+        background: rgba(26, 23, 6, 0.45);
+        pointer-events: auto;
+      }
+      #contact-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(520px, 100vw);
+        background: #f9f6f1;
+        z-index: 2001;
+        transform: translateX(100%);
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #contact-drawer.open {
+        transform: translateX(0);
+      }
+
+      .cd-head {
+        padding: 32px 36px 24px;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.07);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .cd-head-left {
+      }
+      .cd-eyebrow {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.44em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .cd-eyebrow em {
+        display: block;
+        width: 16px;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.2);
+        font-style: normal;
+      }
+      .cd-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: 36px;
+        color: #1a1706;
+        line-height: 1;
+      }
+      .cd-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.14);
+        background: #fff;
+        color: rgba(26, 23, 6, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .cd-close:hover {
+        background: #1a1706;
+        color: #f5f0e6;
+        border-color: #1a1706;
+      }
+
+      .cd-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 32px 36px;
+      }
+      .cd-body::-webkit-scrollbar {
+        width: 3px;
+      }
+      .cd-body::-webkit-scrollbar-thumb {
+        background: rgba(26, 23, 6, 0.12);
+      }
+
+      .cd-contact-list {
+        margin-bottom: 36px;
+      }
+      .cd-contact-item {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(26, 23, 6, 0.06);
+      }
+      .cd-contact-item:first-child {
+        border-top: 1px solid rgba(26, 23, 6, 0.06);
+      }
+      .cd-ci-label {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.32);
+      }
+      .cd-ci-val {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 17px;
+        color: #1a1706;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .cd-ci-val:hover {
+        color: rgba(26, 23, 6, 0.55);
+      }
+
+      .cd-divider {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+      .cd-divider-line {
+        flex: 1;
+        height: 1px;
+        background: rgba(26, 23, 6, 0.07);
+      }
+      .cd-divider-text {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.3);
+        white-space: nowrap;
+      }
+
+      .cd-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .cd-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .cd-label {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.38);
+      }
+      .cd-input,
+      .cd-select,
+      .cd-textarea {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 17px;
+        color: #1a1706;
+        background: #fff;
+        border: 1px solid rgba(26, 23, 6, 0.1);
+        padding: 12px 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        width: 100%;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+      .cd-input::placeholder,
+      .cd-textarea::placeholder {
+        color: rgba(26, 23, 6, 0.25);
+        font-style: italic;
+      }
+      .cd-input:focus,
+      .cd-select:focus,
+      .cd-textarea:focus {
+        border-color: rgba(26, 23, 6, 0.4);
+      }
+      .cd-textarea {
+        resize: vertical;
+        min-height: 90px;
+        line-height: 1.6;
+      }
+      .cd-select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(26,23,6,0.3)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px;
+      }
+      .cd-select option {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 16px;
+      }
+
+      .cd-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .cd-submit {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        padding: 14px 28px;
+        background: #1a1706;
+        color: #f5f0e6;
+        border: none;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.15s;
+        width: 100%;
+        margin-top: 6px;
+      }
+      .cd-submit:hover {
+        background: #2e290a;
+      }
+      .cd-submit:active {
+        transform: scale(0.99);
+      }
+
+      .cd-sent {
+        display: none;
+        text-align: center;
+        padding: 40px 0;
+      }
+      .cd-sent.show {
+        display: block;
+      }
+      .cd-sent-icon {
+        font-size: 28px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      .cd-sent-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 28px;
+        color: #1a1706;
+        margin-bottom: 10px;
+      }
+      .cd-sent-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.35);
+      }
+
+      .cd-footer {
+        padding: 20px 36px;
+        border-top: 1px solid rgba(26, 23, 6, 0.07);
+        flex-shrink: 0;
+      }
+      .cd-footer-note {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 14px;
+        color: rgba(26, 23, 6, 0.35);
+        line-height: 1.7;
+      }
+
+      /* ══ LIGHTBOX ══ */
+      #lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 600;
+        background: rgba(249, 246, 241, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.35s ease,
+          background 0.35s ease;
+      }
+      #lightbox.open {
+        opacity: 1;
+        pointer-events: auto;
+        background: rgba(249, 246, 241, 0.92);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      .lb-img-wrap {
+        position: relative;
+        max-width: min(80vw, 900px);
+        max-height: 85vh;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(26, 23, 6, 0.16);
+        transform: scale(0.94);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #lightbox.open .lb-img-wrap {
+        transform: scale(1);
+      }
+      #lb-img {
+        display: block;
+        max-width: 100%;
+        max-height: 85vh;
+        object-fit: contain;
+      }
+      .lb-meta {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: linear-gradient(
+          to top,
+          rgba(249, 246, 241, 0.96) 0%,
+          transparent 100%
+        );
+      }
+      .lb-meta-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-size: 18px;
+        color: #1a1706;
+      }
+      .lb-meta-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.38);
+        margin-top: 4px;
+      }
+      .lb-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.16);
+        background: rgba(249, 246, 241, 0.92);
+        color: rgba(26, 23, 6, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 15px;
+        transition: all 0.2s;
+      }
+      .lb-close:hover {
+        background: #1a1706;
+        color: #f9f6f1;
+      }
+      .lb-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.14);
+        background: rgba(249, 246, 241, 0.9);
+        color: rgba(26, 23, 6, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 22px;
+        transition: all 0.2s;
+      }
+      .lb-nav:hover {
+        background: #1a1706;
+        color: #f9f6f1;
+      }
+      #lb-prev {
+        left: 14px;
+      }
+      #lb-next {
+        right: 14px;
+      }
+
+      /* ══ STORY MODAL ══ */
+      #story-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 700;
+        display: none;
+        pointer-events: none;
+      }
+      #story-modal.open {
+        display: block;
+        pointer-events: auto;
+      }
+      #sm-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(249, 246, 241, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        cursor: pointer;
+      }
+      #sm-sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 72vh;
+        background: #fff;
+        border-top: 1px solid rgba(26, 23, 6, 0.09);
+        border-radius: 18px 18px 0 0;
+        display: flex;
+        overflow: hidden;
+        transform: translateY(100%);
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 -20px 70px rgba(26, 23, 6, 0.11);
+      }
+      #sm-handle {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(26, 23, 6, 0.1);
+        z-index: 10;
+      }
+      #story-modal.open #sm-sheet {
+        transform: translateY(0);
+      }
+      #sm-left {
+        width: 40%;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      #sm-media-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s;
+      }
+      #sm-video-wrap {
+        position: absolute;
+        inset: 0;
+        display: none;
+      }
+      #sm-video-wrap iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .sm-media-grad {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to right,
+          transparent 60%,
+          rgba(255, 255, 255, 0.95) 100%
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+      .sm-thumbstrip {
+        position: absolute;
+        bottom: 14px;
+        left: 10px;
+        right: 10px;
+        z-index: 5;
+        display: flex;
+        gap: 5px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .sm-thumbstrip::-webkit-scrollbar {
+        display: none;
+      }
+      .sm-sthumb {
+        width: 46px;
+        height: 58px;
+        flex-shrink: 0;
+        overflow: hidden;
+        cursor: pointer;
+        border: 1.5px solid transparent;
+        transition: border-color 0.2s;
+      }
+      .sm-sthumb:hover {
+        border-color: rgba(26, 23, 6, 0.4);
+      }
+      .sm-sthumb.active {
+        border-color: #1a1706;
+      }
+      .sm-sthumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        filter: saturate(0.8);
+        transition: filter 0.2s;
+      }
+      .sm-sthumb:hover img {
+        filter: saturate(1);
+      }
+      .sm-media-toggle {
+        position: absolute;
+        top: 14px;
+        left: 10px;
+        z-index: 6;
+        display: flex;
+        gap: 4px;
+      }
+      .sm-mtbtn {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 5px 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+      }
+      .sm-mtbtn.active {
+        background: #1a1706;
+        color: #f5f0e6;
+      }
+      .sm-mtbtn:not(.active) {
+        background: rgba(249, 246, 241, 0.9);
+        color: rgba(26, 23, 6, 0.5);
+        border: 1px solid rgba(26, 23, 6, 0.14);
+      }
+      #sm-right {
+        flex: 1;
+        padding: 44px 36px 28px 28px;
+        overflow-y: auto;
+        position: relative;
+      }
+      #sm-right::-webkit-scrollbar {
+        width: 3px;
+      }
+      #sm-right::-webkit-scrollbar-thumb {
+        background: rgba(26, 23, 6, 0.12);
+      }
+      .sm-title {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: clamp(22px, 2.8vw, 38px);
+        color: #1a1706;
+        line-height: 1.05;
+        margin-bottom: 6px;
+      }
+      .sm-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.38);
+        margin-bottom: 22px;
+      }
+      .sm-chapters-nav {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .sm-chbtn {
+        font-family: "DM Mono", monospace;
+        font-size: 7px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        padding: 6px 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: rgba(26, 23, 6, 0.04);
+        border: 1px solid rgba(26, 23, 6, 0.09);
+        color: rgba(26, 23, 6, 0.44);
+      }
+      .sm-chbtn.active {
+        background: #1a1706;
+        border-color: #1a1706;
+        color: #f5f0e6;
+      }
+      .sm-story-text {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(17px, 1.8vw, 21px);
+        color: rgba(26, 23, 6, 0.7);
+        line-height: 1.85;
+        margin-bottom: 24px;
+        min-height: 60px;
+      }
+      .sm-voice-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px;
+        background: rgba(26, 23, 6, 0.04);
+        border: 1px solid rgba(26, 23, 6, 0.07);
+        margin-bottom: 24px;
+      }
+      .voice-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.2);
+        background: #fff;
+        color: #1a1706;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .voice-btn:hover {
+        background: #1a1706;
+        color: #f5f0e6;
+        border-color: #1a1706;
+      }
+      .voice-progress-wrap {
+        flex: 1;
+        height: 2px;
+        background: rgba(26, 23, 6, 0.09);
+        border-radius: 1px;
+      }
+      .voice-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: #1a1706;
+        border-radius: 1px;
+        transition: width 0.1s linear;
+      }
+      .voice-label {
+        font-family: "DM Mono", monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.32);
+        white-space: nowrap;
+      }
+      .voice-wave {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .voice-wave.playing {
+        opacity: 1;
+      }
+      .wave-bar {
+        width: 2px;
+        height: 10px;
+        background: #1a1706;
+        border-radius: 1px;
+        animation: waveBounce 0.6s ease-in-out infinite;
+      }
+      .wave-bar:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .wave-bar:nth-child(2) {
+        animation-delay: 0.1s;
+        height: 6px;
+      }
+      .wave-bar:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .wave-bar:nth-child(4) {
+        animation-delay: 0.15s;
+        height: 7px;
+      }
+      .wave-bar:nth-child(5) {
+        animation-delay: 0.05s;
+        height: 5px;
+      }
+      @keyframes waveBounce {
+        0%,
+        100% {
+          transform: scaleY(1);
+        }
+        50% {
+          transform: scaleY(1.8);
+        }
+      }
+      #sm-progress {
+        display: flex;
+        gap: 3px;
+        margin-bottom: 14px;
+      }
+      .sm-seg {
+        flex: 1;
+        height: 2px;
+        background: rgba(26, 23, 6, 0.09);
+        border-radius: 2px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .sm-seg-fill {
+        height: 100%;
+        background: #1a1706;
+        width: 0%;
+        border-radius: 2px;
+      }
+      .sm-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-top: 18px;
+        border-top: 1px solid rgba(26, 23, 6, 0.07);
+      }
+      .sm-btn-book {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        padding: 10px 20px;
+        background: #1a1706;
+        color: #f5f0e6;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .sm-btn-book:hover {
+        background: #2a250a;
+      }
+      .sm-btn-share {
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        padding: 10px 16px;
+        background: transparent;
+        border: 1px solid rgba(26, 23, 6, 0.2);
+        color: rgba(26, 23, 6, 0.55);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+      .sm-btn-share:hover {
+        border-color: rgba(26, 23, 6, 0.5);
+        color: #1a1706;
+      }
+      #sm-nav-prev,
+      #sm-nav-next {
+        position: absolute;
+        top: 16px;
+        z-index: 12;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.15);
+        background: rgba(249, 246, 241, 0.9);
+        color: rgba(26, 23, 6, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 15px;
+        transition: all 0.2s;
+      }
+      #sm-nav-prev {
+        right: 74px;
+      }
+      #sm-nav-next {
+        right: 38px;
+      }
+      #sm-nav-prev:hover,
+      #sm-nav-next:hover {
+        background: #1a1706;
+        color: #f5f0e6;
+      }
+      #sm-close {
+        position: absolute;
+        top: 14px;
+        right: 10px;
+        z-index: 12;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 1px solid rgba(26, 23, 6, 0.13);
+        background: rgba(249, 246, 241, 0.9);
+        color: rgba(26, 23, 6, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+      #sm-close:hover {
+        background: #1a1706;
+        color: #f5f0e6;
+      }
+      .sm-youtube-slot {
+        margin-top: 10px;
+        padding: 11px 14px;
+        border: 1px dashed rgba(26, 23, 6, 0.11);
+        font-family: "DM Mono", monospace;
+        font-size: 7.5px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(26, 23, 6, 0.26);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .sm-youtube-slot:hover {
+        border-color: rgba(26, 23, 6, 0.28);
+        color: rgba(26, 23, 6, 0.48);
+      }
+      .sm-youtube-url {
+        display: none;
+        margin-top: 7px;
+        width: 100%;
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        padding: 8px 12px;
+        background: rgba(26, 23, 6, 0.03);
+        border: 1px solid rgba(26, 23, 6, 0.09);
+        color: #1a1706;
+        outline: none;
+        letter-spacing: 0.05em;
+      }
+      .sm-youtube-url::placeholder {
+        color: rgba(26, 23, 6, 0.22);
+      }
+
+      #share-toast {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "DM Mono", monospace;
+        font-size: 8px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        padding: 10px 24px;
+        background: #1a1706;
+        color: #f5f0e6;
+        z-index: 9000;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      #share-toast.show {
+        opacity: 1;
+      }
+
+      .fade-up {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .fade-up.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          padding: 14px 18px;
+        }
+        .nav-links {
+          display: none;
+        }
+        #hero {
+          padding-top: 50px;
+        }
+        .hero-grid-wrap {
+          top: 50px;
+        }
+        .h-card {
+          width: 160px;
+          height: 200px;
+        }
+        #atelier {
+          padding: 60px 20px;
+        }
+        #categories {
+          padding: 60px 20px;
+        }
+        .cat-grid {
+          grid-template-columns: 1fr;
+        }
+        #rates {
+          padding: 60px 20px;
+        }
+        .rates-cols {
+          grid-template-columns: 1fr;
+        }
+        .rates-col:first-child {
+          padding-right: 0;
+          border-right: none;
+          border-bottom: 1px solid rgba(26, 23, 6, 0.07);
+          padding-bottom: 32px;
+        }
+        .rates-col:last-child {
+          padding-left: 0;
+        }
+        .rates-header {
+          flex-direction: column;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        .rates-note {
+          text-align: left;
+          max-width: 100%;
+        }
+        .consult-strip {
+          grid-template-columns: 1fr;
+          padding: 40px 20px;
+          gap: 32px;
+        }
+        .policy-bar {
+          padding: 20px;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        .policy-cell {
+          border-right: none;
+          padding: 0;
+        }
+        .lk-section-header {
+          padding: 48px 24px 32px;
+          flex-direction: column;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        .look-card {
+          flex-direction: column;
+        }
+        .lc-left {
+          width: 100%;
+          padding: 36px 24px 24px;
+          justify-content: flex-end;
+          border-right: none;
+          border-bottom: 1px solid rgba(26, 23, 6, 0.06);
+        }
+        .lc-right {
+          flex: none;
+          height: 50vh;
+        }
+        .lc-title {
+          font-size: clamp(32px, 7vw, 48px);
+        }
+        .lc-desc {
+          display: none;
+        }
+        .lc-ordinal {
+          font-size: 28vw;
+        }
+        #sm-left {
+          display: none;
+        }
+        #sm-right {
+          width: 100%;
+          padding: 44px 18px 22px;
+        }
+        #sm-sheet {
+          height: 90vh;
+        }
+        #contact-drawer {
+          width: 100vw;
+        }
+        .cat-header {
+          flex-direction: column;
+          gap: 12px;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="grain"></div>
+    <div id="share-toast">Link copied to clipboard</div>
+
+    <!-- ══ INTRO ══ -->
+    <div id="intro">
+      <div class="intro-progress" id="intro-prog"></div>
+      <div class="intro-corners">
+        <div class="ic tl"></div>
+        <div class="ic tr"></div>
+        <div class="ic bl"></div>
+        <div class="ic br"></div>
+      </div>
+      <div class="intro-chapters">
+        <div class="intro-ch active" id="ich-0">
+          <div class="ch-tag">Step One</div>
+          <div class="ch-big">Iyawoooo,<br />Oko Iyawoooo!</div>
+          <div class="ch-med">Sé dáadáa lè wà?</div>
+        </div>
+        <div class="intro-ch" id="ich-1">
+          <div class="ch-tag">Step Two</div>
+          <div class="ch-big">I'm Fiponmileoluwa.</div>
+          <div class="ch-med">Lawyer by training.<br />Stylist by calling.</div>
+        </div>
+        <div class="intro-ch" id="ich-2">
+          <div class="ch-tag">Step Three</div>
+          <div class="ch-big" style="font-size: clamp(36px, 6vw, 72px)">
+            Arrive in looks that stand out,<br />stay clean, remain timeless.
+          </div>
+        </div>
+        <div class="intro-ch" id="ich-3">
+          <div class="ch-tag">Step Four</div>
+          <div class="ch-big">Abánitúnrase.</div>
+          <div class="ch-med">A Lagos Styling Atelier</div>
+        </div>
+      </div>
+      <div class="intro-meta">
+        <span>Abánitúnrase</span>
+        <span style="opacity: 0.4">·</span>
+        <span id="intro-counter">01 / 04</span>
+      </div>
+    </div>
+
+    <!-- ══ MAIN SITE ══ -->
+    <div id="site" style="pointer-events: none">
+      <nav id="main-nav">
+        <a class="nav-logo" href="#">
+          <div class="nav-brand">ABÁNITÚNRASE</div>
+        </a>
+        <div class="nav-links">
+          <a href="#categories">Categories</a>
+          <a href="#lookbook-section">Lookbook</a>
+          <a href="#rates">Rates</a>
+          <a
+            href="#"
+            onclick="
+              openContact();
+              return false;
+            "
+            >Contact</a
+          >
+        </div>
+        <button class="nav-cta" onclick="openContact()">Book a Fitting</button>
+      </nav>
+
+      <!-- HERO -->
+      <section id="hero">
+        <div class="hero-grid-wrap" id="hero-grid"></div>
+        <div class="hero-scroll-cue">
+          <div class="hero-scroll-line"></div>
+          explore
+        </div>
+      </section>
+
+      <!-- FOUNDER NOTE -->
+      <section id="atelier" class="fade-up">
+        <div class="atelier-content">
+          <div class="sec-eyebrow"><em></em>A Note from the Atelier</div>
+          <blockquote class="atelier-quote">
+            "Iyawoooo, Oko Iyawoooo!<br />Sé dáadáa lè wà?"
+          </blockquote>
+          <div class="founder-body">
+            <p>
+              My name is Fiponmileoluwa — most people call me Fifii. I'm the
+              creative director of Abánitúnrase. Lawyer by training, stylist by
+              calling. Mostly stylist, actually.
+            </p>
+            <p>
+              We built this house with one passion: that our brides, grooms, and
+              clients arrive in looks that stand out, stay clean, and remain
+              timeless. Òkó iyàwó, iyàwó — I look forward to working with you.
+            </p>
+          </div>
+          <div class="sig-row">
+            <span class="sig-name">Fiponmileoluwa</span>
+            <span class="sig-div"></span>
+            <span class="sig-title">Creative Director</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIES -->
+      <section id="categories" class="fade-up">
+        <div class="cat-header">
+          <div class="cat-header-title">Choose<br /><em>your chapter.</em></div>
+          <div class="sec-eyebrow" style="margin-bottom: 0">
+            <em></em>Three Ways to Dress
+          </div>
+        </div>
+        <div class="cat-grid">
+          <div class="cat-card">
+            <div class="cat-num">01</div>
+            <div class="cat-yoruba">Ìyàwó &amp; Oko Ìyàwó</div>
+            <div class="cat-title">The Bridal Suite</div>
+            <div class="cat-desc">
+              From court vows to white wedding to the after-party — every
+              chapter dressed with intention.
+            </div>
+            <div class="cat-looks">6 looks available</div>
+            <div class="cat-bar"></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-num">02</div>
+            <div class="cat-yoruba">Ìgbà Ayẹyẹ</div>
+            <div class="cat-title">Occasion Styling</div>
+            <div class="cat-desc">
+              Birthdays, red carpets, family portraits, headshots — the party
+              where everyone will be looking.
+            </div>
+            <div class="cat-looks">5 looks available</div>
+            <div class="cat-bar"></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-num">03</div>
+            <div class="cat-yoruba">The Travel Styling Experience</div>
+            <div class="cat-title">Kájáyelo</div>
+            <div class="cat-desc">
+              Destination-based wardrobe curation with a physical Polaroid Guide
+              to your trip.
+            </div>
+            <div class="cat-looks">4 looks available</div>
+            <div class="cat-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ LOOKBOOK ══ -->
+      <div id="lookbook-section">
+        <div class="lk-section-header">
+          <div class="lk-header-left">
+            <div class="lk-header-eyebrow">The Lookbook · SS 2026</div>
+            <div class="lk-header-title">Selected Works</div>
+          </div>
+          <div class="lk-header-right">
+            Bridal · Occasion · Travel<br />
+            Lagos · Ibadan · Abroad
+          </div>
+        </div>
+        <div class="lk-stack" id="lk-stack"></div>
+      </div>
+
+      <div id="lk-progress"></div>
+      <div id="lk-counter">01 / 06</div>
+
+      <!-- ══ RATES ══ -->
+      <section id="rates" class="fade-up">
+        <div class="rates-header">
+          <div class="rates-header-title">The<br /><em>investment.</em></div>
+          <p class="rates-note">
+            Every package is a commitment to detail, intention, and artistry.
+            All prices in Nigerian Naira. Consultation is required prior to
+            booking.
+          </p>
+        </div>
+
+        <div class="rates-cols">
+          <!-- BRIDAL -->
+          <div class="rates-col">
+            <div class="rates-col-title">
+              <em></em>Bridal Suite — Ìyàwó &amp; Oko Ìyàwó
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Aso Àsìkò</div>
+                <div class="rate-includes">Engagement · White Wedding</div>
+                <div class="rate-tier">Tier IV</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>2,500,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Aso Ìgbáfé</div>
+                <div class="rate-includes">
+                  Engagement · White Wedding · After Party
+                </div>
+                <div class="rate-tier">Tier V</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>3,000,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Aso Ojúdé</div>
+                <div class="rate-includes">
+                  Pre-Wedding · Engagement · White · After Party
+                </div>
+                <div class="rate-tier">Tier VII</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>4,000,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Aso Àrìyá</div>
+                <div class="rate-includes">
+                  Pre-Wedding · Civil · Engagement · White · After Party
+                </div>
+                <div class="rate-tier">Tier VIII</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>4,800,000</div>
+            </div>
+          </div>
+
+          <!-- OCCASION + TRAVEL -->
+          <div class="rates-col">
+            <div class="rates-col-title">
+              <em></em>Occasion Styling — Ìgbà Ayẹyẹ
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Káseré Jáde</div>
+                <div class="rate-includes">
+                  Party guest · Special outing · One look
+                </div>
+              </div>
+              <div class="rate-price"><small>NGN</small>300,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Káyáworán</div>
+                <div class="rate-includes">
+                  Birthday · Corporate · Head-shot · One look
+                </div>
+              </div>
+              <div class="rate-price"><small>NGN</small>500,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Káànkò</div>
+                <div class="rate-includes">
+                  Family photoshoot up to 3 people · One look
+                </div>
+              </div>
+              <div class="rate-price"><small>NGN</small>1,000,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">Kábosagbo</div>
+                <div class="rate-includes">
+                  Red carpet · Premieres · Themed celebrity events
+                </div>
+              </div>
+              <div class="rate-price"><small>NGN</small>1,000,000</div>
+            </div>
+
+            <div class="rates-col-title" style="margin-top: 24px">
+              <em></em>Travel Styling — Kájáyelo
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">The Weekend Escape</div>
+                <div class="rate-includes">3 looks · Weekend</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>500,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">The Mid-Week Venture</div>
+                <div class="rate-includes">4 looks</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>700,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">The Grand Tour</div>
+                <div class="rate-includes">5 looks</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>900,000</div>
+            </div>
+            <div class="rate-row">
+              <div>
+                <div class="rate-name">The Elite Collection</div>
+                <div class="rate-includes">6 looks</div>
+              </div>
+              <div class="rate-price"><small>NGN</small>1,000,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONSULTATION STRIP -->
+        <div class="consult-strip">
+          <div class="consult-strip-left">
+            <h3>Consultation</h3>
+            <p>
+              All bookings begin with a conversation. The consultation fee is
+              non-refundable and is not deductible upon booking your package. It
+              is the beginning of the work.
+            </p>
+          </div>
+          <div class="consult-rows">
+            <div class="consult-row">
+              <div class="consult-row-label">General Consultation</div>
+              <div class="consult-row-price">₦100,000</div>
+            </div>
+            <div class="consult-row">
+              <div class="consult-row-label">Couple's Consultation</div>
+              <div class="consult-row-price">₦150,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POLICY BAR -->
+        <div class="policy-bar">
+          <div class="policy-cell">
+            <div class="policy-label">Commitment Fee</div>
+            <div class="policy-val">80% upfront</div>
+          </div>
+          <div class="policy-cell">
+            <div class="policy-label">Balance Due</div>
+            <div class="policy-val">20% remaining</div>
+          </div>
+          <div class="policy-cell">
+            <div class="policy-label">Payment Deadline</div>
+            <div class="policy-val">1 week before</div>
+          </div>
+          <div class="policy-cell">
+            <div class="policy-label">Travel Notice</div>
+            <div class="policy-val">2 weeks prior</div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- end #site -->
+
+    <!-- ══ CONTACT DRAWER ══ -->
+    <div id="contact-overlay" onclick="closeContact()"></div>
+    <div id="contact-drawer">
+      <div class="cd-head">
+        <div class="cd-head-left">
+          <div class="cd-eyebrow"><em></em>Abánitúnrase · Lagos</div>
+          <div class="cd-title">Let's build<br />your look.</div>
+        </div>
+        <button class="cd-close" onclick="closeContact()">✕</button>
+      </div>
+
+      <div class="cd-body">
+        <!-- Contact info -->
+        <div class="cd-contact-list">
+          <div class="cd-contact-item">
+            <span class="cd-ci-label">Phone</span>
+            <a href="tel:+2348126286593" class="cd-ci-val">+234 812 628 6593</a>
+          </div>
+          <div class="cd-contact-item">
+            <span class="cd-ci-label">Email</span>
+            <a href="mailto:officialabanitunrase@gmail.com" class="cd-ci-val"
+              >officialabanitunrase@gmail.com</a
+            >
+          </div>
+          <div class="cd-contact-item">
+            <span class="cd-ci-label">Instagram</span>
+            <a
+              href="https://instagram.com/abanitunrase"
+              target="_blank"
+              class="cd-ci-val"
+              >@Abanitunrase</a
+            >
+          </div>
+          <div class="cd-contact-item">
+            <span class="cd-ci-label">Location</span>
+            <span class="cd-ci-val">Lagos, Nigeria</span>
+          </div>
+        </div>
+
+        <div class="cd-divider">
+          <div class="cd-divider-line"></div>
+          <span class="cd-divider-text">Or send an enquiry</span>
+          <div class="cd-divider-line"></div>
+        </div>
+
+        <!-- Form -->
+        <div id="cd-form-wrap">
+          <div class="cd-form">
+            <div class="cd-row-2">
+              <div class="cd-field">
+                <label class="cd-label">First name</label>
+                <input
+                  class="cd-input"
+                  id="cd-fname"
+                  type="text"
+                  placeholder="Your name"
+                />
+              </div>
+              <div class="cd-field">
+                <label class="cd-label">Last name</label>
+                <input
+                  class="cd-input"
+                  id="cd-lname"
+                  type="text"
+                  placeholder="Surname"
+                />
+              </div>
+            </div>
+            <div class="cd-field">
+              <label class="cd-label">Email address</label>
+              <input
+                class="cd-input"
+                id="cd-email"
+                type="email"
+                placeholder="your@email.com"
+              />
+            </div>
+            <div class="cd-field">
+              <label class="cd-label">Phone number</label>
+              <input
+                class="cd-input"
+                id="cd-phone"
+                type="tel"
+                placeholder="+234 …"
+              />
+            </div>
+            <div class="cd-field">
+              <label class="cd-label">Service of interest</label>
+              <select class="cd-select" id="cd-service">
+                <option value="" disabled selected>Select a category</option>
+                <optgroup label="Bridal Suite — Ìyàwó & Oko Ìyàwó">
+                  <option>Aso Àsìkò — Engagement &amp; White Wedding</option>
+                  <option>Aso Ìgbáfé — + After Party</option>
+                  <option>Aso Ojúdé — Pre-Wedding through After Party</option>
+                  <option>Aso Àrìyá — Full Suite incl. Civil</option>
+                </optgroup>
+                <optgroup label="Occasion Styling — Ìgbà Ayẹyẹ">
+                  <option>Káseré Jáde — Party Guest</option>
+                  <option>Káyáworán — Birthday / Corporate</option>
+                  <option>Káànkò — Family Photoshoot</option>
+                  <option>Kábosagbo — Red Carpet</option>
+                </optgroup>
+                <optgroup label="Travel Styling — Kájáyelo">
+                  <option>The Weekend Escape — 3 Looks</option>
+                  <option>The Mid-Week Venture — 4 Looks</option>
+                  <option>The Grand Tour — 5 Looks</option>
+                  <option>The Elite Collection — 6 Looks</option>
+                </optgroup>
+                <option value="consultation">General Consultation</option>
+              </select>
+            </div>
+            <div class="cd-field">
+              <label class="cd-label">Event date (if applicable)</label>
+              <input
+                class="cd-input"
+                id="cd-date"
+                type="text"
+                placeholder="e.g. March 2026"
+              />
+            </div>
+            <div class="cd-field">
+              <label class="cd-label">Tell us about your event</label>
+              <textarea
+                class="cd-textarea"
+                id="cd-message"
+                placeholder="Share the vision — venue, theme, dress code, anything on your mind…"
+              ></textarea>
+            </div>
+            <button class="cd-submit" onclick="submitForm()">
+              Send Enquiry →
+            </button>
+          </div>
+        </div>
+
+        <!-- Thank you state -->
+        <div class="cd-sent" id="cd-sent">
+          <div class="cd-sent-icon">✦</div>
+          <div class="cd-sent-title">We received your note.</div>
+          <div class="cd-sent-sub">We'll be in touch within 48 hours</div>
+        </div>
+      </div>
+
+      <div class="cd-footer">
+        <div class="cd-footer-note">
+          Consultation fee is non-refundable and not deductible upon booking.
+          80% commitment fee required to confirm your date.
+        </div>
+      </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox">
+      <div class="lb-nav" id="lb-prev" onclick="lbNav(-1)">‹</div>
+      <div class="lb-img-wrap">
+        <img id="lb-img" src="" alt="" />
+        <div class="lb-meta">
+          <div class="lb-meta-title" id="lb-title"></div>
+          <div class="lb-meta-sub" id="lb-sub"></div>
+        </div>
+      </div>
+      <div class="lb-nav" id="lb-next" onclick="lbNav(1)">›</div>
+      <button class="lb-close" onclick="closeLightbox()">✕</button>
+    </div>
+
+    <!-- STORY MODAL -->
+    <div id="story-modal">
+      <div id="sm-backdrop" onclick="closeStory()"></div>
+      <div id="sm-sheet">
+        <div id="sm-handle"></div>
+        <button id="sm-close" onclick="closeStory()">✕</button>
+        <div id="sm-nav-prev" onclick="prevLook()">‹</div>
+        <div id="sm-nav-next" onclick="nextLook()">›</div>
+        <div id="sm-left">
+          <div class="sm-media-toggle">
+            <button
+              class="sm-mtbtn active"
+              id="sm-tab-photo"
+              onclick="showMedia('photo')"
+            >
+              Photo
+            </button>
+            <button
+              class="sm-mtbtn"
+              id="sm-tab-video"
+              onclick="showMedia('video')"
+            >
+              Video
+            </button>
+          </div>
+          <img id="sm-media-img" src="" alt="" />
+          <div id="sm-video-wrap">
+            <iframe
+              id="sm-iframe"
+              src=""
+              allowfullscreen
+              allow="autoplay"
+            ></iframe>
+          </div>
+          <div class="sm-media-grad"></div>
+          <div class="sm-thumbstrip" id="sm-thumbstrip"></div>
+        </div>
+        <div id="sm-right">
+          <div id="sm-progress"></div>
+          <div class="sm-title" id="sm-title"></div>
+          <div class="sm-sub" id="sm-sub"></div>
+          <div class="sm-chapters-nav" id="sm-ch-nav"></div>
+          <div class="sm-voice-bar">
+            <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+              ▶
+            </button>
+            <div class="voice-wave" id="voice-wave">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+            <div class="voice-progress-wrap">
+              <div class="voice-progress-fill" id="voice-prog"></div>
+            </div>
+            <div class="voice-label" id="voice-label">Read aloud</div>
+          </div>
+          <div class="sm-story-text" id="sm-story-text"></div>
+          <div
+            class="sm-youtube-slot"
+            id="sm-yt-slot"
+            onclick="toggleYtInput()"
+          >
+            ▶ &nbsp; Add video for this look
+          </div>
+          <input
+            class="sm-youtube-url"
+            id="sm-yt-input"
+            placeholder="https://youtube.com/watch?v=..."
+          />
+          <div class="sm-actions">
+            <button
+              class="sm-btn-book"
+              onclick="
+                closeStory();
+                openContact();
+              "
+            >
+              Book this Look →
+            </button>
+            <button class="sm-btn-share" onclick="shareStory()">
+              ↑ &nbsp; Share Look
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const LOOKS = [
+        {
+          id: "bridal-01",
+          cat: "Bridal",
+          title: "The Civil Vow",
+          sub: "Court Wedding · Lagos",
+          img: "https://res.cloudinary.com/drxxei318/image/upload/q_auto/f_auto/v1778719606/SaveClip.App_670450798_17938323207254973_1615245445868749339_n_qrnzqg.jpg",
+          video:
+            "https://res.cloudinary.com/drxxei318/video/upload/q_auto/f_auto/v1778719183/savesss_objdrj.mp4",
+          chapters: [
+            {
+              label: "The Brief",
+              text: "She walked in wearing her grandmother's coral beads and a conviction that simplicity was its own kind of luxury. We built the look around that energy — letting the fabric breathe, the silhouette stand, the woman lead.",
+            },
+            {
+              label: "The Source",
+              text: "Ivory brocade from Balogun market sourced at 7am. The vendor almost didn't open for us. Three bolts inspected. One chosen. That bolt became the dress.",
+            },
+            {
+              label: "The Detail",
+              text: "Three shoes tried. Two discarded. One pair — cream satin kitten heels — that made the whole look land perfectly. Sometimes the right finishing note takes four rounds of fittings.",
+            },
+            {
+              label: "The Arrival",
+              text: "The magistrate's courtroom had never seen anything like it. Neither had we. She walked in and the clerk forgot to ask everyone to rise — they already were.",
+            },
+          ],
+        },
+        {
+          id: "bridal-02",
+          cat: "Bridal",
+          title: "Aso Òkè, Re-Read",
+          sub: "Engagement · Ibadan",
+          img: "https://res.cloudinary.com/drxxei318/image/upload/q_auto/f_auto/v1778719176/SaveClip.App_670056046_17937929682254973_115841610841833887_n_pv0av8.jpg",
+          video:
+            "https://res.cloudinary.com/drxxei318/video/upload/q_auto/f_auto/v1778719185/savessss_j6v3zx.mp4",
+          chapters: [
+            {
+              label: "The Heirloom",
+              text: "Her mother's aso-òkè had sat in a trunk for twenty-two years. We brought it back to life with modern tailoring — deconstructing the weave just enough to let it speak in a new century.",
+            },
+            {
+              label: "The Silhouette",
+              text: "A contemporary silhouette. The same ancient weave. Something old and something entirely new in conversation.",
+            },
+            {
+              label: "The Gold",
+              text: "Minimal gold jewelry — just the right weight. Nothing that competed with the fabric's inherent story. A single cuff. Ear studs.",
+            },
+            {
+              label: "The Mirror",
+              text: "She cried when she looked in the mirror. We may have too. Her fiancé stood still at the entrance for a full ten seconds. That was the moment.",
+            },
+          ],
+        },
+        {
+          id: "occasion-01",
+          cat: "Occasion",
+          title: "The Owambe Arrival",
+          sub: "Party Guest · Lekki",
+          img: "https://res.cloudinary.com/drxxei318/image/upload/q_auto/f_auto/v1778719174/SaveClip.App_657629594_17934033246254973_4767573184899257147_n_nu89ox.jpg",
+          video:
+            "https://res.cloudinary.com/drxxei318/image/upload/q_auto/f_auto/v1778719173/SaveClip.App_656350026_17934033219254973_5085001795344307511_n_tatbja.jpg",
+          chapters: [
+            {
+              label: "The Brief",
+              text: "The client said: 'I want everyone to turn and look.' We took that very seriously. The brief was not modest. The budget was not modest. The result was not modest.",
+            },
+            {
+              label: "The Build",
+              text: "Ankara with architectural structure. A silhouette that moved without apology. A wide-brimmed hat at an angle the hat itself seemed unsure about. It worked.",
+            },
+            {
+              label: "The Entrance",
+              text: "She arrived forty minutes late. The room waited. It was worth it. The DJ paused — not on cue, just instinctively. The floor cleared without a word.",
+            },
+            {
+              label: "The Impact",
+              text: "Three hundred guests. Zero who didn't notice. Six bookings followed that single entrance.",
+            },
+          ],
+        },
+        {
+          id: "travel-01",
+          cat: "Travel",
+          title: "The Weekend Escape",
+          sub: "Cape Town · 48 Hours",
+          img: "https://res.cloudinary.com/drxxei318/image/upload/q_auto/f_auto/v1778719179/SaveClip.App_696190760_17942426766254973_6528501205889293125_n_htzssr.jpg",
+          //   video: "",
+          chapters: [
+            {
+              label: "The Challenge",
+              text: "Cape Town in forty-eight hours demands a wardrobe that transitions across wind, sun, fine dining, and exploration without missing a beat.",
+            },
+            {
+              label: "The Edit",
+              text: "Three complete looks. One carry-on. Zero compromises. The packing list was its own art.",
+            },
+            {
+              label: "The Guide",
+              text: "Polaroid notes told her where to wear what. She sent pictures from Boulders Beach wearing look two. She cried at the penguins. The coat survived.",
+            },
+            {
+              label: "The Verdict",
+              text: "She called it the best-dressed trip she'd ever taken. Three different Instagram captions. None of them mentioned the clothes — which meant the clothes were doing exactly what they should.",
+            },
+          ],
+        },
+        {
+          id: "occasion-02",
+          cat: "Occasion",
+          title: "Kábosagbo",
+          sub: "AMVCA · Red Carpet",
+          img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=85",
+          video: "",
+          chapters: [
+            {
+              label: "The Stakes",
+              text: "Red carpet is not a place. It's a verdict. We prepare for verdicts with precision. Two weeks of planning. One night of execution. No room for hesitation.",
+            },
+            {
+              label: "The Hunt",
+              text: "Designer called at 9pm. Shoes sourced from Dubai. Bag borrowed from someone exclusive. Jewellery negotiated from a Lagos craftsman who does not take last-minute orders.",
+            },
+            {
+              label: "The Walk",
+              text: "She walked. Five cameras turned. Three publications ran the look the next morning without being pitched. The headline wrote itself.",
+            },
+            {
+              label: "The Call",
+              text: "Best phone call: hers, from the afterparty, saying she felt absolutely unstoppable. That's the whole job.",
+            },
+          ],
+        },
+        {
+          id: "travel-02",
+          cat: "Travel",
+          title: "The Medina Edit",
+          sub: "Marrakech · 4 Looks",
+          img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=1200&q=85",
+          video: "",
+          chapters: [
+            {
+              label: "The Place",
+              text: "Marrakech is colour and texture and heat and energy. We styled with restraint — letting the city be the backdrop, not the competition.",
+            },
+            {
+              label: "The Fabric",
+              text: "Four looks built from linen, cotton, and one silk kaftan from a hidden boutique near Jemaa el-Fna. The vendor made it in three hours.",
+            },
+            {
+              label: "The Guide",
+              text: "Notes included our favourite riad, a hidden ceramics souk, and when the light hits the Koutoubia for the best photograph.",
+            },
+            {
+              label: "The Response",
+              text: "People kept asking where she bought her clothes. We said: nowhere you can find online. That's the truth. And the whole point.",
+            },
+          ],
+        },
+      ];
+
+      /* ── CONTACT DRAWER ── */
+      function openContact() {
+        document.getElementById("contact-overlay").classList.add("open");
+        document.getElementById("contact-drawer").classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function closeContact() {
+        document.getElementById("contact-overlay").classList.remove("open");
+        document.getElementById("contact-drawer").classList.remove("open");
+        document.body.style.overflow = "";
+      }
+      function submitForm() {
+        const req = ["cd-fname", "cd-email", "cd-service"];
+        let ok = true;
+        req.forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el.value.trim()) {
+            el.style.borderColor = "rgba(26,23,6,0.4)";
+            ok = false;
+          } else el.style.borderColor = "";
+        });
+        if (!ok) return;
+        document.getElementById("cd-form-wrap").style.display = "none";
+        document.getElementById("cd-sent").classList.add("show");
+      }
+
+      /* ── INTRO ── */
+      let introStep = 0;
+      const INTRO_STEPS = 4,
+        INTRO_TRIGGER = 300;
+      function buildIntroProg() {
+        document.getElementById("intro-prog").innerHTML = Array.from(
+          { length: INTRO_STEPS },
+          (_, i) =>
+            `<div class="ipr-seg"><div class="ipr-fill" id="ipf-${i}"></div></div>`,
+        ).join("");
+      }
+      function updateIntro() {
+        if (document.getElementById("intro").classList.contains("gone")) return;
+        const s = window.scrollY;
+        const newStep = Math.min(
+          Math.floor(s / INTRO_TRIGGER),
+          INTRO_STEPS - 1,
+        );
+        if (newStep !== introStep) {
+          document
+            .getElementById("ich-" + introStep)
+            ?.classList.remove("active");
+          introStep = newStep;
+          document.getElementById("ich-" + introStep)?.classList.add("active");
+          document.getElementById("intro-counter").textContent =
+            String(introStep + 1).padStart(2, "0") + " / 0" + INTRO_STEPS;
+          for (let i = 0; i < INTRO_STEPS; i++) {
+            const f = document.getElementById("ipf-" + i);
+            if (f)
+              f.style.width =
+                i < introStep ? "100%" : i === introStep ? "50%" : "0%";
+          }
+        }
+        if (s > INTRO_TRIGGER * INTRO_STEPS) dismissIntro();
+      }
+      function dismissIntro() {
+        document.getElementById("intro").classList.add("gone");
+        document.getElementById("site").style.pointerEvents = "auto";
+      }
+
+      /* ── HERO ── */
+      function buildHeroGrid() {
+        const wrap = document.getElementById("hero-grid");
+        function makeRow(indices, dir) {
+          const row = document.createElement("div");
+          row.className = "h-row " + (dir === "left" ? "hl" : "hr");
+          [...indices, ...indices].forEach((i) => {
+            const l = LOOKS[i],
+              c = document.createElement("div");
+            c.className = "h-card";
+            c.innerHTML = `<img src="${l.img}" alt="${l.title}" loading="lazy"><div class="h-card-over"></div><div class="h-card-label">${l.title}</div>`;
+            c.addEventListener("click", () => openStory(i));
+            row.appendChild(c);
+          });
+          return row;
+        }
+        wrap.appendChild(makeRow([0, 1, 2, 3, 4, 5], "left"));
+        wrap.appendChild(makeRow([3, 4, 5, 0, 1, 2], "right"));
+        wrap.appendChild(makeRow([1, 3, 5, 0, 2, 4], "left"));
+      }
+
+      /* ── LOOKBOOK ── */
+      function buildLookbook() {
+        const stack = document.getElementById("lk-stack");
+        stack.style.height = window.innerHeight * LOOKS.length + "px";
+        LOOKS.forEach((look, i) => {
+          const card = document.createElement("div");
+          card.className = "look-card";
+          card.id = "lk-" + i;
+          card.style.zIndex = String(10 + i);
+          const num = String(i + 1).padStart(2, "0");
+          const total = String(LOOKS.length).padStart(2, "0");
+          const teaser =
+            look.chapters[0].text.split(" ").slice(0, 22).join(" ") + "…";
+          card.innerHTML = `
+            <div class="lc-top-line"></div>
+            <div class="lc-left">
+              <div class="lc-ordinal">${num}</div>
+              <div class="lc-counter">${num} / ${total}</div>
+              <div class="lc-cat-tag">${look.cat}</div>
+              <div class="lc-title">${look.title}</div>
+              <div class="lc-location">${look.sub}</div>
+              <div class="lc-divider"></div>
+              <div class="lc-desc">${teaser}</div>
+              <div class="lc-actions">
+                <button class="lc-btn-primary" onclick="openStory(${i})">Read the Story</button>
+                <button class="lc-btn-ghost" onclick="openLightbox(${i},'${look.img}','${look.title}','${look.sub}')">View image</button>
+              </div>
+            </div>
+            <div class="lc-right">
+              <img class="lc-img" src="${look.img}" alt="${look.title}" loading="${i === 0 ? "eager" : "lazy"}"/>
+              <div class="lc-edge-fade"></div>
+              <div class="lc-img-overlay"></div>
+              <div class="lc-img-index">${num} / ${total}</div>
+              <div class="lc-img-meta">
+                <div class="lc-img-meta-title">${look.title}</div>
+                <div class="lc-img-meta-sub">${look.sub}</div>
+              </div>
+              <button class="lc-expand-btn" onclick="openLightbox(${i},'${look.img}','${look.title}','${look.sub}');event.stopPropagation()" title="Expand image">⤢</button>
+            </div>
+          `;
+          stack.appendChild(card);
+        });
+        document.getElementById("lk-progress").innerHTML = LOOKS.map(
+          (_, i) => `<div class="lkp-dot" id="lkpd-${i}"></div>`,
+        ).join("");
+      }
+
+      function updateLookbook() {
+        const stack = document.getElementById("lk-stack");
+        const nav = document.getElementById("main-nav");
+        const prog = document.getElementById("lk-progress");
+        const counter = document.getElementById("lk-counter");
+        const stackRect = stack.getBoundingClientRect();
+        const inLookbook = stackRect.top <= 0 && stackRect.bottom > 0;
+        nav.classList.toggle("nav-hidden", inLookbook);
+        prog.classList.toggle("visible", inLookbook);
+        counter.classList.toggle("visible", inLookbook);
+        if (!inLookbook) return;
+        const scrolledIn = -stackRect.top;
+        const vh = window.innerHeight;
+        const activeIdx = Math.min(
+          Math.floor(scrolledIn / vh),
+          LOOKS.length - 1,
+        );
+        counter.textContent =
+          String(activeIdx + 1).padStart(2, "0") +
+          " / " +
+          String(LOOKS.length).padStart(2, "0");
+        LOOKS.forEach((_, i) => {
+          document
+            .getElementById("lkpd-" + i)
+            ?.classList.toggle("active", i === activeIdx);
+        });
+      }
+
+      /* ── LIGHTBOX ── */
+      let lbImages = [],
+        lbIdx = 0;
+      function openLightbox(lookIdx, src, title, sub) {
+        lbImages = LOOKS.map((l, i) => ({
+          src: l.img,
+          title: l.title,
+          sub: l.sub,
+          lookIdx: i,
+        }));
+        lbIdx = lbImages.findIndex((x) => x.lookIdx === lookIdx);
+        if (lbIdx < 0) lbIdx = 0;
+        renderLightbox();
+        document.getElementById("lightbox").classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function renderLightbox() {
+        const it = lbImages[lbIdx];
+        document.getElementById("lb-img").src = it.src;
+        document.getElementById("lb-title").textContent = it.title;
+        document.getElementById("lb-sub").textContent = it.sub;
+      }
+      function lbNav(dir) {
+        lbIdx = (lbIdx + dir + lbImages.length) % lbImages.length;
+        renderLightbox();
+      }
+      function closeLightbox() {
+        document.getElementById("lightbox").classList.remove("open");
+        document.body.style.overflow = "";
+      }
+
+      /* ── STORY MODAL ── */
+      let curLook = 0,
+        curCh = 0,
+        videoUrl = "";
+      let voiceUtterance = null,
+        voicePlaying = false,
+        voiceInterval = null;
+      function openStory(idx) {
+        stopVoice();
+        curLook = idx;
+        curCh = 0;
+        videoUrl = LOOKS[idx].video || "";
+        renderStory();
+        document.getElementById("story-modal").classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+      function renderStory() {
+        stopVoice();
+        const look = LOOKS[curLook];
+        document.getElementById("sm-title").textContent = look.title;
+        document.getElementById("sm-sub").textContent =
+          look.sub + " · " + look.cat;
+        document.getElementById("sm-media-img").src = look.img;
+        showMedia("photo");
+        document.getElementById("sm-ch-nav").innerHTML = look.chapters
+          .map(
+            (ch, i) =>
+              `<button class="sm-chbtn${i === curCh ? " active" : ""}" onclick="setChapter(${i})">${ch.label}</button>`,
+          )
+          .join("");
+        document.getElementById("sm-story-text").textContent =
+          look.chapters[curCh].text;
+        document.getElementById("sm-progress").innerHTML = look.chapters
+          .map(
+            (_, i) =>
+              `<div class="sm-seg" onclick="setChapter(${i})"><div class="sm-seg-fill" style="width:${i < curCh ? 100 : 0}%"></div></div>`,
+          )
+          .join("");
+        const thumbs = [
+          look.img,
+          look.img.replace("w=1200", "w=400"),
+          look.img.replace("q=85", "q=50"),
+        ];
+        document.getElementById("sm-thumbstrip").innerHTML = thumbs
+          .map(
+            (src, ti) =>
+              `<div class="sm-sthumb${ti === 0 ? " active" : ""}" onclick="spotlightThumb(this,'${src}')"><img src="${src}" alt="" loading="lazy"></div>`,
+          )
+          .join("");
+        document.getElementById("sm-yt-input").value = videoUrl || "";
+        document.getElementById("sm-yt-input").style.display = "none";
+        document.getElementById("sm-yt-slot").innerHTML =
+          "▶ &nbsp; Add video for this look";
+        resetVoiceUI();
+      }
+      function spotlightThumb(el, src) {
+        document
+          .querySelectorAll(".sm-sthumb")
+          .forEach((t) => t.classList.remove("active"));
+        el.classList.add("active");
+        document.getElementById("sm-media-img").src = src;
+        showMedia("photo");
+      }
+      function setChapter(i) {
+        stopVoice();
+        curCh = i;
+        const look = LOOKS[curLook];
+        document.getElementById("sm-story-text").textContent =
+          look.chapters[i].text;
+        document
+          .querySelectorAll(".sm-chbtn")
+          .forEach((b, j) => b.classList.toggle("active", j === i));
+        document.querySelectorAll(".sm-seg-fill").forEach((f, j) => {
+          f.style.width = j < i ? "100%" : j === i ? "50%" : "0%";
+        });
+        resetVoiceUI();
+      }
+      function showMedia(type) {
+        const img = document.getElementById("sm-media-img"),
+          vid = document.getElementById("sm-video-wrap"),
+          iframe = document.getElementById("sm-iframe");
+        document
+          .getElementById("sm-tab-photo")
+          .classList.toggle("active", type === "photo");
+        document
+          .getElementById("sm-tab-video")
+          .classList.toggle("active", type === "video");
+        if (type === "photo") {
+          img.style.display = "block";
+          vid.style.display = "none";
+          iframe.src = "";
+        } else {
+          img.style.display = "none";
+          vid.style.display = "block";
+          if (videoUrl) iframe.src = ytEmbedUrl(videoUrl);
+        }
+      }
+      function ytEmbedUrl(url) {
+        if (!url) return "";
+        const m = url.match(
+          /(?:v=|youtu\.be\/|vimeo\.com\/)([a-zA-Z0-9_-]{5,15})/,
+        );
+        if (!m) return url;
+        if (url.includes("vimeo"))
+          return "https://player.vimeo.com/video/" + m[1] + "?autoplay=1";
+        return "https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1";
+      }
+      function toggleYtInput() {
+        const inp = document.getElementById("sm-yt-input");
+        inp.style.display = inp.style.display === "none" ? "block" : "none";
+        if (inp.style.display === "block") inp.focus();
+      }
+      document
+        .getElementById("sm-yt-input")
+        .addEventListener("change", (e) => setVideoUrl(e.target.value));
+      document
+        .getElementById("sm-yt-input")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") setVideoUrl(e.target.value);
+        });
+      function setVideoUrl(val) {
+        videoUrl = val;
+        LOOKS[curLook].video = val;
+        if (val) {
+          document.getElementById("sm-yt-slot").innerHTML =
+            "▶ &nbsp; Video linked";
+          showMedia("video");
+        }
+      }
+      function prevLook() {
+        curLook = (curLook - 1 + LOOKS.length) % LOOKS.length;
+        curCh = 0;
+        videoUrl = LOOKS[curLook].video || "";
+        renderStory();
+      }
+      function nextLook() {
+        curLook = (curLook + 1) % LOOKS.length;
+        curCh = 0;
+        videoUrl = LOOKS[curLook].video || "";
+        renderStory();
+      }
+      function closeStory() {
+        stopVoice();
+        document.getElementById("story-modal").classList.remove("open");
+        document.getElementById("sm-iframe").src = "";
+        document.body.style.overflow = "";
+      }
+      function shareStory() {
+        const look = LOOKS[curLook];
+        if (navigator.share) {
+          navigator.share({
+            title: look.title + " — " + look.sub + " | Abánitúnrase",
+            url: window.location.href,
+          });
+        } else {
+          navigator.clipboard
+            .writeText(window.location.href + "#" + look.id)
+            .then(() => {
+              const t = document.getElementById("share-toast");
+              t.classList.add("show");
+              setTimeout(() => t.classList.remove("show"), 2500);
+            });
+        }
+      }
+
+      /* ── VOICE ── */
+      function resetVoiceUI() {
+        document.getElementById("voice-btn").textContent = "▶";
+        document.getElementById("voice-wave").classList.remove("playing");
+        document.getElementById("voice-prog").style.width = "0%";
+        document.getElementById("voice-label").textContent = "Read aloud";
+        voicePlaying = false;
+      }
+      function stopVoice() {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        if (voiceInterval) clearInterval(voiceInterval);
+        voiceInterval = null;
+        resetVoiceUI();
+      }
+      function toggleVoice() {
+        if (!("speechSynthesis" in window)) {
+          document.getElementById("voice-label").textContent = "Not supported";
+          return;
+        }
+        if (voicePlaying) {
+          window.speechSynthesis.pause();
+          document.getElementById("voice-btn").textContent = "▶";
+          document.getElementById("voice-wave").classList.remove("playing");
+          document.getElementById("voice-label").textContent = "Paused";
+          voicePlaying = false;
+          if (voiceInterval) {
+            clearInterval(voiceInterval);
+            voiceInterval = null;
+          }
+          return;
+        }
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+          document.getElementById("voice-btn").textContent = "⏸";
+          document.getElementById("voice-wave").classList.add("playing");
+          document.getElementById("voice-label").textContent = "Reading…";
+          voicePlaying = true;
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const text = LOOKS[curLook].chapters[curCh].text;
+        voiceUtterance = new SpeechSynthesisUtterance(text);
+        voiceUtterance.rate = 0.88;
+        voiceUtterance.pitch = 1.0;
+        voiceUtterance.lang = "en-GB";
+        const voices = window.speechSynthesis.getVoices();
+        const pref =
+          voices.find(
+            (v) =>
+              v.lang.startsWith("en") &&
+              (v.name.includes("Samantha") ||
+                v.name.includes("Karen") ||
+                v.name.includes("Moira") ||
+                v.name.includes("Allison") ||
+                v.name.includes("Ava")),
+          ) ||
+          voices.find((v) => v.lang.startsWith("en")) ||
+          null;
+        if (pref) voiceUtterance.voice = pref;
+        let startTime = Date.now();
+        const estDuration = (text.length / 14) * 1000;
+        voiceUtterance.onstart = () => {
+          startTime = Date.now();
+          voicePlaying = true;
+          document.getElementById("voice-btn").textContent = "⏸";
+          document.getElementById("voice-wave").classList.add("playing");
+          document.getElementById("voice-label").textContent = "Reading…";
+          if (voiceInterval) clearInterval(voiceInterval);
+          voiceInterval = setInterval(() => {
+            if (!voicePlaying) return;
+            document.getElementById("voice-prog").style.width =
+              Math.min(100, ((Date.now() - startTime) / estDuration) * 100) +
+              "%";
+          }, 80);
+        };
+        voiceUtterance.onend = voiceUtterance.onerror = () => {
+          stopVoice();
+          document.getElementById("voice-prog").style.width = "100%";
+          setTimeout(resetVoiceUI, 600);
+        };
+        window.speechSynthesis.speak(voiceUtterance);
+      }
+
+      /* ── KEYBOARD ── */
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (
+            document.getElementById("contact-drawer").classList.contains("open")
+          ) {
+            closeContact();
+            return;
+          }
+          if (document.getElementById("lightbox").classList.contains("open")) {
+            closeLightbox();
+            return;
+          }
+          if (
+            document.getElementById("story-modal").classList.contains("open")
+          ) {
+            closeStory();
+            return;
+          }
+        }
+        if (document.getElementById("lightbox").classList.contains("open")) {
+          if (e.key === "ArrowRight") lbNav(1);
+          if (e.key === "ArrowLeft") lbNav(-1);
+          return;
+        }
+        if (document.getElementById("story-modal").classList.contains("open")) {
+          if (e.key === "ArrowRight") nextLook();
+          if (e.key === "ArrowLeft") prevLook();
+          if (e.key === "ArrowUp") setChapter(Math.max(curCh - 1, 0));
+          if (e.key === "ArrowDown")
+            setChapter(Math.min(curCh + 1, LOOKS[curLook].chapters.length - 1));
+          if (e.key === " ") {
+            e.preventDefault();
+            toggleVoice();
+          }
+        }
+      });
+
+      /* ── SCROLL ── */
+      window.addEventListener(
+        "scroll",
+        () => {
+          updateIntro();
+          updateLookbook();
+          document
+            .getElementById("main-nav")
+            .classList.toggle("scrolled", window.scrollY > 60);
+        },
+        { passive: true },
+      );
+
+      /* ── FADE-UP ── */
+      const fadeObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.08 },
+      );
+
+      /* ── INIT ── */
+      document.addEventListener("DOMContentLoaded", () => {
+        buildIntroProg();
+        buildHeroGrid();
+        buildLookbook();
+        document
+          .querySelectorAll(".fade-up")
+          .forEach((el) => fadeObs.observe(el));
+        updateIntro();
+        updateLookbook();
+      });
+    </script>
+  </body>
+</html>

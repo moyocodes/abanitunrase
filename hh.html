@@ -1,0 +1,3863 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventPass — Beautiful QR event passes in minutes</title>
+    <meta
+      name="description"
+      content="Create branded digital event passes with scannable QR codes. Download as PNG or PDF. No design skills needed."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============================================================
+   EventPass — warm design system
+   Fonts: Fraunces (display) + Hanken Grotesk (UI)
+   ============================================================ */
+
+      :root {
+        /* warm brand */
+        --primary: #e2603b;
+        --primary-dark: #c2410c;
+        --primary-tint: #fcede5;
+
+        /* warm neutrals */
+        --bg: #faf6f1;
+        --bg-soft: #f4ece3;
+        --surface: #ffffff;
+        --surface-2: #fbf7f2;
+        --border: #ebe0d4;
+        --border-strong: #ddcebe;
+        --text: #2a2320;
+        --text-2: #6f635a;
+        --text-3: #a2948a;
+
+        /* status */
+        --success: #2f8f4e;
+        --success-tint: #e6f2e9;
+        --warning: #d08214;
+        --warning-tint: #fbefd9;
+        --danger: #d14343;
+        --danger-tint: #fbe7e7;
+
+        /* shape */
+        --r-sm: 8px;
+        --r-md: 12px;
+        --r-lg: 18px;
+        --r-xl: 24px;
+        --r-full: 999px;
+
+        /* shadow (warm-tinted) */
+        --sh-sm: 0 1px 2px rgba(80, 50, 30, 0.06);
+        --sh-md: 0 6px 18px rgba(90, 55, 30, 0.08);
+        --sh-lg: 0 16px 40px rgba(90, 55, 30, 0.12);
+        --sh-xl: 0 28px 70px rgba(80, 45, 25, 0.18);
+
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        --font-display: "Fraunces", Georgia, serif;
+        --font-ui: "Hanken Grotesk", system-ui, sans-serif;
+      }
+
+      [data-theme="dark"] {
+        --primary: #f0764e;
+        --primary-dark: #e2603b;
+        --primary-tint: #2e211b;
+
+        --bg: #181310;
+        --bg-soft: #1f1814;
+        --surface: #241d18;
+        --surface-2: #2b231d;
+        --border: #392e26;
+        --border-strong: #4a3c32;
+        --text: #f5eee6;
+        --text-2: #c4b4a6;
+        --text-3: #8c7c6f;
+
+        --success: #5bb877;
+        --success-tint: #1f2c22;
+        --warning: #e5a33e;
+        --warning-tint: #2e2415;
+        --danger: #e8716f;
+        --danger-tint: #2e1b1a;
+
+        --sh-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+        --sh-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+        --sh-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
+        --sh-xl: 0 28px 70px rgba(0, 0, 0, 0.55);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* inline-svg icons (hydrated from <i class="ti ti-*">) */
+      i.ti {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        line-height: 0;
+      }
+      i.ti svg {
+        width: 1em;
+        height: 1em;
+        display: block;
+      }
+      .btn i.ti {
+        font-size: 18px;
+      }
+      .btn i.ti svg {
+        width: 18px;
+        height: 18px;
+      }
+      .icon-btn i.ti svg {
+        width: 19px;
+        height: 19px;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-ui);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        transition:
+          background 0.4s var(--ease),
+          color 0.4s var(--ease);
+        min-height: 100vh;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.15;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      ::selection {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      /* ---------- buttons ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 600;
+        padding: 12px 22px;
+        border-radius: var(--r-md);
+        border: none;
+        cursor: pointer;
+        transition:
+          transform 0.18s var(--ease),
+          box-shadow 0.18s var(--ease),
+          background 0.18s var(--ease);
+        white-space: nowrap;
+        text-decoration: none;
+      }
+      .btn:active {
+        transform: scale(0.96);
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: var(--sh-sm);
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        box-shadow: var(--sh-md);
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1.5px solid var(--border-strong);
+      }
+      .btn-secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text-2);
+        padding: 10px 14px;
+      }
+      .btn-ghost:hover {
+        color: var(--primary);
+        background: var(--primary-tint);
+      }
+      .btn-danger {
+        background: var(--danger-tint);
+        color: var(--danger);
+      }
+      .btn-danger:hover {
+        background: var(--danger);
+        color: #fff;
+      }
+      .btn-lg {
+        font-size: 17px;
+        padding: 15px 30px;
+      }
+      .btn-sm {
+        font-size: 13px;
+        padding: 8px 14px;
+        border-radius: var(--r-sm);
+      }
+      .btn-block {
+        width: 100%;
+      }
+      .btn .ic {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      /* ---------- inputs ---------- */
+      .field {
+        margin-bottom: 18px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-2);
+        margin-bottom: 7px;
+        letter-spacing: 0.01em;
+      }
+      .input,
+      .select,
+      textarea.input {
+        width: 100%;
+        font-family: var(--font-ui);
+        font-size: 15px;
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1.5px solid var(--border);
+        border-radius: var(--r-sm);
+        padding: 12px 15px;
+        transition:
+          border-color 0.18s var(--ease),
+          box-shadow 0.18s var(--ease),
+          background 0.18s var(--ease);
+      }
+      .input::placeholder {
+        color: var(--text-3);
+      }
+      .input:focus,
+      .select:focus,
+      textarea.input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow: 0 0 0 4px var(--primary-tint);
+      }
+      textarea.input {
+        resize: vertical;
+        min-height: 80px;
+      }
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      /* ---------- cards ---------- */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 24px;
+        box-shadow: var(--sh-sm);
+      }
+
+      /* ---------- badges ---------- */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        padding: 4px 11px;
+        border-radius: var(--r-full);
+        text-transform: uppercase;
+      }
+      .badge-unused {
+        background: var(--warning-tint);
+        color: var(--warning);
+      }
+      .badge-used {
+        background: var(--success-tint);
+        color: var(--success);
+      }
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      /* ---------- top nav ---------- */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 28px;
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+      }
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: var(--primary);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 19px;
+        box-shadow: var(--sh-sm);
+        transition: transform 0.3s var(--ease);
+      }
+      .brand:hover .brand-mark {
+        transform: rotate(-8deg) scale(1.05);
+      }
+      .brand-name {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .crumbs {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: 8px;
+        padding-left: 12px;
+        border-left: 1px solid var(--border);
+        min-width: 0;
+        overflow: hidden;
+      }
+      .crumbs .sep {
+        color: var(--text-3);
+        font-size: 15px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .crumb {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 200px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-2);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: var(--r-sm);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition:
+          color 0.16s var(--ease),
+          background 0.16s var(--ease);
+      }
+      .crumb:hover {
+        color: var(--primary);
+        background: var(--primary-tint);
+      }
+      .crumb.current {
+        color: var(--text);
+        cursor: default;
+      }
+      .crumb.current:hover {
+        background: none;
+      }
+      .crumb .ic {
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      @media (max-width: 640px) {
+        .nav-left .brand-name {
+          display: none;
+        }
+        .crumb {
+          max-width: 130px;
+          font-size: 13px;
+        }
+        .crumbs {
+          margin-left: 4px;
+          padding-left: 8px;
+        }
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--r-sm);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text-2);
+        cursor: pointer;
+        font-size: 19px;
+        display: grid;
+        place-items: center;
+        transition: all 0.18s var(--ease);
+      }
+      .icon-btn:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-1px);
+      }
+      .hamburger {
+        display: none;
+      }
+      .mobile-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 18px;
+        z-index: 50;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        box-shadow: var(--sh-lg);
+        padding: 6px;
+        min-width: 190px;
+        display: none;
+        animation: modalIn 0.22s var(--ease) both;
+      }
+      .mobile-menu.open {
+        display: block;
+      }
+      .mm-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 11px 13px;
+        border-radius: var(--r-sm);
+        font-family: var(--font-ui);
+        font-size: 14.5px;
+        font-weight: 500;
+        color: var(--text);
+        transition:
+          background 0.15s var(--ease),
+          color 0.15s var(--ease);
+      }
+      .mm-item:hover {
+        background: var(--primary-tint);
+        color: var(--primary);
+      }
+      .mm-item i.ti {
+        font-size: 18px;
+        color: var(--text-2);
+      }
+      .mm-item:hover i.ti {
+        color: var(--primary);
+      }
+
+      /* ---------- layout ---------- */
+      .shell {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 36px 28px 80px;
+      }
+      .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+      }
+      .page-head h1 {
+        font-family: var(--font-display);
+        font-size: 34px;
+      }
+      .page-head p {
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-2);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 14px;
+        transition:
+          color 0.18s var(--ease),
+          gap 0.18s var(--ease);
+        background: none;
+        border: none;
+      }
+      .back-link:hover {
+        color: var(--primary);
+        gap: 9px;
+      }
+
+      /* ---------- banner hero (event detail) ---------- */
+      .banner {
+        position: relative;
+        min-height: 260px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 24px 28px;
+        overflow: hidden;
+        background: var(
+          --bnr,
+          linear-gradient(135deg, var(--primary), var(--primary-dark))
+        );
+        background-size: cover;
+        background-position: center;
+      }
+      .banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(20, 12, 6, 0.15) 0%,
+          rgba(20, 12, 6, 0.3) 45%,
+          rgba(20, 12, 6, 0.72) 100%
+        );
+      }
+      .back-fab {
+        position: absolute;
+        top: 20px;
+        left: 24px;
+        z-index: 3;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--r-full);
+        border: none;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        font-size: 21px;
+        display: grid;
+        place-items: center;
+        transition:
+          transform 0.2s var(--ease),
+          background 0.2s var(--ease);
+      }
+      .back-fab:hover {
+        background: rgba(255, 255, 255, 0.32);
+        transform: translateX(-3px);
+      }
+      .back-fab:active {
+        transform: scale(0.92);
+      }
+      .banner-actions {
+        position: absolute;
+        top: 20px;
+        right: 24px;
+        z-index: 3;
+        display: flex;
+        gap: 8px;
+      }
+      .glass-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 40px;
+        padding: 0 16px;
+        border-radius: var(--r-full);
+        border: none;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(10px);
+        transition:
+          background 0.2s var(--ease),
+          transform 0.2s var(--ease);
+      }
+      .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.34);
+        transform: translateY(-1px);
+      }
+      .glass-btn.danger {
+        width: 40px;
+        padding: 0;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .glass-btn.danger:hover {
+        background: var(--danger);
+      }
+      .banner-content {
+        position: relative;
+        z-index: 2;
+        max-width: 1120px;
+        margin: 0 auto;
+        width: 100%;
+        animation: fadeUp 0.5s var(--ease) both;
+      }
+      .banner-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(6px);
+        padding: 6px 13px;
+        border-radius: var(--r-full);
+        margin-bottom: 14px;
+        letter-spacing: 0.02em;
+      }
+      .banner-content h1 {
+        font-family: var(--font-display);
+        font-size: 42px;
+        color: #fff;
+        line-height: 1.05;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+      }
+      .banner-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 12px;
+      }
+      .banner-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: rgba(255, 255, 255, 0.94);
+        font-size: 14.5px;
+        font-weight: 500;
+      }
+      .banner-meta i {
+        font-size: 17px;
+        opacity: 0.9;
+      }
+
+      /* ---------- back pill (pass page) ---------- */
+      .back-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        padding: 8px 16px 8px 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-full);
+        cursor: pointer;
+        margin-bottom: 18px;
+        box-shadow: var(--sh-sm);
+        transition:
+          transform 0.2s var(--ease),
+          box-shadow 0.2s var(--ease),
+          border-color 0.2s var(--ease);
+      }
+      .back-pill:hover {
+        transform: translateX(-3px);
+        box-shadow: var(--sh-md);
+        border-color: var(--border-strong);
+      }
+      .back-pill .bp-ic {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--r-full);
+        background: var(--primary-tint);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .back-pill .bp-txt {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+        text-align: left;
+      }
+      .back-pill .bp-txt small {
+        font-size: 11px;
+        color: var(--text-3);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+      .back-pill .bp-txt b {
+        font-size: 14.5px;
+        color: var(--text);
+        font-weight: 600;
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* ---------- cover gallery ---------- */
+      .cover-gallery {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .cover-thumb {
+        position: relative;
+        aspect-ratio: 16/10;
+        border-radius: var(--r-sm);
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        background: var(--bg-soft);
+        transition:
+          transform 0.18s var(--ease),
+          border-color 0.18s var(--ease);
+      }
+      .cover-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .cover-thumb:hover {
+        transform: translateY(-2px);
+      }
+      .cover-thumb.active {
+        border-color: var(--primary);
+      }
+      .cover-thumb.active::after {
+        content: "\\2713";
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 20px;
+        height: 20px;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .cover-thumb.upload {
+        display: grid;
+        place-items: center;
+        color: var(--text-2);
+        font-size: 22px;
+        border: 2px dashed var(--border-strong);
+      }
+      .cover-thumb.upload:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+      .cover-thumb.upload span {
+        font-size: 10.5px;
+        font-weight: 600;
+        margin-top: 2px;
+      }
+
+      /* ---------- views ---------- */
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
+        animation: fadeUp 0.45s var(--ease) both;
+      }
+
+      /* ---------- landing ---------- */
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 80px 28px 70px;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            680px 360px at 82% 0%,
+            color-mix(in srgb, var(--primary) 20%, transparent),
+            transparent 62%
+          ),
+          radial-gradient(
+            540px 320px at 6% 96%,
+            color-mix(in srgb, var(--warning) 16%, transparent),
+            transparent 62%
+          );
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+        max-width: 1080px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 56px;
+        align-items: center;
+      }
+      .hero-copy {
+        max-width: 540px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--primary-tint);
+        padding: 6px 14px;
+        border-radius: var(--r-full);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+      .eyebrow i.ti {
+        font-size: 15px;
+      }
+      .hero h1 {
+        font-family: var(--font-display);
+        font-size: 54px;
+        line-height: 1.04;
+        letter-spacing: -0.025em;
+      }
+      .hero h1 em {
+        font-style: italic;
+        color: var(--primary);
+      }
+      .hero .lead {
+        font-size: 18px;
+        color: var(--text-2);
+        margin: 22px 0 30px;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .hero-note {
+        margin-top: 18px;
+        font-size: 13.5px;
+        color: var(--text-3);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .hero-note i.ti {
+        font-size: 16px;
+      }
+
+      /* hero art — anchored, with depth */
+      .hero-art {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 340px;
+      }
+      .hero-glow {
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          color-mix(in srgb, var(--primary) 30%, transparent),
+          transparent 70%
+        );
+        filter: blur(20px);
+        z-index: 0;
+      }
+      .hero-art .pass {
+        position: relative;
+        z-index: 1;
+        transform: rotate(-4deg);
+        animation: floaty 5s ease-in-out infinite;
+      }
+      .float-badge {
+        position: absolute;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        box-shadow: var(--sh-lg);
+        padding: 9px 14px;
+        border-radius: var(--r-full);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .float-badge i.ti {
+        font-size: 16px;
+      }
+      .float-badge.fb-1 {
+        top: 18%;
+        left: -4%;
+        color: var(--success);
+        animation: floaty 4s ease-in-out infinite;
+      }
+      .float-badge.fb-1 i.ti {
+        color: var(--success);
+      }
+      .float-badge.fb-2 {
+        bottom: 16%;
+        right: -2%;
+        color: var(--primary);
+        animation: floaty 4.6s ease-in-out infinite 0.5s;
+      }
+      .float-badge.fb-2 i.ti {
+        color: var(--primary);
+      }
+
+      /* section intro */
+      .section-intro {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 30px 28px 4px;
+        text-align: center;
+      }
+      .section-intro .eyebrow {
+        margin-bottom: 14px;
+      }
+      .section-intro h2 {
+        font-family: var(--font-display);
+        font-size: 32px;
+        letter-spacing: -0.02em;
+        max-width: 540px;
+        margin: 0 auto;
+      }
+
+      .features {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 28px 28px 70px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .feature {
+        padding: 26px;
+        border-radius: var(--r-lg);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        transition:
+          transform 0.25s var(--ease),
+          box-shadow 0.25s var(--ease),
+          border-color 0.25s var(--ease);
+      }
+      .feature:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--sh-md);
+        border-color: var(--border-strong);
+      }
+      .feature .fic {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: var(--primary-tint);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 23px;
+        margin-bottom: 16px;
+      }
+      .feature .fic i.ti {
+        font-size: 23px;
+      }
+      .feature h3 {
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+      .feature p {
+        color: var(--text-2);
+        font-size: 14.5px;
+      }
+
+      /* CTA band */
+      .cta-band {
+        max-width: 1080px;
+        margin: 0 auto 60px;
+        padding: 56px 28px;
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        border-radius: var(--r-xl);
+        margin-left: 28px;
+        margin-right: 28px;
+      }
+      .cta-band h2 {
+        font-family: var(--font-display);
+        font-size: 30px;
+        color: #fff;
+      }
+      .cta-band p {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 8px 0 24px;
+      }
+      .cta-band .btn-primary {
+        background: #fff;
+        color: var(--primary-dark);
+      }
+      .cta-band .btn-primary:hover {
+        background: #fff;
+        transform: translateY(-2px);
+        box-shadow: var(--sh-lg);
+      }
+
+      /* ---------- events grid ---------- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .event-card {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: var(--sh-sm);
+        transition:
+          transform 0.25s var(--ease),
+          box-shadow 0.25s var(--ease);
+      }
+      .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--sh-lg);
+        border-color: var(--border-strong);
+      }
+      .event-card .band {
+        height: 112px;
+        position: relative;
+        background: var(--ec);
+      }
+      .event-card .band::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          transparent 40%,
+          rgba(20, 12, 6, 0.28)
+        );
+      }
+      .date-chip {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 2;
+        background: var(--surface);
+        color: var(--text);
+        border-radius: var(--r-sm);
+        width: 48px;
+        padding: 6px 0;
+        text-align: center;
+        box-shadow: var(--sh-md);
+        line-height: 1;
+      }
+      .date-chip b {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        font-family: var(--font-display);
+      }
+      .date-chip span {
+        display: block;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--primary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+      }
+      .card-tpl {
+        position: absolute;
+        top: 16px;
+        right: 14px;
+        z-index: 2;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(4px);
+        padding: 4px 10px;
+        border-radius: var(--r-full);
+      }
+      .event-card .ec-body {
+        padding: 16px 18px 18px;
+      }
+      .event-card h3 {
+        font-family: var(--font-display);
+        font-size: 21px;
+        margin-bottom: 8px;
+        line-height: 1.15;
+      }
+      .event-card .meta {
+        font-size: 13.5px;
+        color: var(--text-2);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .event-card .meta span {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .event-card .meta i.ti {
+        font-size: 15px;
+        color: var(--text-3);
+        flex-shrink: 0;
+      }
+      .event-card .ec-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 14px;
+        padding-top: 13px;
+        border-top: 1px solid var(--border);
+      }
+      .count-pill {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .count-pill i.ti {
+        font-size: 16px;
+      }
+      .open-arrow {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--r-full);
+        background: var(--primary-tint);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        transition:
+          transform 0.2s var(--ease),
+          background 0.2s var(--ease);
+      }
+      .event-card:hover .open-arrow {
+        background: var(--primary);
+        color: #fff;
+        transform: translateX(2px);
+      }
+
+      /* ---------- empty state ---------- */
+      .empty {
+        text-align: center;
+        padding: 70px 20px;
+      }
+      .empty .em-art {
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 22px;
+        border-radius: 28px;
+        background: var(--primary-tint);
+        color: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 46px;
+        animation: floaty 4s ease-in-out infinite;
+      }
+      .empty h3 {
+        font-family: var(--font-display);
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      .empty p {
+        color: var(--text-2);
+        margin-bottom: 22px;
+        max-width: 380px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ---------- attendees table ---------- */
+      .att-toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .search {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+      }
+      .search .ic {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-3);
+        font-size: 18px;
+      }
+      .search .input {
+        padding-left: 40px;
+      }
+      .att-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .att-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        transition:
+          border-color 0.18s var(--ease),
+          transform 0.18s var(--ease),
+          box-shadow 0.18s var(--ease);
+      }
+      .att-row:hover {
+        border-color: var(--border-strong);
+        box-shadow: var(--sh-md);
+        transform: translateX(3px);
+      }
+      .avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--r-full);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #fff;
+        font-size: 16px;
+        flex-shrink: 0;
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+      }
+      .att-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .att-info .nm {
+        font-weight: 600;
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .att-info .ty {
+        font-size: 12.5px;
+        color: var(--text-2);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .att-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      /* ---------- pass templates ---------- */
+      .pass-stage {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 36px;
+        align-items: start;
+      }
+      .pass-wrap {
+        display: grid;
+        place-items: center;
+        padding: 30px;
+        background: var(--bg-soft);
+        border-radius: var(--r-xl);
+        border: 1px solid var(--border);
+      }
+      .pass {
+        width: 380px;
+        height: 232px;
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        position: relative;
+        background: var(--surface);
+        box-shadow: var(--sh-xl);
+        font-family: var(--font-ui);
+        color: #fff;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: transform 0.4s var(--ease);
+      }
+      .pass-wrap:hover .pass {
+        transform: translateY(-4px) scale(1.01);
+      }
+      .pass .qr {
+        background: #fff;
+        border-radius: 10px;
+        padding: 6px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+        flex-shrink: 0;
+      }
+      .pass .qr img {
+        display: block;
+        width: 76px;
+        height: 76px;
+      }
+
+      .pass-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .pass-status {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        opacity: 0.92;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .pass-status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .pass-badge {
+        padding: 4px 11px;
+        border-radius: var(--r-full);
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .pass-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+      }
+      .pass-event {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 23px;
+        line-height: 1.12;
+        letter-spacing: -0.01em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .pass-att {
+        font-size: 13.5px;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-top: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pass-foot {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      .pass-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        font-size: 11px;
+        opacity: 0.88;
+        min-width: 0;
+      }
+      .pass-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pass-meta i.ti {
+        font-size: 12px;
+        flex-shrink: 0;
+        opacity: 0.85;
+      }
+      .pass-meta i.ti svg {
+        width: 12px;
+        height: 12px;
+      }
+      .pass-org {
+        opacity: 0.7;
+        font-style: italic;
+        margin-top: 2px;
+      }
+
+      /* template: BOLD — solid brand, centered, big QR */
+      .pass.t-bold {
+        text-align: center;
+      }
+      .pass.t-bold .pass-head {
+        justify-content: center;
+      }
+      .pass.t-bold .pass-status {
+        display: none;
+      }
+      .pass.t-bold .pass-body {
+        justify-content: flex-start;
+      }
+      .pass.t-bold .pass-event {
+        font-size: 20px;
+      }
+      .pass.t-bold .pass-foot {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .pass.t-bold .pass-meta {
+        align-items: center;
+        text-align: center;
+      }
+      .pass.t-bold .pass-meta span {
+        justify-content: center;
+      }
+      .pass.t-bold .qr img {
+        width: 70px;
+        height: 70px;
+      }
+
+      /* template: MINIMAL — clean white, brand accent bar */
+      .pass.t-minimal {
+        background: #fff;
+        color: #2a2320;
+        padding-top: 24px;
+      }
+      .pass.t-minimal::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--brand);
+      }
+      .pass.t-minimal .pass-status {
+        color: #6f635a;
+      }
+      .pass.t-minimal .pass-badge {
+        background: var(--brand);
+        color: #fff;
+      }
+      .pass.t-minimal .pass-event {
+        color: #2a2320;
+      }
+      .pass.t-minimal .pass-att {
+        color: #6f635a;
+        opacity: 1;
+      }
+      .pass.t-minimal .pass-meta {
+        color: #908377;
+        opacity: 1;
+      }
+
+      /* template: ELEGANT — warm gradient, serif feel */
+      .pass.t-elegant .pass-event {
+        font-style: italic;
+      }
+
+      /* pass controls */
+      .template-pick {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+      .tpl-opt {
+        flex: 1;
+        text-align: center;
+        padding: 12px 8px;
+        border-radius: var(--r-md);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-2);
+        transition: all 0.18s var(--ease);
+      }
+      .tpl-opt:hover {
+        border-color: var(--border-strong);
+      }
+      .tpl-opt.active {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-tint);
+      }
+      .swatches {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+      }
+      .swatch {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--r-full);
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition:
+          transform 0.18s var(--ease),
+          border-color 0.18s var(--ease);
+        position: relative;
+      }
+      .swatch:hover {
+        transform: scale(1.12);
+      }
+      .swatch.active {
+        border-color: var(--text);
+        transform: scale(1.12);
+      }
+      .swatch.active::after {
+        content: "\\2713";
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 15px;
+      }
+
+      /* ---------- modal ---------- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: rgba(40, 25, 15, 0.5);
+        backdrop-filter: blur(3px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .overlay.open {
+        display: flex;
+        animation: fadeIn 0.25s ease both;
+      }
+      .modal {
+        width: 100%;
+        max-width: 460px;
+        background: var(--surface);
+        border-radius: var(--r-lg);
+        box-shadow: var(--sh-xl);
+        padding: 26px;
+        animation: modalIn 0.32s var(--ease) both;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+      .modal-head h2 {
+        font-family: var(--font-display);
+        font-size: 23px;
+      }
+      .modal-head p {
+        font-size: 13.5px;
+        color: var(--text-2);
+        margin-top: 3px;
+      }
+      .dropzone {
+        border: 2px dashed var(--border-strong);
+        border-radius: var(--r-md);
+        padding: 28px;
+        text-align: center;
+        color: var(--text-2);
+        cursor: pointer;
+        transition: all 0.2s var(--ease);
+      }
+      .dropzone:hover {
+        border-color: var(--primary);
+        background: var(--primary-tint);
+        color: var(--primary);
+      }
+      .dropzone .ic {
+        font-size: 34px;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      /* segmented control */
+      .seg {
+        display: flex;
+        background: var(--bg-soft);
+        border-radius: var(--r-md);
+        padding: 4px;
+        margin-bottom: 18px;
+      }
+      .seg button {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 9px;
+        border-radius: var(--r-sm);
+        font-family: var(--font-ui);
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-2);
+        cursor: pointer;
+        transition: all 0.2s var(--ease);
+      }
+      .seg button.active {
+        background: var(--surface);
+        color: var(--primary);
+        box-shadow: var(--sh-sm);
+      }
+
+      /* ---------- toast ---------- */
+      .toasts {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 120;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--success);
+        border-radius: var(--r-md);
+        padding: 13px 18px;
+        box-shadow: var(--sh-lg);
+        font-size: 14px;
+        font-weight: 500;
+        animation: toastIn 0.4s var(--ease) both;
+        min-width: 240px;
+      }
+      .toast.err {
+        border-left-color: var(--danger);
+      }
+      .toast .ic {
+        font-size: 19px;
+        color: var(--success);
+      }
+      .toast.err .ic {
+        color: var(--danger);
+      }
+      .toast.out {
+        animation: toastOut 0.35s var(--ease) forwards;
+      }
+
+      /* cover upload preview */
+      .cover-zone {
+        position: relative;
+        border-radius: var(--r-md);
+        overflow: hidden;
+        border: 1.5px solid var(--border);
+      }
+      .cover-zone img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+      }
+      .cover-rm {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
+
+      /* skeleton */
+      .skel {
+        background: linear-gradient(
+          90deg,
+          var(--bg-soft) 25%,
+          var(--border) 37%,
+          var(--bg-soft) 63%
+        );
+        background-size: 400% 100%;
+        animation: shimmer 1.4s ease infinite;
+        border-radius: var(--r-sm);
+      }
+
+      /* stagger helper */
+      .stagger > * {
+        animation: fadeUp 0.5s var(--ease) both;
+      }
+      .stagger > *:nth-child(1) {
+        animation-delay: 0.04s;
+      }
+      .stagger > *:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .stagger > *:nth-child(3) {
+        animation-delay: 0.16s;
+      }
+      .stagger > *:nth-child(4) {
+        animation-delay: 0.22s;
+      }
+      .stagger > *:nth-child(5) {
+        animation-delay: 0.28s;
+      }
+      .stagger > *:nth-child(6) {
+        animation-delay: 0.34s;
+      }
+      .stagger > *:nth-child(7) {
+        animation-delay: 0.4s;
+      }
+      .stagger > *:nth-child(8) {
+        animation-delay: 0.46s;
+      }
+
+      /* ---------- footer ---------- */
+      .site-footer {
+        background: var(--surface-2);
+        border-top: 1px solid var(--border);
+        margin-top: 40px;
+      }
+      .footer-inner {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 48px 28px 32px;
+        display: grid;
+        grid-template-columns: 1.3fr 2fr;
+        gap: 40px;
+      }
+      .footer-brand .brand {
+        margin-bottom: 14px;
+        cursor: pointer;
+      }
+      .footer-brand p {
+        color: var(--text-2);
+        font-size: 14px;
+        max-width: 300px;
+      }
+      .footer-cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .footer-col h4 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-3);
+        margin-bottom: 12px;
+        font-weight: 700;
+      }
+      .footer-col button,
+      .footer-col span {
+        display: block;
+        background: none;
+        border: none;
+        text-align: left;
+        padding: 4px 0;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        color: var(--text-2);
+        cursor: default;
+      }
+      .footer-col button {
+        cursor: pointer;
+        transition: color 0.15s var(--ease);
+      }
+      .footer-col button:hover {
+        color: var(--primary);
+      }
+      .footer-bar {
+        border-top: 1px solid var(--border);
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 18px 28px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-3);
+      }
+
+      /* ---------- keyframes ---------- */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes modalIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateX(40px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes toastOut {
+        to {
+          opacity: 0;
+          transform: translateX(40px);
+        }
+      }
+      @keyframes shimmer {
+        to {
+          background-position: -400% 0;
+        }
+      }
+      @keyframes floaty {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 880px) {
+        .hero-inner {
+          grid-template-columns: 1fr;
+          gap: 44px;
+        }
+        .hero-copy {
+          max-width: none;
+        }
+        .hero h1 {
+          font-size: 44px;
+        }
+        .hero-art {
+          min-height: 320px;
+        }
+        .features {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .pass-stage {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .pass-wrap {
+          order: -1;
+        }
+      }
+      @media (max-width: 560px) {
+        .shell {
+          padding: 24px 18px 70px;
+        }
+        .hero {
+          padding: 52px 18px 40px;
+        }
+        .hero h1 {
+          font-size: 35px;
+        }
+        .nav {
+          padding: 12px 18px;
+        }
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+        .page-head h1 {
+          font-size: 27px;
+        }
+        .pass {
+          transform: scale(0.92);
+        }
+        .hero-art .pass {
+          transform: rotate(-4deg) scale(0.94);
+        }
+        .toasts {
+          left: 18px;
+          right: 18px;
+          bottom: 18px;
+        }
+        .toast {
+          min-width: 0;
+        }
+        .features {
+          grid-template-columns: 1fr;
+        }
+        .float-badge.fb-1 {
+          left: 0;
+        }
+        .float-badge.fb-2 {
+          right: 0;
+        }
+        .section-intro h2 {
+          font-size: 26px;
+        }
+        .cta-band {
+          padding: 40px 22px;
+          margin-left: 18px;
+          margin-right: 18px;
+        }
+        .cta-band h2 {
+          font-size: 25px;
+        }
+        .banner {
+          min-height: 220px;
+          padding: 18px;
+        }
+        .banner-content h1 {
+          font-size: 30px;
+        }
+        .banner-meta {
+          gap: 12px;
+        }
+        .banner-meta span {
+          font-size: 13px;
+        }
+        .glass-btn {
+          height: 38px;
+          font-size: 13px;
+          padding: 0 13px;
+        }
+        .back-fab {
+          width: 40px;
+          height: 40px;
+          top: 16px;
+          left: 16px;
+        }
+        .banner-actions {
+          top: 16px;
+          right: 16px;
+        }
+        .cover-gallery {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .att-toolbar {
+          gap: 8px;
+        }
+        .att-toolbar .btn {
+          flex: 1;
+        }
+        .nav-cta {
+          display: none;
+        }
+        .hamburger {
+          display: grid;
+        }
+        .crumbs {
+          display: none;
+        }
+        .footer-inner {
+          grid-template-columns: 1fr;
+          gap: 28px;
+          padding: 36px 18px 24px;
+        }
+        .footer-cols {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .footer-bar {
+          padding: 16px 18px;
+        }
+      }
+      @media (max-width: 420px) {
+        .footer-cols {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================= TOP NAV (app views) ================= -->
+    <nav class="nav" id="appNav" style="display: none">
+      <div class="nav-left">
+        <div class="brand" onclick="goHome()" title="Back to events">
+          <div class="brand-mark"><i class="ti ti-ticket"></i></div>
+          <span class="brand-name">EventPass</span>
+        </div>
+        <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+      </div>
+      <div class="nav-actions">
+        <button
+          class="icon-btn"
+          id="themeBtn"
+          title="Toggle theme"
+          aria-label="Toggle theme"
+        >
+          <i class="ti ti-moon"></i>
+        </button>
+        <button class="btn btn-primary btn-sm nav-cta" onclick="openCreate()">
+          <i class="ti ti-plus ic"></i> New event
+        </button>
+        <button
+          class="icon-btn hamburger"
+          id="appHamburger"
+          aria-label="Menu"
+          aria-expanded="false"
+        >
+          <i class="ti ti-menu"></i>
+        </button>
+      </div>
+      <div class="mobile-menu" id="appMenu">
+        <button
+          class="mm-item"
+          onclick="
+            closeMenu();
+            goHome();
+          "
+        >
+          <i class="ti ti-home"></i> All events
+        </button>
+        <button
+          class="mm-item"
+          onclick="
+            closeMenu();
+            openCreate();
+          "
+        >
+          <i class="ti ti-plus"></i> New event
+        </button>
+        <button
+          class="mm-item"
+          onclick="
+            closeMenu();
+            toggleTheme();
+          "
+        >
+          <i class="ti ti-moon"></i> Toggle theme
+        </button>
+      </div>
+    </nav>
+
+    <!-- ================= LANDING ================= -->
+    <section id="view-landing" class="view active">
+      <nav class="nav">
+        <div class="brand" onclick="scrollTop()" title="Home">
+          <div class="brand-mark"><i class="ti ti-ticket"></i></div>
+          <span class="brand-name">EventPass</span>
+        </div>
+        <div class="nav-actions">
+          <button
+            class="icon-btn"
+            onclick="toggleTheme()"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            <i class="ti ti-moon"></i>
+          </button>
+          <button class="btn btn-primary btn-sm nav-cta" onclick="enterApp()">
+            Open app <i class="ti ti-arrow-right ic"></i>
+          </button>
+          <button
+            class="icon-btn hamburger"
+            id="landingHamburger"
+            aria-label="Menu"
+            aria-expanded="false"
+          >
+            <i class="ti ti-menu"></i>
+          </button>
+        </div>
+        <div class="mobile-menu" id="landingMenu">
+          <button
+            class="mm-item"
+            onclick="
+              closeMenu();
+              enterApp();
+            "
+          >
+            <i class="ti ti-arrow-right"></i> Open app
+          </button>
+          <button
+            class="mm-item"
+            onclick="
+              closeMenu();
+              loadDemo();
+            "
+          >
+            <i class="ti ti-wand"></i> Try a demo
+          </button>
+          <button
+            class="mm-item"
+            onclick="
+              closeMenu();
+              toggleTheme();
+            "
+          >
+            <i class="ti ti-moon"></i> Toggle theme
+          </button>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-inner">
+          <div class="hero-copy stagger">
+            <div class="eyebrow">
+              <i class="ti ti-sparkles"></i> QR passes in under 3 minutes
+            </div>
+            <h1>
+              Beautiful event passes,<br /><em>without the design hassle.</em>
+            </h1>
+            <p class="lead">
+              Create branded digital passes with scannable QR codes for
+              weddings, meetups, workshops and conferences — customize, preview
+              live, and download as PNG or PDF.
+            </p>
+            <div class="hero-cta">
+              <button class="btn btn-primary btn-lg" onclick="enterApp()">
+                <i class="ti ti-plus ic"></i> Create your first event
+              </button>
+              <button class="btn btn-secondary btn-lg" onclick="loadDemo()">
+                <i class="ti ti-wand ic"></i> Try a live demo
+              </button>
+            </div>
+            <div class="hero-note">
+              <i class="ti ti-device-floppy"></i> No account needed — everything
+              saves in your browser.
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="hero-glow"></div>
+            <div
+              class="pass t-elegant"
+              style="
+                --brand: #e2603b;
+                background: linear-gradient(135deg, #e2603b, #9e3f22);
+              "
+            >
+              <div class="pass-head">
+                <span class="pass-status"><span class="dot"></span>Valid</span>
+                <span class="pass-badge">VIP</span>
+              </div>
+              <div class="pass-body">
+                <div class="pass-event">Aurora Summit</div>
+                <div class="pass-att">Amara Okafor</div>
+              </div>
+              <div class="pass-foot">
+                <div class="pass-meta">
+                  <span
+                    ><i class="ti ti-calendar-event"></i> Sat 12 Jul · 6:00
+                    PM</span
+                  >
+                  <span
+                    ><i class="ti ti-map-pin"></i> The Glasshouse, Lagos</span
+                  >
+                  <span class="pass-org">Organized by Aurora Co.</span>
+                </div>
+                <div class="qr">
+                  <img
+                    alt="QR preview"
+                    src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76'><rect width='76' height='76' fill='white'/><g fill='black'><rect x='5' y='5' width='20' height='20'/><rect x='10' y='10' width='10' height='10' fill='white'/><rect x='51' y='5' width='20' height='20'/><rect x='56' y='10' width='10' height='10' fill='white'/><rect x='5' y='51' width='20' height='20'/><rect x='10' y='56' width='10' height='10' fill='white'/><rect x='32' y='32' width='6' height='6'/><rect x='44' y='32' width='6' height='6'/><rect x='32' y='44' width='6' height='6'/><rect x='54' y='44' width='6' height='6'/><rect x='44' y='54' width='6' height='6'/><rect x='60' y='54' width='6' height='6'/></g></svg>"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="float-badge fb-1">
+              <i class="ti ti-circle-check"></i> Pass generated
+            </div>
+            <div class="float-badge fb-2">
+              <i class="ti ti-qrcode"></i> Unique QR
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="section-intro">
+        <span class="eyebrow"
+          ><i class="ti ti-bolt"></i> Everything you need</span
+        >
+        <h2>From guest list to printed pass — in one place.</h2>
+      </section>
+      <section class="features stagger">
+        <div class="feature">
+          <div class="fic"><i class="ti ti-qrcode"></i></div>
+          <h3>Unique QR per guest</h3>
+          <p>
+            Every attendee gets their own scannable code with used / unused
+            tracking.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="fic"><i class="ti ti-palette"></i></div>
+          <h3>On-brand in seconds</h3>
+          <p>
+            Pick a template, set your colour, choose a cover image. Preview
+            updates live.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="fic"><i class="ti ti-download"></i></div>
+          <h3>PNG &amp; PDF export</h3>
+          <p>
+            Download crisp passes ready to share, print, or send straight to
+            guests.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="fic"><i class="ti ti-users"></i></div>
+          <h3>Bulk upload</h3>
+          <p>
+            Import your whole guest list from a CSV and generate every pass at
+            once.
+          </p>
+        </div>
+        <div class="feature">
+          <div class="fic"><i class="ti ti-bolt"></i></div>
+          <h3>Fast &amp; offline-friendly</h3>
+          <p>No sign-up, no waiting. Your events live right in your browser.</p>
+        </div>
+        <div class="feature">
+          <div class="fic"><i class="ti ti-moon"></i></div>
+          <h3>Light &amp; dark</h3>
+          <p>
+            A warm, polished interface that looks great in either mode, on any
+            device.
+          </p>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <h2>Ready to make your first pass?</h2>
+        <p>It takes about a minute. No account, no card, no catch.</p>
+        <button class="btn btn-primary btn-lg" onclick="enterApp()">
+          <i class="ti ti-arrow-right ic"></i> Get started free
+        </button>
+      </section>
+    </section>
+
+    <!-- ================= DASHBOARD ================= -->
+    <section id="view-dashboard" class="view">
+      <div class="shell">
+        <div class="page-head">
+          <div>
+            <h1>Your events</h1>
+            <p id="dashSub">Create and manage event passes.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreate()">
+            <i class="ti ti-plus ic"></i> New event
+          </button>
+        </div>
+        <div id="eventsArea"></div>
+      </div>
+    </section>
+
+    <!-- ================= CREATE / EDIT EVENT ================= -->
+    <section id="view-create" class="view">
+      <div class="shell" style="max-width: 640px">
+        <button class="back-link" id="createBack" onclick="go('dashboard')">
+          <i class="ti ti-arrow-left"></i> Back to events
+        </button>
+        <div class="page-head">
+          <div>
+            <h1 id="createTitle">Create event</h1>
+            <p>Set up the details and branding for your passes.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="field">
+            <label>Event name *</label
+            ><input
+              class="input"
+              id="f_name"
+              placeholder="e.g. Aurora Summit 2026"
+            />
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Date *</label
+              ><input class="input" id="f_date" type="date" />
+            </div>
+            <div class="field">
+              <label>Time *</label
+              ><input class="input" id="f_time" type="time" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Venue / location *</label
+            ><input
+              class="input"
+              id="f_venue"
+              placeholder="e.g. The Glasshouse, Lagos"
+            />
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Organizer name</label
+              ><input class="input" id="f_org" placeholder="e.g. Aurora Co." />
+            </div>
+            <div class="field">
+              <label>Organizer contact</label
+              ><input
+                class="input"
+                id="f_orgd"
+                placeholder="e.g. hello@aurora.co"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label>Brand colour</label>
+            <div class="swatches" id="swatches"></div>
+          </div>
+          <div class="field">
+            <label>Pass template</label>
+            <div class="template-pick" id="createTpl">
+              <div class="tpl-opt" data-tpl="minimal">Minimal</div>
+              <div class="tpl-opt active" data-tpl="elegant">Elegant</div>
+              <div class="tpl-opt" data-tpl="bold">Bold</div>
+            </div>
+          </div>
+          <div class="field">
+            <label
+              >Cover image
+              <span style="color: var(--text-3); font-weight: 500"
+                >(optional)</span
+              ></label
+            >
+            <div class="cover-gallery" id="coverGallery"></div>
+            <div id="coverArea"></div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 8px">
+            <button class="btn btn-primary btn-block" onclick="saveEvent()">
+              <i class="ti ti-check ic"></i>
+              <span id="saveBtnTxt">Create event</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= EVENT DETAIL ================= -->
+    <section id="view-event" class="view">
+      <div class="banner" id="evBanner">
+        <div class="banner-overlay"></div>
+        <button
+          class="back-fab"
+          onclick="go('dashboard')"
+          aria-label="Back to events"
+        >
+          <i class="ti ti-arrow-left"></i>
+        </button>
+        <div class="banner-actions">
+          <button class="glass-btn" onclick="editEvent()">
+            <i class="ti ti-edit ic"></i> Edit
+          </button>
+          <button
+            class="glass-btn danger"
+            onclick="deleteEvent()"
+            aria-label="Delete event"
+          >
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+        <div class="banner-content">
+          <span class="banner-tag" id="evTag"
+            ><i class="ti ti-calendar-event"></i> <span id="evTagTxt"></span
+          ></span>
+          <h1 id="evTitle">Event</h1>
+          <div class="banner-meta" id="evMeta"></div>
+        </div>
+      </div>
+      <div class="shell" style="padding-top: 26px">
+        <div class="att-toolbar">
+          <div class="search">
+            <i class="ti ti-search ic"></i>
+            <input
+              class="input"
+              id="attSearch"
+              placeholder="Search attendees..."
+              oninput="renderAttendees()"
+            />
+          </div>
+          <button class="btn btn-secondary" onclick="openBulk()">
+            <i class="ti ti-upload ic"></i> Bulk CSV
+          </button>
+          <button class="btn btn-primary" onclick="openAddAttendee()">
+            <i class="ti ti-user-plus ic"></i> Add attendee
+          </button>
+        </div>
+        <div id="attArea"></div>
+      </div>
+    </section>
+
+    <!-- ================= PASS VIEW ================= -->
+    <section id="view-pass" class="view">
+      <div class="shell">
+        <button class="back-pill" id="passBack">
+          <span class="bp-ic"><i class="ti ti-arrow-left"></i></span
+          ><span class="bp-txt"
+            ><small>Back to</small><b id="passBackName">event</b></span
+          >
+        </button>
+        <div class="page-head">
+          <div>
+            <h1>Attendee pass</h1>
+            <p id="passSub"></p>
+          </div>
+        </div>
+        <div class="pass-stage">
+          <div>
+            <div class="field">
+              <label>Template</label>
+              <div class="template-pick" id="passTpl">
+                <div class="tpl-opt" data-tpl="minimal">Minimal</div>
+                <div class="tpl-opt" data-tpl="elegant">Elegant</div>
+                <div class="tpl-opt" data-tpl="bold">Bold</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Brand colour</label>
+              <div class="swatches" id="passSwatches"></div>
+            </div>
+            <div class="field">
+              <label>Pass status</label>
+              <div class="seg" id="statusSeg">
+                <button data-st="unused">Unused</button>
+                <button data-st="used">Used</button>
+              </div>
+            </div>
+            <div
+              style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px"
+            >
+              <button class="btn btn-primary" onclick="exportPNG()">
+                <i class="ti ti-photo ic"></i> Download PNG
+              </button>
+              <button class="btn btn-secondary" onclick="exportPDF()">
+                <i class="ti ti-file-type-pdf ic"></i> PDF
+              </button>
+              <button class="btn btn-secondary" onclick="sharePass()">
+                <i class="ti ti-share ic"></i> Share
+              </button>
+            </div>
+          </div>
+          <div class="pass-wrap">
+            <div class="pass" id="passCard"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="brand" onclick="goHome()">
+            <div class="brand-mark"><i class="ti ti-ticket"></i></div>
+            <span class="brand-name">EventPass</span>
+          </div>
+          <p>
+            Beautiful QR event passes in minutes — no design skills, no account,
+            no backend.
+          </p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Product</h4>
+            <button onclick="enterApp()">Dashboard</button>
+            <button onclick="openCreate()">Create event</button>
+            <button onclick="loadDemo()">Try a demo</button>
+          </div>
+          <div class="footer-col">
+            <h4>Features</h4>
+            <span>QR pass generation</span>
+            <span>PNG &amp; PDF export</span>
+            <span>Bulk CSV upload</span>
+          </div>
+          <div class="footer-col">
+            <h4>Built with</h4>
+            <span>HTML, CSS &amp; JavaScript</span>
+            <span>Lucide icons</span>
+            <span>localStorage</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bar">
+        <span>© 2026 EventPass · An HNG project</span>
+        <span>Made with care for small events</span>
+      </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+    <div class="overlay" id="addOverlay">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <h2>Add attendee</h2>
+            <p>A unique QR pass is generated automatically.</p>
+          </div>
+          <button
+            class="icon-btn"
+            onclick="closeModal('addOverlay')"
+            aria-label="Close"
+          >
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+        <div class="field">
+          <label>Attendee name *</label
+          ><input class="input" id="a_name" placeholder="e.g. Amara Okafor" />
+        </div>
+        <div class="field">
+          <label>Pass type</label>
+          <select class="select input" id="a_type">
+            <option>General</option>
+            <option>VIP</option>
+            <option>Speaker</option>
+            <option>Staff</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="addAttendee()">
+          <i class="ti ti-user-plus ic"></i> Add &amp; generate pass
+        </button>
+      </div>
+    </div>
+
+    <div class="overlay" id="bulkOverlay">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <h2>Bulk upload</h2>
+            <p>Import many attendees from a CSV.</p>
+          </div>
+          <button
+            class="icon-btn"
+            onclick="closeModal('bulkOverlay')"
+            aria-label="Close"
+          >
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+        <div class="seg" id="bulkSeg">
+          <button class="active" data-mode="csv">Upload CSV</button>
+          <button data-mode="paste">Paste names</button>
+        </div>
+        <div id="bulkCsv">
+          <div class="dropzone" id="csvDrop">
+            <i class="ti ti-file-spreadsheet ic"></i>Click to choose a CSV file
+          </div>
+          <input type="file" id="csvInput" accept=".csv,text/csv" hidden />
+          <p style="font-size: 12.5px; color: var(--text-3); margin-top: 10px">
+            Columns: <b>name</b>, <b>type</b> (optional). First row may be a
+            header.
+          </p>
+          <button
+            class="btn btn-ghost btn-sm"
+            onclick="downloadTemplate()"
+            style="margin-top: 6px"
+          >
+            <i class="ti ti-download ic"></i> Download CSV template
+          </button>
+        </div>
+        <div id="bulkPaste" style="display: none">
+          <div class="field">
+            <label>One name per line</label
+            ><textarea
+              class="input"
+              id="bulkText"
+              rows="6"
+              placeholder="Amara Okafor&#10;Daniel Reyes&#10;Mei Lin"
+            ></textarea>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="addPasted()">
+            <i class="ti ti-users ic"></i> Add all
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toasts" id="toasts"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      /* ============================================================
+   EventPass — app logic (vanilla JS, localStorage)
+   ============================================================ */
+
+      /* ---------- inline Lucide icons (no external dependency, never 404) ---------- */
+      const ICONS = {
+        ticket:
+          '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+        moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+        sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+        plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+        "arrow-right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+        "arrow-left": '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+        sparkles:
+          '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+        wand: '<path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>',
+        "device-floppy":
+          '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+        qrcode:
+          '<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>',
+        palette:
+          '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>',
+        download:
+          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+        upload:
+          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>',
+        users:
+          '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        bolt: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+        check: '<path d="M20 6 9 17l-5-5"/>',
+        edit: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>',
+        trash:
+          '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+        search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+        "user-plus":
+          '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',
+        "file-type-pdf":
+          '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
+        photo:
+          '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+        share:
+          '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+        x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+        "file-spreadsheet":
+          '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>',
+        "calendar-event":
+          '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+        "calendar-plus":
+          '<path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/>',
+        "map-pin":
+          '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+        user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+        home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+        "chevron-right": '<path d="m9 18 6-6-6-6"/>',
+        clock:
+          '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+        menu: '<line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>',
+        "circle-check":
+          '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+        "alert-triangle":
+          '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      };
+      function svgFor(name) {
+        const p = ICONS[name];
+        if (!p) return "";
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+      }
+      function hydrateIcons(root) {
+        (root || document).querySelectorAll("i.ti").forEach((el) => {
+          const cls = [...el.classList].find((c) => c.startsWith("ti-"));
+          if (!cls) return;
+          const name = cls.slice(3);
+          const svg = svgFor(name);
+          if (svg) {
+            el.innerHTML = svg;
+            el.classList.add("icon-hydrated");
+          }
+        });
+      }
+
+      const KEYS = {
+        events: "eventpass.events",
+        attendees: "eventpass.attendees",
+        theme: "eventpass.theme",
+      };
+      const PALETTE = [
+        "#E2603B",
+        "#D8852E",
+        "#C9476A",
+        "#A85BC0",
+        "#3E8E7E",
+        "#3D6FB4",
+        "#B5483F",
+        "#6B7D45",
+      ];
+      const COVERS = [
+        {
+          id: "conf",
+          url: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "wedding",
+          url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "party",
+          url: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "workshop",
+          url: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "concert",
+          url: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "dinner",
+          url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80&auto=format&fit=crop",
+        },
+        {
+          id: "meetup",
+          url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=900&q=80&auto=format&fit=crop",
+        },
+      ];
+
+      let state = {
+        events: load(KEYS.events),
+        attendees: load(KEYS.attendees),
+        view: "landing",
+        editingId: null,
+        cover: null, // working cover for create form
+        currentEventId: null,
+        currentAttendeeId: null,
+        createTpl: "elegant",
+        createColor: PALETTE[0],
+      };
+
+      /* ---------- storage ---------- */
+      function load(k) {
+        try {
+          return JSON.parse(localStorage.getItem(k)) || [];
+        } catch {
+          return [];
+        }
+      }
+      function persist() {
+        try {
+          localStorage.setItem(KEYS.events, JSON.stringify(state.events));
+          localStorage.setItem(KEYS.attendees, JSON.stringify(state.attendees));
+        } catch (e) {
+          toast("Storage is full or blocked", true);
+        }
+      }
+      function uid() {
+        return crypto.randomUUID
+          ? crypto.randomUUID()
+          : "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+      }
+
+      /* ---------- helpers ---------- */
+      function $(s) {
+        return document.querySelector(s);
+      }
+      function esc(s) {
+        return String(s == null ? "" : s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function lum(hex) {
+        const c = hex.replace("#", "");
+        return (
+          (0.299 * parseInt(c.substr(0, 2), 16) +
+            0.587 * parseInt(c.substr(2, 2), 16) +
+            0.114 * parseInt(c.substr(4, 2), 16)) /
+          255
+        );
+      }
+      function idealText(hex) {
+        return lum(hex) > 0.62 ? "#2A2320" : "#ffffff";
+      }
+      function hexA(hex, a) {
+        const c = hex.replace("#", "");
+        return `rgba(${parseInt(c.substr(0, 2), 16)},${parseInt(c.substr(2, 2), 16)},${parseInt(c.substr(4, 2), 16)},${a})`;
+      }
+      function darken(hex, amt) {
+        const c = hex.replace("#", "");
+        const v = (i) =>
+          Math.max(0, Math.round(parseInt(c.substr(i, 2), 16) * (1 - amt)));
+        return `rgb(${v(0)},${v(2)},${v(4)})`;
+      }
+      function initials(n) {
+        return (n || "?")
+          .trim()
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase();
+      }
+      function fmtDate(d) {
+        if (!d) return "";
+        const dt = new Date(d + "T00:00");
+        return isNaN(dt)
+          ? d
+          : dt.toLocaleDateString(undefined, {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+            });
+      }
+      function fmtTime(t) {
+        if (!t) return "";
+        const [h, m] = t.split(":");
+        const dt = new Date();
+        dt.setHours(+h, +m);
+        return dt.toLocaleTimeString(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      /* ---------- theme ---------- */
+      function applyTheme(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        const icons = document.querySelectorAll(
+          '.nav .icon-btn[title="Toggle theme"] i, #themeBtn i',
+        );
+        icons.forEach(
+          (i) => (i.className = t === "dark" ? "ti ti-sun" : "ti ti-moon"),
+        );
+      }
+      function toggleTheme() {
+        const t =
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "light"
+            : "dark";
+        localStorage.setItem(KEYS.theme, t);
+        applyTheme(t);
+      }
+
+      /* ---------- routing ---------- */
+      function go(view) {
+        state.view = view;
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        const el = $("#view-" + view);
+        // force reflow so the entry animation re-runs
+        void el.offsetWidth;
+        el.classList.add("active");
+        $("#appNav").style.display = view === "landing" ? "none" : "flex";
+        if (view === "dashboard") renderDashboard();
+        renderCrumbs(view);
+        hydrateIcons(el);
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+      function goHome() {
+        go("dashboard");
+      }
+      function scrollTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function enterApp() {
+        go("dashboard");
+        renderDashboard();
+      }
+
+      /* ---------- breadcrumbs ---------- */
+      function renderCrumbs(view) {
+        const c = $("#crumbs");
+        if (!c) return;
+        const ev = currentEvent();
+        const att = state.attendees.find(
+          (a) => a.id === state.currentAttendeeId,
+        );
+        const sep =
+          '<span class="sep"><i class="ti ti-chevron-right"></i></span>';
+        const root = `<button class="crumb${view === "dashboard" ? " current" : ""}" onclick="goHome()"><i class="ti ti-home ic"></i> Events</button>`;
+        let html = root;
+
+        if (view === "create") {
+          html +=
+            sep +
+            `<span class="crumb current">${esc(state.editingId ? "Edit event" : "New event")}</span>`;
+        } else if (view === "event" && ev) {
+          html +=
+            sep + `<span class="crumb current">${esc(ev.event_name)}</span>`;
+        } else if (view === "pass" && ev) {
+          html +=
+            sep +
+            `<button class="crumb" onclick="openEvent('${ev.id}')">${esc(ev.event_name)}</button>`;
+          html +=
+            sep +
+            `<span class="crumb current">${esc(att ? att.attendee_name : "Pass")}</span>`;
+        }
+        c.innerHTML = html;
+        hydrateIcons(c);
+      }
+
+      /* ---------- toast ---------- */
+      function toast(msg, err) {
+        const t = document.createElement("div");
+        t.className = "toast" + (err ? " err" : "");
+        t.innerHTML = `<i class="ti ${err ? "ti-alert-triangle" : "ti-circle-check"} ic"></i> ${esc(msg)}`;
+        $("#toasts").appendChild(t);
+        hydrateIcons(t);
+        setTimeout(() => {
+          t.classList.add("out");
+          setTimeout(() => t.remove(), 350);
+        }, 2600);
+      }
+
+      /* ---------- swatches ---------- */
+      function renderSwatches(containerId, selected, onPick) {
+        const c = $("#" + containerId);
+        c.innerHTML = "";
+        PALETTE.forEach((col) => {
+          const s = document.createElement("div");
+          s.className =
+            "swatch" +
+            (col.toLowerCase() === selected.toLowerCase() ? " active" : "");
+          s.style.background = col;
+          s.onclick = () => onPick(col);
+          c.appendChild(s);
+        });
+      }
+
+      /* ---------- template pickers ---------- */
+      function wireTpl(containerId, current, onPick) {
+        const c = $("#" + containerId);
+        c.querySelectorAll(".tpl-opt").forEach((o) => {
+          o.classList.toggle("active", o.dataset.tpl === current);
+          o.onclick = () => {
+            c.querySelectorAll(".tpl-opt").forEach((x) =>
+              x.classList.remove("active"),
+            );
+            o.classList.add("active");
+            onPick(o.dataset.tpl);
+          };
+        });
+      }
+
+      /* ============================================================
+   CREATE / EDIT EVENT
+   ============================================================ */
+      function openCreate() {
+        state.editingId = null;
+        state.cover = null;
+        state.createTpl = "elegant";
+        state.createColor = PALETTE[0];
+        $("#createTitle").textContent = "Create event";
+        $("#saveBtnTxt").textContent = "Create event";
+        ["f_name", "f_date", "f_time", "f_venue", "f_org", "f_orgd"].forEach(
+          (id) => ($("#" + id).value = ""),
+        );
+        renderCoverGallery();
+        renderSwatches("swatches", state.createColor, pickCreateColor);
+        wireTpl("createTpl", state.createTpl, (t) => (state.createTpl = t));
+        $("#createBack").innerHTML =
+          '<i class="ti ti-arrow-left"></i> Back to events';
+        $("#createBack").onclick = () => go("dashboard");
+        go("create");
+      }
+      function pickCreateColor(c) {
+        state.createColor = c;
+        renderSwatches("swatches", c, pickCreateColor);
+      }
+
+      function editEvent() {
+        const ev = currentEvent();
+        if (!ev) return;
+        state.editingId = ev.id;
+        state.cover = ev.cover_image || null;
+        state.createTpl = ev.template || "elegant";
+        state.createColor = ev.brand_color || PALETTE[0];
+        $("#createTitle").textContent = "Edit event";
+        $("#saveBtnTxt").textContent = "Save changes";
+        $("#f_name").value = ev.event_name || "";
+        $("#f_date").value = ev.date || "";
+        $("#f_time").value = ev.time || "";
+        $("#f_venue").value = ev.venue || "";
+        $("#f_org").value = ev.organizer_name || "";
+        $("#f_orgd").value = ev.organizer_details || "";
+        renderCoverGallery();
+        renderSwatches("swatches", state.createColor, pickCreateColor);
+        wireTpl("createTpl", state.createTpl, (t) => (state.createTpl = t));
+        $("#createBack").innerHTML =
+          '<i class="ti ti-arrow-left"></i> Back to event';
+        $("#createBack").onclick = () => openEvent(state.editingId);
+        go("create");
+      }
+
+      function saveEvent() {
+        const name = $("#f_name").value.trim();
+        const date = $("#f_date").value,
+          time = $("#f_time").value,
+          venue = $("#f_venue").value.trim();
+        if (!name) return toast("Event name is required", true);
+        if (!date || !time) return toast("Date and time are required", true);
+        if (!venue) return toast("Venue is required", true);
+
+        if (state.editingId) {
+          const ev = state.events.find((e) => e.id === state.editingId);
+          Object.assign(ev, {
+            event_name: name,
+            date,
+            time,
+            venue,
+            organizer_name: $("#f_org").value.trim(),
+            organizer_details: $("#f_orgd").value.trim(),
+            brand_color: state.createColor,
+            template: state.createTpl,
+            cover_image: state.cover,
+          });
+          persist();
+          toast("Event updated");
+          openEvent(ev.id);
+        } else {
+          const ev = {
+            id: uid(),
+            event_name: name,
+            date,
+            time,
+            venue,
+            organizer_name: $("#f_org").value.trim(),
+            organizer_details: $("#f_orgd").value.trim(),
+            brand_color: state.createColor,
+            template: state.createTpl,
+            cover_image: state.cover,
+            created_at: new Date().toISOString(),
+          };
+          state.events.unshift(ev);
+          persist();
+          toast("Event created");
+          openEvent(ev.id);
+        }
+      }
+
+      /* cover gallery + upload */
+      function renderCoverGallery() {
+        const g = $("#coverGallery");
+        if (!g) return;
+        const thumbs = COVERS.map(
+          (c) =>
+            `<div class="cover-thumb${state.cover === c.url ? " active" : ""}" onclick="pickCover('${c.url}')"><img src="${c.url}" alt="cover option" loading="lazy"></div>`,
+        ).join("");
+        g.innerHTML =
+          thumbs +
+          `<div class="cover-thumb upload" id="coverUpload"><i class="ti ti-upload"></i><span>Upload</span></div>`;
+        $("#coverArea").innerHTML =
+          `<input type="file" id="coverInput" accept="image/*" hidden>`;
+        hydrateIcons(g);
+        const up = $("#coverUpload"),
+          inp = $("#coverInput");
+        up.onclick = () => inp.click();
+        inp.onchange = () => {
+          const f = inp.files[0];
+          if (!f) return;
+          if (f.size > 1.5 * 1024 * 1024)
+            return toast("Image too large (max 1.5MB)", true);
+          const r = new FileReader();
+          r.onload = () => {
+            state.cover = r.result;
+            renderCoverGallery();
+            showUploaded(r.result);
+          };
+          r.readAsDataURL(f);
+        };
+        if (state.cover && !COVERS.some((c) => c.url === state.cover))
+          showUploaded(state.cover);
+      }
+      function pickCover(url) {
+        state.cover = state.cover === url ? null : url;
+        renderCoverGallery();
+      }
+      function showUploaded(src) {
+        document
+          .querySelectorAll(".cover-thumb")
+          .forEach((t) => t.classList.remove("active"));
+        $("#coverArea").innerHTML =
+          `<input type="file" id="coverInput" accept="image/*" hidden><div class="cover-zone" style="margin-top:8px"><img src="${src}" alt="your cover"><button class="btn btn-danger btn-sm cover-rm" onclick="removeCover()"><i class="ti ti-trash ic"></i> Remove</button></div>`;
+        // re-bind upload input that was just replaced
+        const inp = $("#coverInput");
+        inp.onchange = () => {
+          const f = inp.files[0];
+          if (!f) return;
+          if (f.size > 1.5 * 1024 * 1024)
+            return toast("Image too large (max 1.5MB)", true);
+          const r = new FileReader();
+          r.onload = () => {
+            state.cover = r.result;
+            renderCoverGallery();
+            showUploaded(r.result);
+          };
+          r.readAsDataURL(f);
+        };
+      }
+      function removeCover() {
+        state.cover = null;
+        renderCoverGallery();
+      }
+
+      /* ============================================================
+   DASHBOARD
+   ============================================================ */
+      function renderDashboard() {
+        const area = $("#eventsArea");
+        if (!state.events.length) {
+          area.innerHTML = `<div class="empty"><div class="em-art"><i class="ti ti-calendar-plus"></i></div><h3>No events yet</h3><p>Create your first event and start generating beautiful QR passes for your guests.</p><button class="btn btn-primary btn-lg" onclick="openCreate()"><i class="ti ti-plus ic"></i> Create an event</button></div>`;
+          hydrateIcons(area);
+          $("#dashSub").textContent = "Create and manage event passes.";
+          return;
+        }
+        $("#dashSub").textContent =
+          `${state.events.length} event${state.events.length > 1 ? "s" : ""} · ${state.attendees.length} pass${state.attendees.length === 1 ? "" : "es"}`;
+        const cards = state.events
+          .map((ev) => {
+            const atts = state.attendees.filter((a) => a.event_id === ev.id);
+            const n = atts.length;
+            const used = atts.filter((a) => a.pass_status === "used").length;
+            const brand = ev.brand_color || PALETTE[0];
+            const d = ev.date ? new Date(ev.date + "T00:00") : null;
+            const day = d && !isNaN(d) ? d.getDate() : "–";
+            const mon =
+              d && !isNaN(d)
+                ? d.toLocaleDateString(undefined, { month: "short" })
+                : "";
+            const band = ev.cover_image
+              ? `style="background:linear-gradient(135deg,${hexA(brand, 0.45)},${hexA(brand, 0.72)}),url('${ev.cover_image}') center/cover;--ec:${brand}"`
+              : `style="background:linear-gradient(135deg,${brand},${darken(brand, 0.28)});--ec:${brand}"`;
+            return `<div class="event-card" onclick="openEvent('${ev.id}')">
+      <div class="band" ${band}>
+        <div class="date-chip"><b>${day}</b><span>${esc(mon)}</span></div>
+        <span class="card-tpl">${esc(ev.template || "elegant")}</span>
+      </div>
+      <div class="ec-body">
+        <h3>${esc(ev.event_name)}</h3>
+        <div class="meta">
+          <span><i class="ti ti-clock"></i> ${esc(fmtTime(ev.time))}</span>
+          <span><i class="ti ti-map-pin"></i> ${esc(ev.venue)}</span>
+        </div>
+        <div class="ec-foot">
+          <span class="count-pill"><i class="ti ti-users"></i> ${n} guest${n === 1 ? "" : "s"}${used ? ` · ${used} in` : ""}</span>
+          <span class="open-arrow"><i class="ti ti-arrow-right"></i></span>
+        </div>
+      </div>
+    </div>`;
+          })
+          .join("");
+        area.innerHTML = `<div class="grid stagger">${cards}</div>`;
+        hydrateIcons(area);
+      }
+
+      /* ============================================================
+   EVENT DETAIL
+   ============================================================ */
+      function currentEvent() {
+        return state.events.find((e) => e.id === state.currentEventId);
+      }
+      function openEvent(id) {
+        state.currentEventId = id;
+        const ev = currentEvent();
+        if (!ev) {
+          go("dashboard");
+          return renderDashboard();
+        }
+        const brand = ev.brand_color || PALETTE[0];
+        const banner = $("#evBanner");
+        banner.style.setProperty(
+          "--bnr",
+          ev.cover_image
+            ? `linear-gradient(135deg, ${hexA(brand, 0.35)}, ${hexA(brand, 0.55)}), url('${ev.cover_image}') center/cover`
+            : `linear-gradient(135deg, ${brand}, ${darken(brand, 0.3)})`,
+        );
+        $("#evTitle").textContent = ev.event_name;
+        $("#evTagTxt").textContent =
+          fmtDate(ev.date) + " · " + fmtTime(ev.time);
+        const n = state.attendees.filter((a) => a.event_id === ev.id).length;
+        $("#evMeta").innerHTML =
+          `<span><i class="ti ti-map-pin"></i> ${esc(ev.venue)}</span>` +
+          (ev.organizer_name
+            ? `<span><i class="ti ti-user"></i> ${esc(ev.organizer_name)}</span>`
+            : "") +
+          `<span><i class="ti ti-users"></i> ${n} attendee${n === 1 ? "" : "s"}</span>`;
+        hydrateIcons($("#evBanner"));
+        $("#attSearch").value = "";
+        go("event");
+        renderAttendees();
+      }
+      function deleteEvent() {
+        const ev = currentEvent();
+        if (!ev) return;
+        if (!confirm(`Delete "${ev.event_name}" and all its passes?`)) return;
+        state.events = state.events.filter((e) => e.id !== ev.id);
+        state.attendees = state.attendees.filter((a) => a.event_id !== ev.id);
+        persist();
+        toast("Event deleted");
+        go("dashboard");
+        renderDashboard();
+      }
+
+      function renderAttendees() {
+        const ev = currentEvent();
+        if (!ev) return;
+        const q = ($("#attSearch").value || "").toLowerCase();
+        let list = state.attendees.filter((a) => a.event_id === ev.id);
+        if (q)
+          list = list.filter(
+            (a) =>
+              a.attendee_name.toLowerCase().includes(q) ||
+              (a.pass_type || "").toLowerCase().includes(q),
+          );
+        const area = $("#attArea");
+        if (!state.attendees.filter((a) => a.event_id === ev.id).length) {
+          area.innerHTML = `<div class="empty"><div class="em-art"><i class="ti ti-user-plus"></i></div><h3>No attendees yet</h3><p>Add guests one at a time or import a whole list from CSV — each gets a unique QR pass.</p><button class="btn btn-primary btn-lg" onclick="openAddAttendee()"><i class="ti ti-user-plus ic"></i> Add attendee</button></div>`;
+          hydrateIcons(area);
+          return;
+        }
+        if (!list.length) {
+          area.innerHTML = `<div class="empty"><p>No matches for "${esc(q)}".</p></div>`;
+          return;
+        }
+        const brand = ev.brand_color || PALETTE[0];
+        area.innerHTML =
+          `<div class="att-list stagger">` +
+          list
+            .map(
+              (a) => `
+    <div class="att-row">
+      <div class="avatar" style="background:${brand}">${esc(initials(a.attendee_name))}</div>
+      <div class="att-info"><div class="nm">${esc(a.attendee_name)}</div><div class="ty">${esc(a.pass_type)} pass</div></div>
+      <span class="badge ${a.pass_status === "used" ? "badge-used" : "badge-unused"}"><span class="badge-dot"></span>${a.pass_status === "used" ? "Used" : "Unused"}</span>
+      <div class="att-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openPass('${a.id}')"><i class="ti ti-qrcode ic"></i> Pass</button>
+        <button class="icon-btn" style="width:34px;height:34px;font-size:16px" onclick="delAttendee('${a.id}')" title="Remove" aria-label="Remove attendee"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`,
+            )
+            .join("") +
+          `</div>`;
+        hydrateIcons(area);
+      }
+
+      function delAttendee(id) {
+        state.attendees = state.attendees.filter((a) => a.id !== id);
+        persist();
+        renderAttendees();
+        toast("Attendee removed");
+      }
+
+      /* ---------- add attendee ---------- */
+      function openAddAttendee() {
+        $("#a_name").value = "";
+        $("#a_type").value = "General";
+        openModal("addOverlay");
+        setTimeout(() => $("#a_name").focus(), 60);
+      }
+      function makeAttendee(name, type) {
+        return {
+          id: uid(),
+          event_id: state.currentEventId,
+          attendee_name: name,
+          pass_type: type || "General",
+          qr_code: uid(),
+          pass_status: "unused",
+          created_at: new Date().toISOString(),
+        };
+      }
+      function addAttendee() {
+        const name = $("#a_name").value.trim();
+        if (!name) return toast("Name is required", true);
+        state.attendees.unshift(makeAttendee(name, $("#a_type").value));
+        persist();
+        closeModal("addOverlay");
+        renderAttendees();
+        toast("Pass generated for " + name);
+      }
+
+      /* ---------- bulk ---------- */
+      function openBulk() {
+        $("#bulkText").value = "";
+        document
+          .querySelectorAll("#bulkSeg button")
+          .forEach((b, i) => b.classList.toggle("active", i === 0));
+        $("#bulkCsv").style.display = "";
+        $("#bulkPaste").style.display = "none";
+        resetCsvDrop();
+        openModal("bulkOverlay");
+      }
+      document.addEventListener("click", (e) => {
+        const seg = e.target.closest("#bulkSeg button");
+        if (!seg) return;
+        document
+          .querySelectorAll("#bulkSeg button")
+          .forEach((b) => b.classList.remove("active"));
+        seg.classList.add("active");
+        const csv = seg.dataset.mode === "csv";
+        $("#bulkCsv").style.display = csv ? "" : "none";
+        $("#bulkPaste").style.display = csv ? "none" : "";
+      });
+      function resetCsvDrop() {
+        const drop = $("#csvDrop"),
+          inp = $("#csvInput");
+        if (!drop) return;
+        drop.onclick = () => inp.click();
+        inp.value = "";
+        inp.onchange = () => {
+          const f = inp.files[0];
+          if (f) readCsv(f);
+        };
+      }
+      function readCsv(file) {
+        const r = new FileReader();
+        r.onload = () => {
+          const added = importRows(parseCSV(r.result));
+          finishBulk(added);
+        };
+        r.readAsText(file);
+      }
+      function parseCSV(text) {
+        const rows = text
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((l) => l.split(",").map((c) => c.trim().replace(/^"|"$/g, "")));
+        if (!rows.length) return [];
+        const head = rows[0].map((h) => h.toLowerCase());
+        const hasHeader =
+          head.includes("name") ||
+          head.includes("attendee") ||
+          head.includes("attendee_name");
+        const ni = hasHeader
+          ? Math.max(
+              head.indexOf("name"),
+              head.indexOf("attendee"),
+              head.indexOf("attendee_name"),
+            )
+          : 0;
+        const ti = hasHeader
+          ? Math.max(
+              head.indexOf("type"),
+              head.indexOf("pass_type"),
+              head.indexOf("pass type"),
+            )
+          : 1;
+        const body = hasHeader ? rows.slice(1) : rows;
+        return body
+          .map((r) => ({
+            name: r[ni < 0 ? 0 : ni],
+            type: ti >= 0 ? r[ti] : "",
+          }))
+          .filter((x) => x.name);
+      }
+      function importRows(items) {
+        const valid = ["general", "vip", "speaker", "staff"];
+        let n = 0;
+        items.forEach((it) => {
+          let type = (it.type || "General").trim();
+          type = valid.includes(type.toLowerCase())
+            ? type[0].toUpperCase() + type.slice(1).toLowerCase()
+            : "General";
+          state.attendees.unshift(makeAttendee(it.name, type));
+          n++;
+        });
+        if (n) persist();
+        return n;
+      }
+      function addPasted() {
+        const names = $("#bulkText")
+          .value.split(/\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (!names.length) return toast("Add at least one name", true);
+        const n = importRows(names.map((name) => ({ name, type: "General" })));
+        finishBulk(n);
+      }
+      function finishBulk(n) {
+        closeModal("bulkOverlay");
+        renderAttendees();
+        n
+          ? toast(`${n} pass${n === 1 ? "" : "es"} generated`)
+          : toast("No valid rows found", true);
+      }
+      function downloadTemplate() {
+        const blob = new Blob(
+          [
+            "name,type\nAmara Okafor,VIP\nDaniel Reyes,General\nMei Lin,Speaker\n",
+          ],
+          { type: "text/csv" },
+        );
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "eventpass-template.csv";
+        a.click();
+      }
+
+      /* ============================================================
+   PASS VIEW
+   ============================================================ */
+      function openPass(id) {
+        state.currentAttendeeId = id;
+        const att = state.attendees.find((a) => a.id === id);
+        const ev = currentEvent();
+        if (!att || !ev) return;
+        $("#passSub").textContent = `${att.attendee_name} · ${ev.event_name}`;
+        $("#passBackName").textContent = ev.event_name;
+        $("#passBack").onclick = () => {
+          go("event");
+          renderAttendees();
+        };
+        wireTpl("passTpl", ev.template || "elegant", (t) => {
+          ev.template = t;
+          persist();
+          renderPass();
+        });
+        const pickPassColor = (c) => {
+          ev.brand_color = c;
+          persist();
+          renderPass();
+          renderSwatches("passSwatches", c, pickPassColor);
+        };
+        renderSwatches(
+          "passSwatches",
+          ev.brand_color || PALETTE[0],
+          pickPassColor,
+        );
+        document.querySelectorAll("#statusSeg button").forEach((b) => {
+          b.classList.toggle("active", b.dataset.st === att.pass_status);
+          b.onclick = () => {
+            att.pass_status = b.dataset.st;
+            persist();
+            document
+              .querySelectorAll("#statusSeg button")
+              .forEach((x) => x.classList.toggle("active", x === b));
+            renderPass();
+          };
+        });
+        go("pass");
+        renderPass();
+      }
+
+      function renderPass() {
+        const att = state.attendees.find(
+          (a) => a.id === state.currentAttendeeId,
+        );
+        const ev = currentEvent();
+        if (!att || !ev) return;
+        const tpl = ev.template || "elegant";
+        const brand = ev.brand_color || PALETTE[0];
+        const card = $("#passCard");
+        card.className = "pass t-" + tpl;
+        card.style.cssText = "";
+        card.style.setProperty("--brand", brand);
+
+        const cover = ev.cover_image;
+        if (tpl === "bold") {
+          card.style.background = cover
+            ? `linear-gradient(135deg,${hexA(brand, 0.82)},${hexA(brand, 0.94)}),url('${cover}') center/cover`
+            : `linear-gradient(140deg, ${brand}, ${darken(brand, 0.22)})`;
+          card.style.color = idealText(brand);
+        } else if (tpl === "elegant") {
+          card.style.background = cover
+            ? `linear-gradient(135deg,${hexA(brand, 0.85)},${hexA(brand, 0.95)}),url('${cover}') center/cover`
+            : `linear-gradient(135deg, ${brand}, ${darken(brand, 0.3)})`;
+        }
+
+        const qr = qrDataUrl(
+          `EVENTPASS|${att.qr_code}|${att.attendee_name}|${att.pass_type}|${ev.event_name}`,
+        );
+        const statusTxt = att.pass_status === "used" ? "Used" : "Valid";
+        const org = ev.organizer_name
+          ? `Organized by ${esc(ev.organizer_name)}`
+          : "";
+
+        // single robust structure for all templates — flex layout prevents overlap
+        card.innerHTML = `
+    <div class="pass-head">
+      <span class="pass-status"><span class="dot"></span>${statusTxt}</span>
+      <span class="pass-badge">${esc(att.pass_type)}</span>
+    </div>
+    <div class="pass-body">
+      <div class="pass-event">${esc(ev.event_name)}</div>
+      <div class="pass-att">${esc(att.attendee_name)}</div>
+    </div>
+    <div class="pass-foot">
+      <div class="pass-meta">
+        <span><i class="ti ti-calendar-event"></i> ${esc(fmtDate(ev.date))} · ${esc(fmtTime(ev.time))}</span>
+        <span><i class="ti ti-map-pin"></i> ${esc(ev.venue)}</span>
+        ${org ? `<span class="pass-org">${org}</span>` : ""}
+      </div>
+      <div class="qr"><img alt="QR" src="${qr}"></div>
+    </div>`;
+        hydrateIcons(card);
+      }
+
+      function qrDataUrl(text, size = 240) {
+        try {
+          const q = new QRious({
+            value: text,
+            size,
+            foreground: "#1a1410",
+            background: "#ffffff",
+            level: "M",
+            padding: 0,
+          });
+          return q.toDataURL("image/png");
+        } catch (e) {
+          return "";
+        }
+      }
+
+      /* ---------- exports ---------- */
+      async function captureCard(scale = 3) {
+        if (document.fonts && document.fonts.ready) {
+          try {
+            await document.fonts.ready;
+          } catch {}
+        }
+        await new Promise((r) => setTimeout(r, 60));
+        return html2canvas($("#passCard"), {
+          scale,
+          backgroundColor: null,
+          useCORS: true,
+          logging: false,
+        });
+      }
+      function passFileName() {
+        const att = state.attendees.find(
+          (a) => a.id === state.currentAttendeeId,
+        );
+        return (
+          (att ? att.attendee_name : "pass")
+            .replace(/[^a-z0-9]+/gi, "-")
+            .toLowerCase() + "-pass"
+        );
+      }
+      async function exportPNG() {
+        try {
+          toast("Rendering pass...");
+          const canvas = await captureCard(3);
+          const a = document.createElement("a");
+          a.download = passFileName() + ".png";
+          a.href = canvas.toDataURL("image/png");
+          a.click();
+          toast("PNG downloaded");
+        } catch (e) {
+          toast("Export failed — try again", true);
+        }
+      }
+      async function exportPDF() {
+        try {
+          toast("Building PDF...");
+          const canvas = await captureCard(3);
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "pt",
+            format: [380, 232],
+          });
+          pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, 380, 232);
+          pdf.save(passFileName() + ".pdf");
+          toast("PDF downloaded");
+        } catch (e) {
+          toast("Export failed — try again", true);
+        }
+      }
+      async function sharePass() {
+        try {
+          const canvas = await captureCard(2);
+          const blob = await new Promise((res) =>
+            canvas.toBlob(res, "image/png"),
+          );
+          const file = new File([blob], passFileName() + ".png", {
+            type: "image/png",
+          });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: "Your event pass" });
+          } else {
+            const a = document.createElement("a");
+            a.download = file.name;
+            a.href = URL.createObjectURL(blob);
+            a.click();
+            toast("Pass saved — attach it to share");
+          }
+        } catch (e) {
+          if (e.name !== "AbortError") toast("Could not share", true);
+        }
+      }
+
+      /* ---------- modals ---------- */
+      function openModal(id) {
+        $("#" + id).classList.add("open");
+      }
+      function closeModal(id) {
+        $("#" + id).classList.remove("open");
+      }
+      document.addEventListener("click", (e) => {
+        if (e.target.classList && e.target.classList.contains("overlay"))
+          e.target.classList.remove("open");
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape")
+          document
+            .querySelectorAll(".overlay.open")
+            .forEach((o) => o.classList.remove("open"));
+      });
+
+      /* ---------- demo ---------- */
+      function loadDemo() {
+        const ev = {
+          id: uid(),
+          event_name: "Aurora Design Summit",
+          date: nextSat(),
+          time: "18:00",
+          venue: "The Glasshouse, Lagos",
+          organizer_name: "Aurora Co.",
+          organizer_details: "hello@aurora.co",
+          brand_color: PALETTE[0],
+          template: "elegant",
+          cover_image: COVERS[0].url,
+          created_at: new Date().toISOString(),
+        };
+        state.events.unshift(ev);
+        state.currentEventId = ev.id;
+        [
+          ["Amara Okafor", "VIP"],
+          ["Daniel Reyes", "Speaker"],
+          ["Mei Lin", "General"],
+          ["Tunde Bakare", "Staff"],
+          ["Sofia Marin", "General"],
+        ].forEach(([n, t]) => state.attendees.unshift(makeAttendee(n, t)));
+        state.attendees[2].pass_status = "used";
+        persist();
+        toast("Demo event loaded");
+        enterApp();
+      }
+      function nextSat() {
+        const d = new Date();
+        d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7));
+        return d.toISOString().slice(0, 10);
+      }
+
+      /* ---------- theme buttons wiring ---------- */
+      $("#themeBtn").addEventListener("click", toggleTheme);
+
+      /* ---------- mobile menu ---------- */
+      function closeMenu() {
+        document
+          .querySelectorAll(".mobile-menu")
+          .forEach((m) => m.classList.remove("open"));
+        document
+          .querySelectorAll(".hamburger")
+          .forEach((h) => h.setAttribute("aria-expanded", "false"));
+      }
+      function wireHamburger(btnId, menuId) {
+        const btn = $("#" + btnId);
+        if (!btn) return;
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const menu = $("#" + menuId);
+          const isOpen = menu.classList.contains("open");
+          closeMenu();
+          if (!isOpen) {
+            menu.classList.add("open");
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+      }
+      wireHamburger("landingHamburger", "landingMenu");
+      wireHamburger("appHamburger", "appMenu");
+      document.addEventListener("click", (e) => {
+        if (
+          !e.target.closest(".mobile-menu") &&
+          !e.target.closest(".hamburger")
+        )
+          closeMenu();
+      });
+
+      /* ---------- init ---------- */
+      /* ---------- seed mock data on first run ---------- */
+      function seedMockData() {
+        if (localStorage.getItem("eventpass.seeded")) return;
+        if (state.events.length) {
+          localStorage.setItem("eventpass.seeded", "1");
+          return;
+        }
+        const mk = (name, days, time, venue, org, color, tpl, cover) => ({
+          id: uid(),
+          event_name: name,
+          date: dateIn(days),
+          time,
+          venue,
+          organizer_name: org,
+          organizer_details: "",
+          brand_color: color,
+          template: tpl,
+          cover_image: cover,
+          created_at: new Date().toISOString(),
+        });
+        const e1 = mk(
+          "Aurora Design Summit",
+          12,
+          "18:00",
+          "The Glasshouse, Lagos",
+          "Aurora Co.",
+          PALETTE[0],
+          "elegant",
+          COVERS[0].url,
+        );
+        const e2 = mk(
+          "Lola & Tunde — Wedding",
+          26,
+          "16:00",
+          "Eko Hotel Gardens",
+          "The Adeyemis",
+          PALETTE[2],
+          "elegant",
+          COVERS[1].url,
+        );
+        const e3 = mk(
+          "Frontend Builders Meetup",
+          5,
+          "17:30",
+          "CcHub, Yaba",
+          "FE Builders NG",
+          PALETTE[5],
+          "bold",
+          COVERS[6].url,
+        );
+        state.events.push(e1, e2, e3);
+        const guests = [
+          [
+            e1.id,
+            [
+              ["Amara Okafor", "VIP", "used"],
+              ["Daniel Reyes", "Speaker", "unused"],
+              ["Mei Lin", "General", "used"],
+              ["Tunde Bakare", "Staff", "unused"],
+              ["Sofia Marin", "General", "unused"],
+            ],
+          ],
+          [
+            e2.id,
+            [
+              ["Grace Adeyemi", "VIP", "unused"],
+              ["Michael Obi", "General", "unused"],
+              ["Fatima Bello", "General", "used"],
+            ],
+          ],
+          [
+            e3.id,
+            [
+              ["Chris Eze", "Speaker", "unused"],
+              ["Ada Nwosu", "General", "used"],
+              ["Sam Idris", "General", "unused"],
+              ["Priya Patel", "General", "unused"],
+            ],
+          ],
+        ];
+        guests.forEach(([eid, list]) =>
+          list.forEach(([nm, ty, st]) => {
+            const a = makeAttendee(nm, ty);
+            a.event_id = eid;
+            a.pass_status = st;
+            state.attendees.push(a);
+          }),
+        );
+        persist();
+        localStorage.setItem("eventpass.seeded", "1");
+      }
+      function dateIn(days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toISOString().slice(0, 10);
+      }
+
+      /* ---------- init ---------- */
+      (function init() {
+        applyTheme(localStorage.getItem(KEYS.theme) || "light");
+        seedMockData();
+        hydrateIcons(document);
+        renderDashboard();
+      })();
+    </script>
+  </body>
+</html>
