@@ -8,13 +8,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#4A2C2A",   // deep brown
-        accent: "#C45A2D",    // burnt orange
-        cream: "#F7F3EF",
+        background: "#FFFFFF",
+        foreground: "#0C0C0C",
+        primary: "#0C0C0C",     // black (main)
+        secondary: "#FFFFFF",   // white
+        muted: "#EDEDED",       // soft gray
+        border: "#E5E5E5",
+        "gray-mid": "#D0D0D0",
+        "gray-dark": "#888888",
       },
       fontFamily: {
         heading: ["Playfair Display", "serif"],
         body: ["Inter", "sans-serif"],
+        display: ["Bebas Neue", "sans-serif"],
+      },
+      animation: {
+        "fade-up": "fadeUp 0.8s ease forwards",
+        "fade-in": "fadeIn 1s ease forwards",
+        "marquee": "marquee 22s linear infinite",
+      },
+      keyframes: {
+        fadeUp: { "0%": { opacity: "0", transform: "translateY(22px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+        fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+        marquee: { "0%": { transform: "translateX(0)" }, "100%": { transform: "translateX(-50%)" } },
       },
     },
   },
