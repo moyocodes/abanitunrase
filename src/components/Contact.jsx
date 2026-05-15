@@ -49,7 +49,7 @@ export default function Contact() {
           </div>
           <h2
             style={{
-              fontFamily: "'Playfair Display',serif",
+              fontFamily: "'Cormorant Garamond',serif",
               fontSize: "clamp(24px,3vw,42px)",
               fontWeight: 900,
               color: "#fff",
@@ -153,7 +153,7 @@ export default function Contact() {
         <Reveal delay={80}>
           <p
             style={{
-              fontFamily: "'Playfair Display',serif",
+              fontFamily: "'Cormorant Garamond',serif",
               fontSize: 22,
               fontStyle: "italic",
               color: "#0a0a0a",

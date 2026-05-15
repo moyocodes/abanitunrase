@@ -91,7 +91,7 @@ export default function Pricing() {
         </div>
         <div
           style={{
-            fontFamily: "'Playfair Display',serif",
+            fontFamily: "'Cormorant Garamond',serif",
             fontSize: "clamp(30px,4vw,50px)",
             fontWeight: 900,
             color: "#fff",

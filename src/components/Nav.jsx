@@ -1,0 +1,104 @@
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function Nav({ onBookCall, hidden }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const links = [
+    { label: "Atelier", href: "#atelier" },
+    { label: "What We Do", href: "#categories" },
+    { label: "Lookbook", href: "#lookbook-section" },
+    { label: "Rates", href: "#rates" },
+    { label: "Contact", href: "#contact" },
+  ];
+
+  return (
+    <>
+      <motion.nav
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className={`fixed top-0 left-0 right-0 z-[200] flex items-center justify-between px-6 md:px-[52px] py-5 border-b transition-all duration-500 ${
+          hidden ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"
+        } ${
+          scrolled
+            ? "bg-white border-black/10"
+            : "bg-transparent border-transparent"
+        }`}
+      >
+        {/* Logo */}
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center no-underline z-10 bg-transparent border-none cursor-pointer p-0"
+        >
+          <img src="/logobg.png" alt="Abánitúnrase" className="h-8" />
+        </button>
+
+        {/* Desktop Links */}
+        <div className="hidden md:flex gap-7">
+          {links.map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              className="font-mono text-[8.5px] tracking-[0.18em] uppercase no-underline text-black/55 hover:text-black transition-colors duration-300"
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+
+        {/* Desktop CTA */}
+        <button
+          onClick={onBookCall}
+          className="hidden md:block font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
+        >
+          Book a Fitting
+        </button>
+
+        {/* Hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden flex flex-col justify-center gap-[5px] w-6 h-6 cursor-pointer bg-transparent border-none p-0 z-10"
+        >
+          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
+          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
+        </button>
+      </motion.nav>
+
+      {/* Mobile Menu */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: menuOpen ? 1 : 0, y: menuOpen ? 0 : -8 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className={`fixed top-0 left-0 right-0 z-[199] pt-24 pb-10 px-6 bg-white border-b border-black/10 flex flex-col gap-6 md:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+      >
+        {links.map(({ label, href }) => (
+          <a
+            key={label}
+            href={href}
+            onClick={() => setMenuOpen(false)}
+            className="font-mono text-[11px] tracking-[0.18em] uppercase no-underline text-black/55 hover:text-black transition-colors duration-300"
+          >
+            {label}
+          </a>
+        ))}
+        <button
+          onClick={() => { onBookCall(); setMenuOpen(false); }}
+          className="mt-2 font-mono text-[11px] tracking-[0.18em] uppercase px-5 py-3 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer self-start"
+        >
+          Book a Fitting
+        </button>
+      </motion.div>
+    </>
+  );
+}

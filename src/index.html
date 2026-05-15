@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Ferns Unique Solutions | Request a Case Review</title>
+    <meta
+      name="description"
+      content="Contact Ferns Unique Solutions to request a confidential blockchain investigation or crypto scam case review. Submit wallet details, transaction hashes, and case information securely."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#0b2f6b" />
+    <link rel="canonical" href="https://fernsunique.io/contact.html" />
+
+    <style>
+      :root {
+        --bg: #071426;
+        --text: #eef4ff;
+        --muted: #b8c8e6;
+        --line: rgba(255, 255, 255, 0.12);
+        --primary: #2e74ff;
+        --primary-hover: #225fd6;
+        --max-width: 1180px;
+        --radius: 18px;
+        --shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, Arial, Helvetica, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top right,
+            rgba(46, 116, 255, 0.18),
+            transparent 26%
+          ),
+          radial-gradient(
+            circle at top left,
+            rgba(132, 179, 255, 0.08),
+            transparent 22%
+          ),
+          linear-gradient(180deg, #071426 0%, #08192f 100%);
+        line-height: 1.65;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .container {
+        width: min(calc(100% - 32px), var(--max-width));
+        margin: 0 auto;
+      }
+      .section {
+        padding: 84px 0;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(7, 20, 38, 0.85);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 800;
+      }
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        font-weight: 900;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), #7babff);
+        box-shadow: var(--shadow);
+      }
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        color: var(--muted);
+      }
+      .nav-actions {
+        display: flex;
+        gap: 12px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 20px;
+        border-radius: 999px;
+        font-weight: 700;
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: #fff;
+        border-color: var(--line);
+      }
+      .hero {
+        padding: 76px 0 28px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #d9e6ff;
+        margin-bottom: 18px;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: clamp(2.2rem, 4vw, 4rem);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        max-width: 780px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow);
+      }
+      .section-title {
+        margin: 0 0 12px;
+        font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+        line-height: 1.15;
+      }
+      .section-copy {
+        margin: 0 0 24px;
+        color: var(--muted);
+        max-width: 760px;
+      }
+      .list-clean {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .list-clean li {
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+        color: #eaf2ff;
+      }
+      form {
+        display: grid;
+        gap: 14px;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+      label {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: #fff;
+        font: inherit;
+        outline: none;
+      }
+      textarea {
+        min-height: 160px;
+        resize: vertical;
+      }
+      .help-text {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin: 0;
+      }
+      footer {
+        padding: 46px 0 60px;
+        border-top: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.12);
+        margin-top: 56px;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 0.8fr;
+        gap: 24px;
+      }
+      .footer-copy,
+      .footer-list {
+        color: var(--muted);
+      }
+      .footer-list {
+        display: grid;
+        gap: 10px;
+      }
+      @media (max-width: 980px) {
+        .grid-2,
+        .form-row,
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <a class="brand" href="/">
+          <span class="brand-mark">F</span>
+          <span>Ferns Unique Solutions</span>
+        </a>
+        <nav class="nav-links">
+          <a href="/">Home</a>
+          <a href="/about.html">About</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/disclaimer.html">Disclaimer</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-secondary" href="tel:YOUR_PHONE">Call</a>
+          <a class="btn btn-primary" href="/contact.html"
+            >Request Case Review</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <div class="eyebrow">
+            Confidential intake • Clear expectations • No false promises
+          </div>
+          <h1>Request a Confidential Case Review</h1>
+          <p class="lead">
+            Share the available details of your case, including wallet
+            addresses, transaction hashes, screenshots, and a summary of what
+            happened. We will review the information and assess whether the case
+            appears suitable for further analysis.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container grid-2">
+          <div>
+            <h2 class="section-title">Before you submit</h2>
+            <p class="section-copy">
+              The most useful details usually include transaction hashes, wallet
+              addresses, the platform involved, screenshots, and a short
+              timeline of events.
+            </p>
+
+            <div class="card">
+              <h3>What to prepare</h3>
+              <ul class="list-clean">
+                <li>Wallet address or transaction hash</li>
+
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="UTF-8" />
+                    <meta
+                      name="viewport"
+                      content="width=device-width, initial-scale=1.0"
+                    />
+                    <title>
+                      Contact Ferns Unique Solutions | Request a Case Review
+                    </title>
+                    <meta
+                      name="description"
+                      content="Contact Ferns Unique Solutions to request a confidential blockchain investigation or crypto scam case review. Submit wallet details, transaction hashes, and case information securely."
+                    />
+                    <meta
+                      name="robots"
+                      content="index,follow,max-image-preview:large"
+                    />
+                    <meta name="theme-color" content="#0b2f6b" />
+                    <link
+                      rel="canonical"
+                      href="https://fernsunique.io/contact.html"
+                    />
+
+                    <style>
+                      :root {
+                        --bg: #071426;
+                        --text: #eef4ff;
+                        --muted: #b8c8e6;
+                        --line: rgba(255, 255, 255, 0.12);
+                        --primary: #2e74ff;
+                        --primary-hover: #225fd6;
+                        --max-width: 1180px;
+                        --radius: 18px;
+                        --shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+                      }
+                      * {
+                        box-sizing: border-box;
+                      }
+                      body {
+                        margin: 0;
+                        font-family: Inter, Arial, Helvetica, sans-serif;
+                        color: var(--text);
+                        background:
+                          radial-gradient(
+                            circle at top right,
+                            rgba(46, 116, 255, 0.18),
+                            transparent 26%
+                          ),
+                          radial-gradient(
+                            circle at top left,
+                            rgba(132, 179, 255, 0.08),
+                            transparent 22%
+                          ),
+                          linear-gradient(180deg, #071426 0%, #08192f 100%);
+                        line-height: 1.65;
+                      }
+                      a {
+                        color: inherit;
+                        text-decoration: none;
+                      }
+                      .container {
+                        width: min(calc(100% - 32px), var(--max-width));
+                        margin: 0 auto;
+                      }
+                      .section {
+                        padding: 84px 0;
+                      }
+                      .topbar {
+                        position: sticky;
+                        top: 0;
+                        z-index: 1000;
+                        background: rgba(7, 20, 38, 0.85);
+                        backdrop-filter: blur(14px);
+                        border-bottom: 1px solid var(--line);
+                      }
+                      .nav {
+                        min-height: 76px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 20px;
+                      }
+                      .brand {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        font-weight: 800;
+                      }
+                      .brand-mark {
+                        width: 42px;
+                        height: 42px;
+                        display: grid;
+                        place-items: center;
+                        border-radius: 12px;
+                        font-weight: 900;
+                        color: #fff;
+                        background: linear-gradient(
+                          135deg,
+                          var(--primary),
+                          #7babff
+                        );
+                        box-shadow: var(--shadow);
+                      }
+                      .nav-links {
+                        display: flex;
+                        gap: 24px;
+                        color: var(--muted);
+                      }
+                      .nav-actions {
+                        display: flex;
+                        gap: 12px;
+                      }
+                      .btn {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 48px;
+                        padding: 0 20px;
+                        border-radius: 999px;
+                        font-weight: 700;
+                        border: 1px solid transparent;
+                        cursor: pointer;
+                      }
+                      .btn-primary {
+                        background: var(--primary);
+                        color: #fff;
+                      }
+                      .btn-primary:hover {
+                        background: var(--primary-hover);
+                      }
+                      .btn-secondary {
+                        background: transparent;
+                        color: #fff;
+                        border-color: var(--line);
+                      }
+                      .hero {
+                        padding: 76px 0 28px;
+                      }
+                      .eyebrow {
+                        display: inline-flex;
+                        padding: 8px 12px;
+                        border-radius: 999px;
+                        background: rgba(255, 255, 255, 0.04);
+                        border: 1px solid var(--line);
+                        font-size: 0.84rem;
+                        font-weight: 700;
+                        color: #d9e6ff;
+                        margin-bottom: 18px;
+                      }
+                      h1 {
+                        margin: 0 0 16px;
+                        font-size: clamp(2.2rem, 4vw, 4rem);
+                        line-height: 1.08;
+                        letter-spacing: -0.03em;
+                      }
+                      .lead {
+                        margin: 0;
+                        color: var(--muted);
+                        max-width: 780px;
+                      }
+                      .grid-2 {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 18px;
+                      }
+                      .card {
+                        background: rgba(255, 255, 255, 0.04);
+                        border: 1px solid var(--line);
+                        border-radius: var(--radius);
+                        padding: 24px;
+                        box-shadow: var(--shadow);
+                      }
+                      .section-title {
+                        margin: 0 0 12px;
+                        font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+                        line-height: 1.15;
+                      }
+                      .section-copy {
+                        margin: 0 0 24px;
+                        color: var(--muted);
+                        max-width: 760px;
+                      }
+                      .list-clean {
+                        list-style: none;
+                        margin: 0;
+                        padding: 0;
+                        display: grid;
+                        gap: 10px;
+                      }
+                      .list-clean li {
+                        padding: 14px 16px;
+                        border-radius: 14px;
+                        border: 1px solid var(--line);
+                        background: rgba(255, 255, 255, 0.03);
+                        color: #eaf2ff;
+                      }
+                      form {
+                        display: grid;
+                        gap: 14px;
+                      }
+                      .form-row {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 14px;
+                      }
+                      .field {
+                        display: grid;
+                        gap: 8px;
+                      }
+                      label {
+                        font-weight: 700;
+                        font-size: 0.95rem;
+                      }
+                      input,
+                      textarea,
+                      select {
+                        width: 100%;
+                        padding: 14px 16px;
+                        border-radius: 14px;
+                        border: 1px solid var(--line);
+                        background: rgba(255, 255, 255, 0.04);
+                        color: #fff;
+                        font: inherit;
+                        outline: none;
+                      }
+                      textarea {
+                        min-height: 160px;
+                        resize: vertical;
+                      }
+                      .help-text {
+                        color: var(--muted);
+                        font-size: 0.92rem;
+                        margin: 0;
+                      }
+                      footer {
+                        padding: 46px 0 60px;
+                        border-top: 1px solid var(--line);
+                        background: rgba(0, 0, 0, 0.12);
+                        margin-top: 56px;
+                      }
+                      .footer-grid {
+                        display: grid;
+                        grid-template-columns: 1.2fr 0.8fr 0.8fr;
+                        gap: 24px;
+                      }
+                      .footer-copy,
+                      .footer-list {
+                        color: var(--muted);
+                      }
+                      .footer-list {
+                        display: grid;
+                        gap: 10px;
+                      }
+                      @media (max-width: 980px) {
+                        .grid-2,
+                        .form-row,
+                        .footer-grid {
+                          grid-template-columns: 1fr;
+                        }
+                        .nav-links {
+                          display: none;
+                        }
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <header class="topbar">
+                      <div class="container nav">
+                        <a class="brand" href="/">
+                          <span class="brand-mark">F</span>
+                          <span>Ferns Unique Solutions</span>
+                        </a>
+                        <nav class="nav-links">
+                          <a href="/">Home</a>
+                          <a href="/about.html">About</a>
+                          <a href="/contact.html">Contact</a>
+                          <a href="/disclaimer.html">Disclaimer</a>
+                        </nav>
+                        <div class="nav-actions">
+                          <a class="btn btn-secondary" href="tel:YOUR_PHONE"
+                            >Call</a
+                          >
+                          <a class="btn btn-primary" href="/contact.html"
+                            >Request Case Review</a
+                          >
+                        </div>
+                      </div>
+                    </header>
+
+                    <main>
+                      <section class="hero">
+                        <div class="container">
+                          <div class="eyebrow">
+                            Confidential intake • Clear expectations • No false
+                            promises
+                          </div>
+                          <h1>Request a Confidential Case Review</h1>
+                          <p class="lead">
+                            Share the available details of your case, including
+                            wallet addresses, transaction hashes, screenshots,
+                            and a summary of what happened. We will review the
+                            information and assess whether the case appears
+                            suitable for further analysis.
+                          </p>
+                        </div>
+                      </section>
+
+                      <section class="section">
+                        <div class="container grid-2">
+                          <div>
+                            <h2 class="section-title">Before you submit</h2>
+                            <p class="section-copy">
+                              The most useful details usually include
+                              transaction hashes, wallet addresses, the platform
+                              involved, screenshots, and a short timeline of
+                              events.
+                            </p>
+
+                            <div class="card">
+                              <h3>What to prepare</h3>
+                              <ul class="list-clean">
+                                <li>Wallet address or transaction hash</li>
+                                <li>
+                                  Website, app, exchange, or platform name
+                                </li>
+                                <li>Approximate amount involved</li>
+                                <li>Screenshots or communication records</li>
+                                <li>A short summary of what happened</li>
+                              </ul>
+                            </div>
+
+                            <div class="card" style="margin-top: 18px">
+                              <h3>Important notice</h3>
+                              <p class="section-copy" style="margin-bottom: 0">
+                                Ferns Unique Solutions provides independent
+                                blockchain analysis and case assessment
+                                services. We do not guarantee recovery outcomes
+                                and we do not ask for seed phrases or private
+                                keys.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div class="card">
+                            <form
+                              id="caseForm"
+                              action="/api/case-intake"
+                              method="post"
+                              novalidate
+                            >
+                              <div class="form-row">
+                                <div class="field">
+                                  <label for="name">Full name</label>
+                                  <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    placeholder="Your full name"
+                                  />
+                                </div>
+                                <div class="field">
+                                  <label for="email">Email address</label>
+                                  <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    placeholder="you@example.com"
+                                  />
+                                </div>
+                              </div>
+
+                              <div class="form-row">
+                                <div class="field">
+                                  <label for="phone">Phone number</label>
+                                  <input
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
+                                    placeholder="YOUR_PHONE"
+                                  />
+                                </div>
+                                <div class="field">
+                                  <label for="amount"
+                                    >Approximate amount involved</label
+                                  >
+                                  <select id="amount" name="amount">
+                                    <option value="">Select range</option>
+                                    <option>Under $1,000</option>
+                                    <option>$1,000 – $5,000</option>
+                                    <option>$5,000 – $10,000</option>
+                                    <option>$10,000+</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div class="field">
+                                <label for="platform"
+                                  >Platform, wallet, app, or exchange
+                                  involved</label
+                                >
+                                <input
+                                  id="platform"
+                                  name="platform"
+                                  type="text"
+                                  placeholder="Example: website, exchange, app, or Telegram handle"
+                                />
+                              </div>
+
+                              <div class="field">
+                                <label for="wallet"
+                                  >Wallet address or transaction hash</label
+                                >
+                                <input
+                                  id="wallet"
+                                  name="wallet"
+                                  type="text"
+                                  placeholder="Paste a wallet address or transaction hash if available"
+                                />
+                              </div>
+
+                              <div class="field">
+                                <label for="message">What happened?</label>
+                                <textarea
+                                  id="message"
+                                  name="message"
+                                  required
+                                  placeholder="Briefly explain what happened, when it happened, and any steps already taken."
+                                ></textarea>
+                              </div>
+
+                              <div class="field">
+                                <label
+                                  style="
+                                    display: flex;
+                                    align-items: flex-start;
+                                    gap: 10px;
+                                    font-weight: 600;
+                                  "
+                                >
+                                  <input
+                                    type="checkbox"
+                                    name="consent"
+                                    required
+                                    style="width: auto; margin-top: 3px"
+                                  />
+                                  <span
+                                    >I understand this request is for case
+                                    assessment and information review only, not
+                                    a guarantee of recovery.</span
+                                  >
+                                </label>
+                              </div>
+
+                              <button class="btn btn-primary" type="submit">
+                                Submit Case Review
+                              </button>
+                              <p class="help-text">
+                                Contact:
+                                <a
+                                  href="tel:YOUR_PHONE"
+                                  style="text-decoration: underline"
+                                  >YOUR_PHONE</a
+                                >
+                                •
+                                <a
+                                  href="mailto:YOUR_EMAIL"
+                                  style="text-decoration: underline"
+                                  >YOUR_EMAIL</a
+                                >
+                              </p>
+                              <p
+                                class="help-text"
+                                id="formStatus"
+                                aria-live="polite"
+                              ></p>
+                            </form>
+                          </div>
+                        </div>
+                      </section>
+                    </main>
+
+                    <footer>
+                      <div class="container footer-grid">
+                        <div>
+                          <div class="brand" style="margin-bottom: 12px">
+                            <span class="brand-mark">F</span>
+                            <span>Ferns Unique Solutions</span>
+                          </div>
+                          <p class="footer-copy" style="margin: 0 0 14px">
+                            Independent blockchain investigation and crypto scam
+                            case assessment focused on clarity, documentation,
+                            and realistic expectations.
+                          </p>
+                          <p class="footer-copy" style="margin: 0">
+                            <strong style="color: #fff">Email:</strong>
+                            YOUR_EMAIL<br />
+                            <strong style="color: #fff">Phone:</strong>
+                            YOUR_PHONE<br />
+                            <strong style="color: #fff">Contact:</strong>
+                            YOUR_NAME
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 style="margin-top: 0">Pages</h3>
+                          <div class="footer-list">
+                            <a href="/">Home</a>
+                            <a href="/about.html">About</a>
+                            <a href="/contact.html">Contact</a>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 style="margin-top: 0">Legal</h3>
+                          <div class="footer-list">
+                            <a href="/privacy-policy.html">Privacy Policy</a>
+                            <a href="/terms.html">Terms</a>
+                            <a href="/disclaimer.html">Disclaimer</a>
+                          </div>
+                        </div>
+                      </div>
+                    </footer>
+
+                    <script>
+                      const form = document.getElementById("caseForm");
+                      const status = document.getElementById("formStatus");
+
+                      form.addEventListener("submit", function (e) {
+                        e.preventDefault();
+
+                        // Validate required fields
+                        const required = form.querySelectorAll("[required]");
+                        let valid = true;
+
+                        required.forEach((field) => {
+                          if (field.type === "checkbox") {
+                            if (!field.checked) valid = false;
+                          } else if (!field.value.trim()) {
+                            valid = false;
+                          }
+                        });
+
+                        if (!valid) {
+                          status.textContent =
+                            "Please complete all required fields before submitting.";
+                          status.style.color = "#f7c85d";
+                          return;
+                        }
+
+                        // Combine fields into the message
+                        const amount =
+                          document.getElementById("amount").value ||
+                          "Not specified";
+                        const platform =
+                          document.getElementById("platform").value ||
+                          "Not specified";
+                        const wallet =
+                          document.getElementById("wallet").value ||
+                          "Not specified";
+                        const whatHappened =
+                          document.getElementById("message").value ||
+                          "Not specified";
+
+                        const combinedMessage = `
+Approximate amount involved: ${amount}
+Platform, wallet, app, or exchange involved: ${platform}
+Wallet address or transaction hash: ${wallet}
+What happened: ${whatHappened}
+      `.trim();
+
+                        document.getElementById("message").value =
+                          combinedMessage;
+
+                        // Prepare FormData
+                        const formData = new FormData(form);
+
+                        // Show loading state
+                        const submitBtn = form.querySelector(
+                          'button[type="submit"]',
+                        );
+                        const originalBtnText = submitBtn.innerHTML;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = "Sending...";
+
+                        // Send data to PHP backend
+                        fetch("proxy.php", {
+                          // <- use your proxy
+                          method: "POST",
+                          body: formData,
+                        })
+                          .then((response) => response.json())
+                          .then((data) => {
+                            if (data.success) {
+                              status.textContent = "Message sent successfully!";
+                              status.style.color = "#84b3ff";
+                              form.reset();
+                            } else {
+                              status.textContent = "Error: " + data.message;
+                              status.style.color = "#f77676";
+                            }
+                          })
+                          .catch((error) => {
+                            console.error("Error:", error);
+                            status.textContent =
+                              "Failed to send message. Please try again.";
+                            status.style.color = "#f77676";
+                          })
+                          .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                          });
+                      });
+                    </script>
+                  </body>
+                </html>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -61,7 +61,7 @@ export default function FAQ() {
         </div>
         <div
           style={{
-            fontFamily: "'Playfair Display',serif",
+            fontFamily: "'Cormorant Garamond',serif",
             fontSize: "clamp(26px,3.5vw,42px)",
             fontWeight: 900,
             color: "#fff",

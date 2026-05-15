@@ -1,0 +1,2090 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ABÁNITÚNRASE — A Lagos Styling Atelier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Syncopate:wght@400;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+      :root {
+        --black: #080808;
+        --white: #f5f3ef;
+        --off: #e8e5de;
+        --mid: #888580;
+        --rule: rgba(245, 243, 239, 0.12);
+        --rule-d: rgba(8, 8, 8, 0.15);
+        --serif: "Cormorant Garamond", Georgia, serif;
+        --mono: "DM Mono", monospace;
+        --caps: "Syncopate", sans-serif;
+        --film-w: 28px;
+      }
+
+      /* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--serif);
+        overflow-x: hidden;
+        cursor: crosshair;
+        -webkit-font-smoothing: antialiased;
+      }
+      ::selection {
+        background: var(--white);
+        color: var(--black);
+      }
+
+      /* Custom cursor */
+      .cursor {
+        width: 10px;
+        height: 10px;
+        border: 1.5px solid var(--white);
+        border-radius: 50%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.25s,
+          height 0.25s,
+          background 0.25s;
+        mix-blend-mode: difference;
+      }
+      .cursor.big {
+        width: 36px;
+        height: 36px;
+      }
+      .cursor-dot {
+        width: 3px;
+        height: 3px;
+        background: var(--white);
+        border-radius: 50%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference;
+      }
+
+      /* ═══════════════════════════════════════════
+   FILM GRAIN OVERLAY
+═══════════════════════════════════════════ */
+      .grain {
+        position: fixed;
+        inset: 0;
+        z-index: 9000;
+        pointer-events: none;
+        opacity: 0.055;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-size: 200px 200px;
+        animation: grain-shift 0.15s steps(2) infinite;
+      }
+      @keyframes grain-shift {
+        0% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(-3px, 2px);
+        }
+        50% {
+          transform: translate(2px, -1px);
+        }
+        75% {
+          transform: translate(-1px, 3px);
+        }
+        100% {
+          transform: translate(3px, -2px);
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   FILM STRIP EDGE — left & right
+═══════════════════════════════════════════ */
+      .film-strip {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: var(--film-w);
+        z-index: 8000;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 0;
+        overflow: hidden;
+      }
+      .film-strip.left {
+        left: 0;
+        background: #0a0a0a;
+        border-right: 1px solid #1a1a1a;
+      }
+      .film-strip.right {
+        right: 0;
+        background: #0a0a0a;
+        border-left: 1px solid #1a1a1a;
+      }
+      .film-perf {
+        flex-shrink: 0;
+        width: 14px;
+        height: 10px;
+        background: var(--black);
+        border: 1px solid #2a2a2a;
+        border-radius: 2px;
+        margin: 8px auto;
+      }
+
+      /* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+      nav {
+        position: fixed;
+        top: 0;
+        left: var(--film-w);
+        right: var(--film-w);
+        z-index: 7000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 40px;
+        background: linear-gradient(
+          to bottom,
+          rgba(8, 8, 8, 0.95),
+          transparent
+        );
+        backdrop-filter: blur(0px);
+      }
+      .nav-logo {
+        font-family: var(--caps);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.35em;
+        color: var(--white);
+        text-decoration: none;
+      }
+      .nav-links {
+        display: flex;
+        gap: 32px;
+        list-style: none;
+      }
+      .nav-links a {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--mid);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      .nav-links a:hover {
+        color: var(--white);
+      }
+      .nav-cta {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--black);
+        background: var(--white);
+        border: none;
+        padding: 10px 20px;
+        cursor: crosshair;
+        text-decoration: none;
+        transition:
+          background 0.3s,
+          color 0.3s;
+        display: block;
+      }
+      .nav-cta:hover {
+        background: var(--off);
+      }
+
+      /* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+      .hero {
+        min-height: 100vh;
+        padding: 0 calc(var(--film-w) + 40px);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-left {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-bottom: 80px;
+        padding-top: 140px;
+        position: relative;
+        z-index: 2;
+      }
+      .hero-eyebrow {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--mid);
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .hero-eyebrow::before {
+        content: "";
+        display: block;
+        width: 32px;
+        height: 1px;
+        background: var(--mid);
+      }
+      .hero-h1 {
+        font-family: var(--serif);
+        font-size: clamp(80px, 10vw, 160px);
+        font-weight: 300;
+        line-height: 0.88;
+        letter-spacing: -3px;
+        margin-bottom: 40px;
+      }
+      .hero-h1 em {
+        font-style: italic;
+        font-weight: 300;
+      }
+      .hero-tagline {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.65;
+        color: rgba(245, 243, 239, 0.6);
+        max-width: 400px;
+        margin-bottom: 48px;
+      }
+      .hero-btns {
+        display: flex;
+        gap: 12px;
+      }
+      .btn-primary {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        background: var(--white);
+        color: var(--black);
+        border: none;
+        padding: 14px 28px;
+        cursor: crosshair;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s;
+      }
+      .btn-primary:hover {
+        background: var(--off);
+      }
+      .btn-ghost {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        background: transparent;
+        color: var(--white);
+        border: 1px solid rgba(245, 243, 239, 0.3);
+        padding: 14px 28px;
+        cursor: crosshair;
+        text-decoration: none;
+        display: inline-block;
+        transition: border-color 0.3s;
+      }
+      .btn-ghost:hover {
+        border-color: var(--white);
+      }
+
+      .hero-right {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 80px 0;
+      }
+      .hero-img-frame {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+      }
+      .hero-img-frame::before {
+        content: "";
+        position: absolute;
+        top: -16px;
+        left: -16px;
+        right: 16px;
+        bottom: 16px;
+        border: 1px solid rgba(245, 243, 239, 0.15);
+        z-index: 0;
+      }
+      .hero-img-frame::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(8, 8, 8, 0.2) 0%,
+          transparent 50%
+        );
+        z-index: 2;
+        pointer-events: none;
+      }
+      .hero-img {
+        width: 100%;
+        aspect-ratio: 3/4;
+        object-fit: cover;
+        filter: grayscale(100%) contrast(1.08);
+        display: block;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-img-placeholder {
+        width: 100%;
+        aspect-ratio: 3/4;
+        background: #1a1a1a;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .hero-img-placeholder::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 20px,
+          rgba(255, 255, 255, 0.015) 20px,
+          rgba(255, 255, 255, 0.015) 21px
+        );
+      }
+      /* Exposure meter */
+      .exposure-meter {
+        position: absolute;
+        bottom: 30px;
+        left: -60px;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .exposure-track {
+        width: 80px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        position: relative;
+        border-radius: 2px;
+      }
+      .exposure-fill {
+        height: 100%;
+        width: 72%;
+        background: var(--white);
+        border-radius: 2px;
+        animation: exposure-pulse 3s ease-in-out infinite alternate;
+      }
+      @keyframes exposure-pulse {
+        0% {
+          width: 72%;
+        }
+        100% {
+          width: 85%;
+        }
+      }
+      .exposure-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.2em;
+        color: var(--mid);
+        text-transform: uppercase;
+      }
+      /* Film metadata */
+      .film-meta {
+        position: absolute;
+        top: 24px;
+        right: -8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 3;
+      }
+      .film-meta-item {
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.18em;
+        color: rgba(245, 243, 239, 0.35);
+        text-transform: uppercase;
+        text-align: right;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+      }
+      /* Shutter line */
+      .shutter-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--white);
+        transform: scaleX(0);
+        transform-origin: left;
+        z-index: 10;
+        animation: shutter-sweep 4s cubic-bezier(0.4, 0, 0.2, 1) infinite 1s;
+      }
+      @keyframes shutter-sweep {
+        0% {
+          transform: scaleX(0);
+          opacity: 1;
+        }
+        40% {
+          transform: scaleX(1);
+          opacity: 1;
+        }
+        41% {
+          transform: scaleX(1);
+          opacity: 0;
+        }
+        100% {
+          transform: scaleX(1);
+          opacity: 0;
+        }
+      }
+      /* Frame number badge */
+      .frame-no {
+        position: absolute;
+        bottom: 18px;
+        right: 18px;
+        z-index: 4;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        color: var(--white);
+        background: rgba(8, 8, 8, 0.7);
+        padding: 4px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      /* Hero footer strip */
+      .hero-footer {
+        position: absolute;
+        bottom: 0;
+        left: calc(var(--film-w) + 40px);
+        right: calc(var(--film-w) + 40px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 28px;
+        border-top: 1px solid var(--rule);
+        padding-top: 18px;
+      }
+      .hero-footer-item {
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.35);
+      }
+      .hero-footer-item span {
+        color: rgba(245, 243, 239, 0.7);
+      }
+
+      /* ═══════════════════════════════════════════
+   APERTURE SECTION DIVIDER
+═══════════════════════════════════════════ */
+      .aperture-divider {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 0 calc(var(--film-w) + 40px);
+        margin: 0;
+      }
+      .aper-line {
+        flex: 1;
+        height: 1px;
+        background: var(--rule);
+      }
+      .aper-icon {
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(245, 243, 239, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        flex-shrink: 0;
+        animation: aper-spin 20s linear infinite;
+      }
+      @keyframes aper-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .aper-icon::before,
+      .aper-icon::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 2px;
+        background: rgba(245, 243, 239, 0.4);
+        border-radius: 1px;
+      }
+      .aper-icon::before {
+        transform: rotate(-30deg) translateX(-2px);
+      }
+      .aper-icon::after {
+        transform: rotate(30deg) translateX(2px);
+      }
+      .aper-text {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.3);
+        white-space: nowrap;
+      }
+
+      /* ═══════════════════════════════════════════
+   ATELIER / FOUNDER
+═══════════════════════════════════════════ */
+      .atelier {
+        padding: 120px calc(var(--film-w) + 40px);
+        display: grid;
+        grid-template-columns: 0.85fr 1.15fr;
+        gap: 80px;
+        align-items: center;
+      }
+      .atelier-img-wrap {
+        position: relative;
+      }
+      .atelier-img-wrap::before {
+        content: attr(data-label);
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 3;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--white);
+        background: rgba(8, 8, 8, 0.65);
+        padding: 5px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .atelier-img-inner {
+        aspect-ratio: 4/5;
+        background: #141414;
+        overflow: hidden;
+        position: relative;
+      }
+      .atelier-img-inner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(100%) contrast(1.1);
+        transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .atelier-img-inner:hover img {
+        transform: scale(1.04);
+      }
+      /* Darkroom grid lines */
+      .atelier-img-inner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(245, 243, 239, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(245, 243, 239, 0.04) 1px, transparent 1px);
+        background-size: 20% 25%;
+      }
+      .atelier-corner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: rgba(245, 243, 239, 0.3);
+        border-style: solid;
+      }
+      .atelier-corner.tl {
+        top: -8px;
+        left: -8px;
+        border-width: 1px 0 0 1px;
+      }
+      .atelier-corner.tr {
+        top: -8px;
+        right: -8px;
+        border-width: 1px 1px 0 0;
+      }
+      .atelier-corner.bl {
+        bottom: -8px;
+        left: -8px;
+        border-width: 0 0 1px 1px;
+      }
+      .atelier-corner.br {
+        bottom: -8px;
+        right: -8px;
+        border-width: 0 1px 1px 0;
+      }
+      /* ISO strip */
+      .iso-strip {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 3;
+        background: rgba(8, 8, 8, 0.85);
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .iso-val {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        color: rgba(245, 243, 239, 0.5);
+        text-transform: uppercase;
+      }
+
+      .atelier-content {
+      }
+      .atelier-kicker {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--mid);
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .atelier-kicker::before {
+        content: "";
+        width: 28px;
+        height: 1px;
+        background: var(--mid);
+        display: block;
+      }
+      .atelier-quote {
+        font-family: var(--serif);
+        font-size: clamp(28px, 3.5vw, 44px);
+        font-weight: 300;
+        line-height: 1.25;
+        color: var(--white);
+        margin-bottom: 28px;
+        font-style: italic;
+      }
+      .atelier-body {
+        font-family: var(--serif);
+        font-size: 16px;
+        line-height: 1.85;
+        color: rgba(245, 243, 239, 0.6);
+        margin-bottom: 36px;
+      }
+      .atelier-sig {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-top: 24px;
+        border-top: 1px solid var(--rule);
+      }
+      .atelier-sig-name {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 24px;
+        color: var(--white);
+      }
+      .atelier-sig-rule {
+        width: 1px;
+        height: 18px;
+        background: var(--rule);
+      }
+      .atelier-sig-role {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--mid);
+      }
+
+      /* ═══════════════════════════════════════════
+   CATEGORIES — CONTACT SHEET GRID
+═══════════════════════════════════════════ */
+      .categories {
+        padding: 120px calc(var(--film-w) + 40px);
+        background: #0d0d0d;
+      }
+      .section-header {
+        margin-bottom: 64px;
+      }
+      .section-kicker {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--mid);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .section-kicker::before {
+        content: "";
+        width: 28px;
+        height: 1px;
+        background: var(--mid);
+        display: block;
+      }
+      .section-h2 {
+        font-family: var(--serif);
+        font-size: clamp(52px, 7vw, 100px);
+        font-weight: 300;
+        line-height: 0.9;
+        letter-spacing: -2px;
+        color: var(--white);
+      }
+      .section-h2 em {
+        font-style: italic;
+      }
+
+      /* Contact sheet */
+      .contact-sheet {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        border: 2px solid #1a1a1a;
+        background: #1a1a1a;
+      }
+      .contact-sheet-cell {
+        background: var(--black);
+        cursor: crosshair;
+        position: relative;
+        overflow: hidden;
+      }
+      .cs-inner {
+        padding: 40px 36px 36px;
+        min-height: 380px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        transition: background 0.5s;
+      }
+      .contact-sheet-cell:hover .cs-inner {
+        background: #111;
+      }
+      /* Contact sheet number watermark */
+      .cs-number {
+        position: absolute;
+        bottom: -20px;
+        right: -10px;
+        font-family: var(--serif);
+        font-size: 160px;
+        font-weight: 300;
+        line-height: 1;
+        letter-spacing: -8px;
+        color: rgba(245, 243, 239, 0.04);
+        pointer-events: none;
+        transition: color 0.5s;
+      }
+      .contact-sheet-cell:hover .cs-number {
+        color: rgba(245, 243, 239, 0.07);
+      }
+      .cs-frame-num {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.25);
+        margin-bottom: 32px;
+      }
+      .cs-title {
+        font-family: var(--serif);
+        font-size: 34px;
+        font-weight: 400;
+        color: var(--white);
+        line-height: 1.1;
+        margin-bottom: 6px;
+      }
+      .cs-yoruba {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 14px;
+        color: var(--mid);
+        margin-bottom: 20px;
+      }
+      .cs-desc {
+        font-family: var(--serif);
+        font-size: 14px;
+        line-height: 1.75;
+        color: rgba(245, 243, 239, 0.5);
+        flex: 1;
+        margin-bottom: 28px;
+      }
+      .cs-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 20px;
+        border-top: 1px solid var(--rule);
+      }
+      .cs-looks {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--white);
+      }
+      .cs-arrow {
+        font-family: var(--serif);
+        font-size: 22px;
+        color: var(--white);
+        transition: transform 0.4s;
+      }
+      .contact-sheet-cell:hover .cs-arrow {
+        transform: translateX(6px);
+      }
+
+      /* ═══════════════════════════════════════════
+   LOOKBOOK — MAGAZINE GRID
+═══════════════════════════════════════════ */
+      .lookbook {
+        padding: 120px calc(var(--film-w) + 40px);
+      }
+      .lookbook-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: end;
+        margin-bottom: 64px;
+      }
+      .lb-h2 {
+        font-family: var(--serif);
+        font-size: clamp(52px, 7vw, 96px);
+        font-weight: 300;
+        line-height: 0.9;
+        letter-spacing: -2px;
+        color: var(--white);
+      }
+      .lb-h2 em {
+        font-style: italic;
+      }
+      .lb-sub {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 17px;
+        line-height: 1.65;
+        color: rgba(245, 243, 239, 0.5);
+        align-self: end;
+        padding-bottom: 8px;
+      }
+      /* Magazine layout grid */
+      .magazine-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-template-rows: auto;
+        gap: 3px;
+      }
+      .mag-card {
+        position: relative;
+        overflow: hidden;
+        background: #111;
+        cursor: crosshair;
+      }
+      .mag-card-1 {
+        grid-column: span 7;
+        grid-row: span 2;
+      }
+      .mag-card-2 {
+        grid-column: span 5;
+        aspect-ratio: 4/3;
+      }
+      .mag-card-3 {
+        grid-column: span 5;
+        aspect-ratio: 4/3;
+      }
+      .mag-card-4 {
+        grid-column: span 4;
+        aspect-ratio: 3/4;
+      }
+      .mag-card-5 {
+        grid-column: span 4;
+        aspect-ratio: 3/4;
+      }
+      .mag-card-6 {
+        grid-column: span 4;
+        aspect-ratio: 3/4;
+      }
+      .mag-inner {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      /* Dark pattern placeholder image */
+      .ph {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(100%) contrast(1.1);
+        transition:
+          transform 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+          filter 0.5s;
+      }
+      .mag-card:hover .ph {
+        transform: scale(1.06);
+        filter: grayscale(100%) contrast(1.18);
+      }
+      /* Photo texture placeholder */
+      .ph-bg {
+        width: 100%;
+        height: 100%;
+        background: #181818;
+        position: relative;
+        overflow: hidden;
+        transition: background 0.5s;
+      }
+      .ph-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse at 30% 40%,
+            rgba(255, 255, 255, 0.05) 0%,
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            -55deg,
+            transparent,
+            transparent 18px,
+            rgba(255, 255, 255, 0.012) 18px,
+            rgba(255, 255, 255, 0.012) 19px
+          );
+      }
+      .mag-card:hover .ph-bg {
+        background: #1e1e1e;
+      }
+      .mag-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(8, 8, 8, 0.8) 0%,
+          rgba(8, 8, 8, 0.1) 55%,
+          transparent 100%
+        );
+        transition: opacity 0.5s;
+      }
+      .mag-card:hover .mag-overlay {
+        opacity: 0.9;
+      }
+      .mag-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 18px 20px;
+      }
+      .mag-vol {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.55);
+        margin-bottom: 4px;
+      }
+      .mag-title {
+        font-family: var(--serif);
+        color: var(--white);
+        line-height: 1.15;
+        margin-bottom: 4px;
+      }
+      .mag-card-1 .mag-title {
+        font-size: 32px;
+      }
+      .mag-card-2 .mag-title,
+      .mag-card-3 .mag-title {
+        font-size: 20px;
+      }
+      .mag-card-4 .mag-title,
+      .mag-card-5 .mag-title,
+      .mag-card-6 .mag-title {
+        font-size: 18px;
+      }
+      .mag-sub {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 12px;
+        color: rgba(245, 243, 239, 0.55);
+      }
+      .mag-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 2;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        background: rgba(8, 8, 8, 0.72);
+        color: rgba(245, 243, 239, 0.8);
+        padding: 5px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      /* F-stop indicator */
+      .fstop {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 2;
+        font-family: var(--mono);
+        font-size: 7.5px;
+        letter-spacing: 0.2em;
+        color: rgba(245, 243, 239, 0.4);
+        text-transform: uppercase;
+      }
+      /* Read more hover */
+      .mag-read {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--white);
+        margin-top: 10px;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+          opacity 0.4s,
+          transform 0.4s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mag-read::after {
+        content: "→";
+      }
+      .mag-card:hover .mag-read {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ═══════════════════════════════════════════
+   PRICING — DARKROOM TABLE
+═══════════════════════════════════════════ */
+      .pricing {
+        padding: 120px calc(var(--film-w) + 40px);
+        background: #0a0a0a;
+      }
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 0;
+        border-top: 1px solid var(--rule);
+        margin-top: 64px;
+      }
+      .pricing-cat-label {
+        padding: 48px 0 48px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .pricing-cat-num {
+        font-family: var(--serif);
+        font-size: 80px;
+        font-weight: 300;
+        color: rgba(245, 243, 239, 0.12);
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+      .pricing-cat-name {
+        font-family: var(--serif);
+        font-size: 22px;
+        color: var(--white);
+        margin-bottom: 4px;
+      }
+      .pricing-cat-yor {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 12px;
+        color: var(--mid);
+      }
+      .pricing-rows {
+        border-bottom: 1px solid var(--rule);
+      }
+      .pricing-row {
+        display: grid;
+        grid-template-columns: 1.3fr 2fr 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 20px 32px;
+        border-bottom: 1px solid rgba(245, 243, 239, 0.05);
+        transition: background 0.3s;
+      }
+      .pricing-row:last-child {
+        border-bottom: none;
+      }
+      .pricing-row:hover {
+        background: rgba(245, 243, 239, 0.025);
+      }
+      .pr-name {
+        font-family: var(--serif);
+        font-size: 18px;
+        color: var(--white);
+      }
+      .pr-tier {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.2em;
+        color: var(--mid);
+        margin-left: 8px;
+        vertical-align: super;
+      }
+      .pr-includes {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.05em;
+        color: rgba(245, 243, 239, 0.4);
+        line-height: 1.6;
+      }
+      .pr-price {
+        font-family: var(--serif);
+        font-size: 22px;
+        color: var(--white);
+        text-align: right;
+      }
+      /* Booking note */
+      .booking-note {
+        margin-top: 48px;
+        padding: 28px 32px;
+        border: 1px solid var(--rule);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+      .bn-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--mid);
+        margin-bottom: 10px;
+      }
+      .bn-text {
+        font-family: var(--serif);
+        font-size: 14px;
+        line-height: 1.75;
+        color: rgba(245, 243, 239, 0.55);
+      }
+      .bn-text strong {
+        color: var(--white);
+        font-weight: 400;
+      }
+
+      /* ═══════════════════════════════════════════
+   CONTACT — DARKROOM
+═══════════════════════════════════════════ */
+      .contact {
+        padding: 120px calc(var(--film-w) + 40px) 80px;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Red darkroom safelight tint */
+      .contact::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 20% 50%,
+          rgba(180, 30, 20, 0.04) 0%,
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 80px;
+        margin-bottom: 80px;
+      }
+      .contact-h2 {
+        font-family: var(--serif);
+        font-size: clamp(44px, 6vw, 86px);
+        font-weight: 300;
+        line-height: 0.95;
+        letter-spacing: -2px;
+        color: var(--white);
+        margin-bottom: 24px;
+      }
+      .contact-h2 em {
+        font-style: italic;
+      }
+      .contact-sub {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 17px;
+        color: rgba(245, 243, 239, 0.5);
+        line-height: 1.65;
+        max-width: 440px;
+      }
+      .contact-details {
+        padding-top: 16px;
+      }
+      .contact-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 0;
+        border-bottom: 1px solid rgba(245, 243, 239, 0.07);
+      }
+      .contact-item:last-child {
+        border-bottom: none;
+      }
+      .ci-label {
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.3);
+      }
+      .ci-val {
+        font-family: var(--serif);
+        font-size: 16px;
+        color: var(--white);
+      }
+      /* Footer */
+      .footer-bar {
+        padding-top: 28px;
+        border-top: 1px solid var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-logo {
+        font-family: var(--caps);
+        font-size: 9px;
+        letter-spacing: 0.38em;
+        color: var(--white);
+      }
+      .footer-copy {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.25);
+      }
+      /* Viewfinder focus brackets */
+      .focus-bracket {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        border-color: rgba(245, 243, 239, 0.15);
+        border-style: solid;
+        pointer-events: none;
+      }
+      .focus-bracket.tl {
+        top: 40px;
+        left: calc(var(--film-w) + 40px);
+        border-width: 1px 0 0 1px;
+      }
+      .focus-bracket.tr {
+        top: 40px;
+        right: calc(var(--film-w) + 40px);
+        border-width: 1px 1px 0 0;
+      }
+      .focus-bracket.bl {
+        bottom: 40px;
+        left: calc(var(--film-w) + 40px);
+        border-width: 0 0 1px 1px;
+      }
+      .focus-bracket.br {
+        bottom: 40px;
+        right: calc(var(--film-w) + 40px);
+        border-width: 0 1px 1px 0;
+      }
+
+      /* ═══════════════════════════════════════════
+   SCROLL FADE-IN
+═══════════════════════════════════════════ */
+      .fade-up {
+        opacity: 0;
+        transform: translateY(32px);
+        transition:
+          opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ═══════════════════════════════════════════
+   STRIP LABEL — horizontal scrolling text
+═══════════════════════════════════════════ */
+      .strip-label {
+        overflow: hidden;
+        padding: 14px 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        background: var(--black);
+        white-space: nowrap;
+      }
+      .strip-inner {
+        display: inline-block;
+        animation: strip-scroll 20s linear infinite;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: rgba(245, 243, 239, 0.2);
+      }
+      @keyframes strip-scroll {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* ═══════════════════════════════════════════
+   RESPONSIVE TRIMMING
+═══════════════════════════════════════════ */
+      @media (max-width: 900px) {
+        :root {
+          --film-w: 0px;
+        }
+        .film-strip {
+          display: none;
+        }
+        .hero {
+          grid-template-columns: 1fr;
+          padding: 0 24px;
+        }
+        .hero-right {
+          display: none;
+        }
+        .atelier {
+          grid-template-columns: 1fr;
+          gap: 48px;
+          padding: 80px 24px;
+        }
+        .contact-sheet {
+          grid-template-columns: 1fr;
+        }
+        .lookbook {
+          padding: 80px 24px;
+        }
+        .lookbook-header {
+          grid-template-columns: 1fr;
+        }
+        .magazine-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .mag-card-1 {
+          grid-column: span 2;
+        }
+        .mag-card-2,
+        .mag-card-3 {
+          grid-column: span 1;
+          aspect-ratio: 3/4;
+        }
+        .mag-card-4,
+        .mag-card-5,
+        .mag-card-6 {
+          grid-column: span 1;
+        }
+        .categories,
+        .pricing,
+        .contact {
+          padding: 80px 24px;
+        }
+        .pricing-grid {
+          grid-template-columns: 1fr;
+        }
+        .booking-note,
+        .contact-grid {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        nav {
+          padding: 18px 24px;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- GRAIN OVERLAY -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- CUSTOM CURSOR -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursor-dot"></div>
+
+    <!-- FILM STRIPS -->
+    <div class="film-strip left" aria-hidden="true" id="film-l"></div>
+    <div class="film-strip right" aria-hidden="true" id="film-r"></div>
+
+    <!-- ═══ NAV ═══ -->
+    <nav>
+      <a href="#" class="nav-logo">ABÁNITÚNRASE</a>
+      <ul class="nav-links">
+        <li><a href="#atelier">Atelier</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#lookbook">Lookbook</a></li>
+        <li><a href="#rates">Rates</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="nav-cta">Book a Fitting</a>
+    </nav>
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero">
+      <div class="hero-left fade-up">
+        <div class="hero-eyebrow">Est. Lagos · A Styling Atelier · SS 2026</div>
+        <h1 class="hero-h1">
+          Dressed<br />
+          with<br />
+          <em>intention.</em>
+        </h1>
+        <p class="hero-tagline">
+          A Lagos-based styling atelier for brides, grooms, occasions, and the
+          global traveller. Looks that stand out, stay clean, and remain
+          timeless.
+        </p>
+        <div class="hero-btns">
+          <a href="#lookbook" class="btn-primary">Enter the Lookbook →</a>
+          <a href="#rates" class="btn-ghost">Investment</a>
+        </div>
+      </div>
+
+      <div class="hero-right fade-up" style="transition-delay: 0.15s">
+        <div class="hero-img-frame">
+          <div class="shutter-line"></div>
+          <div class="hero-img-placeholder">
+            <!-- Replace with: <img src="/sacss.jpg" class="hero-img" alt="Editorial styling" /> -->
+            <div
+              style="
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 0.25em;
+                color: rgba(245, 243, 239, 0.15);
+                text-align: center;
+                line-height: 2;
+                text-transform: uppercase;
+              "
+            >
+              /sacss.jpg<br />
+              <span
+                style="
+                  font-size: 7px;
+                  letter-spacing: 0.4em;
+                  color: rgba(245, 243, 239, 0.07);
+                "
+                >Place hero image here</span
+              >
+            </div>
+          </div>
+          <div class="frame-no">№ 01 / 15</div>
+          <div class="exposure-meter">
+            <span class="exposure-label">EV</span>
+            <div class="exposure-track"><div class="exposure-fill"></div></div>
+            <span class="exposure-label">+0.7</span>
+          </div>
+          <div class="film-meta">
+            <span class="film-meta-item">ISO 400</span>
+            <span class="film-meta-item">f/1.8</span>
+            <span class="film-meta-item">1/250s</span>
+            <span class="film-meta-item">Lagos · 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-footer">
+        <span class="hero-footer-item"
+          >Category <span>Bridal · Occasion · Travel</span></span
+        >
+        <span class="hero-footer-item"
+          >Film <span>Ilford HP5 · 35mm</span></span
+        >
+        <span class="hero-footer-item"
+          >Director <span>Fiponmileoluwa</span></span
+        >
+        <span class="hero-footer-item">Studio <span>Lagos, Nigeria</span></span>
+      </div>
+    </section>
+
+    <!-- SCROLLING STRIP -->
+    <div class="strip-label" aria-hidden="true">
+      <div class="strip-inner">
+        ABÁNITÚNRASE &nbsp;·&nbsp; BRIDAL STYLING &nbsp;·&nbsp; OCCASION
+        &nbsp;·&nbsp; KÁJÁYELO TRAVEL &nbsp;·&nbsp; LAGOS ATELIER &nbsp;·&nbsp;
+        EST. 2026 &nbsp;·&nbsp; ABÁNITÚNRASE &nbsp;·&nbsp; BRIDAL STYLING
+        &nbsp;·&nbsp; OCCASION &nbsp;·&nbsp; KÁJÁYELO TRAVEL &nbsp;·&nbsp; LAGOS
+        ATELIER &nbsp;·&nbsp; EST. 2026 &nbsp;·&nbsp; ABÁNITÚNRASE &nbsp;·&nbsp;
+        BRIDAL STYLING &nbsp;·&nbsp; OCCASION &nbsp;·&nbsp; KÁJÁYELO TRAVEL
+        &nbsp;·&nbsp; LAGOS ATELIER &nbsp;·&nbsp; EST. 2026 &nbsp;·&nbsp;
+      </div>
+    </div>
+
+    <!-- ═══ ATELIER ═══ -->
+    <section class="atelier" id="atelier">
+      <div class="atelier-img-wrap" data-label="Creative Director">
+        <div class="atelier-img-inner">
+          <!-- Replace with: <img src="/gbos.jpg" alt="Fiponmileoluwa" /> -->
+          <div
+            class="ph-bg"
+            style="
+              aspect-ratio: 4/5;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <span
+              style="
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 0.3em;
+                color: rgba(245, 243, 239, 0.12);
+                text-transform: uppercase;
+              "
+              >/gbos.jpg</span
+            >
+          </div>
+        </div>
+        <div class="iso-strip">
+          <span class="iso-val">ISO 800</span>
+          <span class="iso-val">f/2.2 · 1/160s</span>
+          <span class="iso-val">Fiponmileoluwa</span>
+        </div>
+        <div class="atelier-corner tl"></div>
+        <div class="atelier-corner tr"></div>
+        <div class="atelier-corner bl"></div>
+        <div class="atelier-corner br"></div>
+      </div>
+
+      <div class="atelier-content fade-up">
+        <div class="atelier-kicker">A Note from the Atelier</div>
+        <blockquote class="atelier-quote">
+          "Iyawoooo, Oko Iyawoooo! <em>Sé dáadáa lè wà?</em>"
+        </blockquote>
+        <p class="atelier-body">
+          My name is Fiponmileoluwa — most people call me Fifii. I'm the
+          creative director of Abánitúnrase. Lawyer by training, stylist by
+          calling. Mostly stylist — I've been pulling looks under the radar
+          since university, and the moment I was called to the Nigerian Bar I
+          knew exactly what I wanted to do with the rest of my life.
+        </p>
+        <p class="atelier-body">
+          We built this house with one passion: that our brides, grooms, and
+          clients arrive in looks that
+          <em>stand out, stay clean, and remain timeless</em>. Òkó iyàwó, iyàwó
+          — I look forward to working with you.
+        </p>
+        <div class="atelier-sig">
+          <span class="atelier-sig-name">Fiponmileoluwa</span>
+          <div class="atelier-sig-rule"></div>
+          <span class="atelier-sig-role">Creative Director</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- APERTURE DIVIDER -->
+    <div class="aperture-divider">
+      <div class="aper-line"></div>
+      <div class="aper-icon" aria-hidden="true"></div>
+      <span class="aper-text">Three Houses · One Atelier</span>
+      <div class="aper-icon" aria-hidden="true"></div>
+      <div class="aper-line"></div>
+    </div>
+
+    <!-- ═══ CATEGORIES ═══ -->
+    <section class="categories" id="categories">
+      <div class="section-header fade-up">
+        <div class="section-kicker">Three Houses, One Atelier</div>
+        <h2 class="section-h2">What we <em>do</em></h2>
+      </div>
+
+      <div class="contact-sheet">
+        <!-- BRIDAL -->
+        <div class="contact-sheet-cell">
+          <div class="cs-inner">
+            <div class="cs-number">01</div>
+            <div class="cs-frame-num">Frame 01 · Bridal</div>
+            <h3 class="cs-title">The Bridal Suite</h3>
+            <p class="cs-yoruba">Ìyàwó & Oko Ìyàwó</p>
+            <p class="cs-desc">
+              From court vows to white wedding to the after-party — every
+              chapter dressed with intention. Our brides do not just wear; they
+              arrive.
+            </p>
+            <div class="cs-footer">
+              <span class="cs-looks">06 Looks</span>
+              <span class="cs-arrow">→</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- OCCASION -->
+        <div class="contact-sheet-cell">
+          <div class="cs-inner">
+            <div class="cs-number">02</div>
+            <div class="cs-frame-num">Frame 02 · Occasion</div>
+            <h3 class="cs-title">Occasion Styling</h3>
+            <p class="cs-yoruba">Ìgbà Ayẹyẹ</p>
+            <p class="cs-desc">
+              For the days that matter outside the aisle. Birthdays, red
+              carpets, family portraits, headshots — the party where everyone
+              will be looking.
+            </p>
+            <div class="cs-footer">
+              <span class="cs-looks">05 Looks</span>
+              <span class="cs-arrow">→</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRAVEL -->
+        <div class="contact-sheet-cell">
+          <div class="cs-inner">
+            <div class="cs-number">03</div>
+            <div class="cs-frame-num">Frame 03 · Travel</div>
+            <h3 class="cs-title">Kájáyelo</h3>
+            <p class="cs-yoruba">The Travel Styling Experience</p>
+            <p class="cs-desc">
+              We handle the aesthetics; you live the moments. Destination-based
+              wardrobe curation with a physical Polaroid Guide to your trip.
+            </p>
+            <div class="cs-footer">
+              <span class="cs-looks">04 Looks</span>
+              <span class="cs-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ LOOKBOOK ═══ -->
+    <section class="lookbook" id="lookbook">
+      <div class="lookbook-header fade-up">
+        <h2 class="lb-h2">Every look,<br /><em>a story.</em></h2>
+        <p class="lb-sub">
+          Each photograph is a chapter. Tap any look to read the story behind
+          the styling — what we sourced, what we tossed, who walked into the
+          room.
+        </p>
+      </div>
+
+      <div class="magazine-grid">
+        <!-- FEATURE -->
+        <div class="mag-card mag-card-1">
+          <div class="mag-inner">
+            <div class="ph-bg" style="height: 100%; min-height: 480px"></div>
+            <!-- Replace: <img src="/sacss.jpg" class="ph" alt="The Civil Vow" /> -->
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 01 · Bridal</div>
+          <div class="fstop">f/1.4 · ISO 200</div>
+          <div class="mag-info">
+            <div class="mag-vol">Court Wedding · Lagos</div>
+            <div class="mag-title">The Civil Vow</div>
+            <div class="mag-sub">
+              An ivory two-piece. A single white bloom. The quiet beginning of
+              forever.
+            </div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="mag-card mag-card-2">
+          <div class="mag-inner">
+            <div class="ph-bg" style="height: 100%; min-height: 200px"></div>
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 02 · Bridal</div>
+          <div class="fstop">f/2.8</div>
+          <div class="mag-info">
+            <div class="mag-vol">Engagement · Ibadan</div>
+            <div class="mag-title">Aso Òkè, Re-Read</div>
+            <div class="mag-sub">Heritage worn as architecture.</div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="mag-card mag-card-3">
+          <div class="mag-inner">
+            <div
+              class="ph-bg"
+              style="height: 100%; min-height: 200px; background: #151515"
+            ></div>
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 07 · Occasion</div>
+          <div class="fstop">f/1.8</div>
+          <div class="mag-info">
+            <div class="mag-vol">Party Guest · Lekki</div>
+            <div class="mag-title">The Owambe Arrival</div>
+            <div class="mag-sub">
+              Aso-ebi, but the version everyone will ask about.
+            </div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="mag-card mag-card-4">
+          <div class="mag-inner">
+            <div
+              class="ph-bg"
+              style="height: 100%; min-height: 300px; background: #121212"
+            ></div>
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 12 · Travel</div>
+          <div class="fstop">f/4</div>
+          <div class="mag-info">
+            <div class="mag-vol">Cape Town · 48 Hours</div>
+            <div class="mag-title">The Weekend Escape</div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+
+        <!-- CARD 5 -->
+        <div class="mag-card mag-card-5">
+          <div class="mag-inner">
+            <div
+              class="ph-bg"
+              style="height: 100%; min-height: 300px; background: #161616"
+            ></div>
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 10 · Occasion</div>
+          <div class="fstop">f/2</div>
+          <div class="mag-info">
+            <div class="mag-vol">AMVCA · Red Carpet</div>
+            <div class="mag-title">Kábosagbo</div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+
+        <!-- CARD 6 -->
+        <div class="mag-card mag-card-6">
+          <div class="mag-inner">
+            <div
+              class="ph-bg"
+              style="height: 100%; min-height: 300px; background: #131313"
+            ></div>
+          </div>
+          <div class="mag-overlay"></div>
+          <div class="mag-badge">Look 13 · Travel</div>
+          <div class="fstop">f/5.6</div>
+          <div class="mag-info">
+            <div class="mag-vol">Marrakech · 4 Looks</div>
+            <div class="mag-title">The Medina Edit</div>
+            <div class="mag-read">Read the story</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCROLLING STRIP 2 -->
+    <div class="strip-label" aria-hidden="true">
+      <div class="strip-inner">
+        THE CIVIL VOW &nbsp;·&nbsp; ASO ÒKÈ RE-READ &nbsp;·&nbsp; WHITE BUT MAKE
+        IT HERS &nbsp;·&nbsp; AFTER-PARTY RESET &nbsp;·&nbsp; MOTHER OF THE
+        BRIDE &nbsp;·&nbsp; THE OWAMBE ARRIVAL &nbsp;·&nbsp; RED CARPET AMVCA
+        &nbsp;·&nbsp; CAPE TOWN ESCAPE &nbsp;·&nbsp; THE MEDINA EDIT
+        &nbsp;·&nbsp; GRAND TOUR ITALY &nbsp;·&nbsp; MAURITIUS HONEYMOON
+        &nbsp;·&nbsp; THE CIVIL VOW &nbsp;·&nbsp; ASO ÒKÈ RE-READ &nbsp;·&nbsp;
+        WHITE BUT MAKE IT HERS &nbsp;·&nbsp; AFTER-PARTY RESET &nbsp;·&nbsp;
+        MOTHER OF THE BRIDE &nbsp;·&nbsp; THE OWAMBE ARRIVAL &nbsp;·&nbsp; RED
+        CARPET AMVCA &nbsp;·&nbsp; CAPE TOWN ESCAPE &nbsp;·&nbsp; THE MEDINA
+        EDIT &nbsp;·&nbsp; GRAND TOUR ITALY &nbsp;·&nbsp; MAURITIUS HONEYMOON
+        &nbsp;·&nbsp;
+      </div>
+    </div>
+
+    <!-- ═══ PRICING ═══ -->
+    <section class="pricing" id="rates">
+      <div class="section-header fade-up">
+        <div class="section-kicker">Investment</div>
+        <h2 class="section-h2">The Rate <em>Cards</em></h2>
+      </div>
+
+      <!-- BRIDAL -->
+      <div class="pricing-grid fade-up">
+        <div class="pricing-cat-label">
+          <div class="pricing-cat-num">01</div>
+          <div class="pricing-cat-name">The Bridal Suite</div>
+          <div class="pricing-cat-yor">Ìyàwó & Oko Ìyàwó</div>
+        </div>
+        <div class="pricing-rows">
+          <div class="pricing-row">
+            <div class="pr-name">Aso Àsìkò<span class="pr-tier">IV</span></div>
+            <div class="pr-includes">Engagement · White Wedding</div>
+            <div class="pr-price">₦2,500,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">Aso Ìgbáfé<span class="pr-tier">V</span></div>
+            <div class="pr-includes">
+              Engagement · White Wedding · After Party
+            </div>
+            <div class="pr-price">₦3,000,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">Aso Ojúdé<span class="pr-tier">VII</span></div>
+            <div class="pr-includes">
+              Pre-Wedding · Engagement · White · After Party
+            </div>
+            <div class="pr-price">₦4,000,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">
+              Aso Àrìyá<span class="pr-tier">VIII</span>
+            </div>
+            <div class="pr-includes">
+              Pre-Wedding · Civil · Engagement · White · After Party
+            </div>
+            <div class="pr-price">₦4,800,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OCCASION -->
+      <div class="pricing-grid fade-up">
+        <div class="pricing-cat-label">
+          <div class="pricing-cat-num">02</div>
+          <div class="pricing-cat-name">Occasion Styling</div>
+          <div class="pricing-cat-yor">Ìgbà Ayẹyẹ</div>
+        </div>
+        <div class="pricing-rows">
+          <div class="pricing-row">
+            <div class="pr-name">Káseré Jáde</div>
+            <div class="pr-includes">
+              Party guest · Special outing · One look
+            </div>
+            <div class="pr-price">₦300,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">Káyáworán</div>
+            <div class="pr-includes">
+              Birthday · Corporate · Head-shot · One look
+            </div>
+            <div class="pr-price">₦500,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">Káànkò</div>
+            <div class="pr-includes">
+              Family photoshoot up to 3 people · One look
+            </div>
+            <div class="pr-price">₦1,000,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">Kábosagbo</div>
+            <div class="pr-includes">
+              Red carpet · Premieres · Themed celebrity events
+            </div>
+            <div class="pr-price">₦1,000,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRAVEL -->
+      <div class="pricing-grid fade-up">
+        <div class="pricing-cat-label">
+          <div class="pricing-cat-num">03</div>
+          <div class="pricing-cat-name">Kájáyelo</div>
+          <div class="pricing-cat-yor">Travel Styling</div>
+        </div>
+        <div class="pricing-rows">
+          <div class="pricing-row">
+            <div class="pr-name">The Weekend Escape</div>
+            <div class="pr-includes">3 Looks</div>
+            <div class="pr-price">₦500,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">The Mid-Week Venture</div>
+            <div class="pr-includes">4 Looks</div>
+            <div class="pr-price">₦700,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">The Grand Tour</div>
+            <div class="pr-includes">5 Looks</div>
+            <div class="pr-price">₦900,000</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pr-name">The Elite Collection</div>
+            <div class="pr-includes">6 Looks</div>
+            <div class="pr-price">₦1,000,000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-note fade-up">
+        <div>
+          <div class="bn-label">Consultation</div>
+          <div class="bn-text">
+            General Consultation — <strong>₦100,000</strong><br />
+            Couple Consultation — <strong>₦150,000</strong><br />
+            <em>Consultation fee is not deductible upon booking.</em>
+          </div>
+        </div>
+        <div>
+          <div class="bn-label">Booking Policy</div>
+          <div class="bn-text">
+            <strong>80%</strong> commitment fee on booking. Balance of
+            <strong>20%</strong> due one week before the event. All single
+            packages cover one outfit and one person. Travel bookings require at
+            least 2 weeks notice before departure.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONTACT ═══ -->
+    <section class="contact" id="contact">
+      <div class="focus-bracket tl"></div>
+      <div class="focus-bracket tr"></div>
+      <div class="focus-bracket bl"></div>
+      <div class="focus-bracket br"></div>
+
+      <div class="contact-grid">
+        <div class="fade-up">
+          <div class="section-kicker">Begin Here</div>
+          <h2 class="contact-h2">
+            We understand the <em>essence</em> of your project.
+          </h2>
+          <p class="contact-sub">
+            And there's nothing we'll love more than to work on it with you.
+            Every great look begins with a conversation.
+          </p>
+        </div>
+
+        <div class="contact-details fade-up" style="transition-delay: 0.15s">
+          <div class="contact-item">
+            <span class="ci-label">Telephone</span>
+            <span class="ci-val">+234 812 628 6593</span>
+          </div>
+          <div class="contact-item">
+            <span class="ci-label">Email</span>
+            <span class="ci-val">Officialabanitunrase@gmail.com</span>
+          </div>
+          <div class="contact-item">
+            <span class="ci-label">Instagram</span>
+            <span class="ci-val">@Abanitunrase</span>
+          </div>
+          <div class="contact-item">
+            <span class="ci-label">Atelier</span>
+            <span class="ci-val">Lagos, Nigeria</span>
+          </div>
+          <div style="margin-top: 28px">
+            <a href="mailto:Officialabanitunrase@gmail.com" class="btn-primary"
+              >Begin a Booking →</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bar">
+        <span class="footer-logo">ABÁNITÚNRASE</span>
+        <span class="footer-copy"
+          >© 2026 · A Lagos Atelier · All Rights Reserved</span
+        >
+        <span class="footer-copy">Ilford HP5 · 35mm · Black & White</span>
+      </div>
+    </section>
+
+    <script>
+      /* ── Film perforations ── */
+      function buildFilmStrip(el) {
+        const h = window.innerHeight;
+        const count = Math.ceil(h / 26) + 4;
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement("div");
+          p.className = "film-perf";
+          el.appendChild(p);
+        }
+      }
+      buildFilmStrip(document.getElementById("film-l"));
+      buildFilmStrip(document.getElementById("film-r"));
+
+      /* ── Custom cursor ── */
+      const cur = document.getElementById("cursor");
+      const dot = document.getElementById("cursor-dot");
+      let mx = 0,
+        my = 0,
+        cx = 0,
+        cy = 0;
+      document.addEventListener("mousemove", (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+      });
+      function animCursor() {
+        cx += (mx - cx) * 0.12;
+        cy += (my - cy) * 0.12;
+        cur.style.left = cx + "px";
+        cur.style.top = cy + "px";
+        dot.style.left = mx + "px";
+        dot.style.top = my + "px";
+        requestAnimationFrame(animCursor);
+      }
+      animCursor();
+      document
+        .querySelectorAll("a,button,.mag-card,.contact-sheet-cell")
+        .forEach((el) => {
+          el.addEventListener("mouseenter", () => cur.classList.add("big"));
+          el.addEventListener("mouseleave", () => cur.classList.remove("big"));
+        });
+
+      /* ── Scroll fade-up ── */
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document
+        .querySelectorAll(".fade-up")
+        .forEach((el) => observer.observe(el));
+
+      /* ── Stagger delays for repeated elements ── */
+      document.querySelectorAll(".pricing-row").forEach((el, i) => {
+        el.style.transitionDelay = i * 40 + "ms";
+      });
+    </script>
+  </body>
+</html>
