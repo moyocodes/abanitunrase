@@ -171,6 +171,15 @@ export default function App() {
           lkSection.getBoundingClientRect().bottom > 0
         : false;
       setNavHidden(inHero || inLkSection);
+
+      // sticky bar: show while rates is on screen and gallery hasn't slid over it
+      const ratesEl = document.getElementById("rates");
+      const galleryEl = document.getElementById("gallery-section");
+      if (ratesEl && galleryEl) {
+        const rr = ratesEl.getBoundingClientRect();
+        const gr = galleryEl.getBoundingClientRect();
+        setRatesVisible(rr.top < window.innerHeight && gr.top > 0);
+      }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
@@ -219,17 +228,6 @@ export default function App() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Rates section visibility (for sticky bar) ── */
-  useEffect(() => {
-    const ratesEl = document.getElementById("rates");
-    if (!ratesEl) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setRatesVisible(entry.isIntersecting),
-      { threshold: 0.05 },
-    );
-    obs.observe(ratesEl);
-    return () => obs.disconnect();
-  }, [introDismissed]);
 
   /* ── Intro progress fills ── */
   const iprFills = Array.from({ length: INTRO_STEPS }, (_, i) => {
@@ -272,7 +270,7 @@ export default function App() {
         />
       </div>
       {/* Gallery sticks — CtaContact + Footer slide over it */}
-      <div className="relative z-[40]">
+      <div id="gallery-section" className="relative z-[40]">
         <div className="sticky top-0">
           <Gallery
             items={collageItems}
@@ -284,9 +282,10 @@ export default function App() {
           />
         </div>
 
-        <CtaContact onBookCall={() => setBookCallOpen(true)} />
-
-        <Footer />
+        <div className="relative z-[1]">
+          <CtaContact onBookCall={() => setBookCallOpen(true)} />
+          <Footer />
+        </div>
       </div>
     </>
   );
