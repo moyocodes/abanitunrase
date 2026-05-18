@@ -177,7 +177,7 @@ export const CATEGORIES = [
   },
   {
     title: "Occasion Styling",
-    yoruba: "Ìgbà Ayẹyẹ",
+    yoruba: "Ìgbà Ayẹyẹ ",
     looks: 5,
     desc: "Birthdays, red carpets, family portraits, headshots — the party where everyone will be looking.",
     catIdx: 1,
