@@ -1,6 +1,88 @@
-import { HERO_IMGS, HERO_LABELS, HERO_ROWS, HERO_DIRS, LOOKS } from "../data.js";
+import { useNavigate } from "react-router-dom";
+import { useData } from "@/providers";
+import { useEditMode, EditableText } from "@/components/AdminBar";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { saveSettings } from "@/lib/firestore";
+import { useState } from "react";
 
-export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
+function HeroCardEdit({ item, allItems, onSaved }) {
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const save = async (updated) => {
+    const idx = allItems.indexOf(item);
+    const next = allItems.map((s, i) => (i === idx ? updated : s));
+    await saveSettings("hero", { images: next });
+    onSaved();
+  };
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setErr("");
+    try {
+      const url = await uploadToCloudinary(file);
+      await save({ ...item, url });
+    } catch (ex) {
+      setErr(ex.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <>
+      {/* Image replace overlay */}
+      <label className="absolute inset-0 flex items-end justify-end cursor-pointer z-10 group/hi p-2">
+        <span className={`font-mono text-[6.5px] tracking-[0.18em] uppercase px-2 py-1 bg-[#f5f0e6]/90 text-[#1a1706] transition-opacity ${uploading ? "opacity-100" : "opacity-0 group-hover/hi:opacity-100"}`}>
+          {uploading ? "…" : "Replace"}
+        </span>
+        <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+      </label>
+      {err && <div className="absolute top-2 left-2 right-2 bg-red-700/90 text-white font-mono text-[7px] px-2 py-1 z-20">{err}</div>}
+
+      {/* Inline caption edit */}
+      <div className="absolute bottom-3 left-3 right-3 z-20 font-['Cormorant_Garamond'] text-[14px] italic text-[rgba(245,240,230,0.8)] leading-tight">
+        <EditableText
+          value={item.label ?? ""}
+          onSave={(v) => save({ ...item, label: v })}
+          placeholder="Caption…"
+        />
+      </div>
+
+      {/* Type selector */}
+      <div className="absolute top-2 left-2 z-20">
+        <select
+          value={item.type ?? ""}
+          onChange={(e) => save({ ...item, type: e.target.value })}
+          className="font-mono text-[6.5px] tracking-[0.15em] uppercase bg-[#1a1706]/70 text-[#f5f0e6] border-none outline-none px-1.5 py-1 cursor-pointer"
+        >
+          <option value="">No link</option>
+          <option value="bridal">Bridal</option>
+          <option value="occasion">Occasion</option>
+          <option value="travel">Travel</option>
+        </select>
+      </div>
+    </>
+  );
+}
+
+export default function Hero({ onBookCall, onQuiz }) {
+  const { heroItems, refetch } = useData();
+  const { editMode } = useEditMode();
+  const navigate = useNavigate();
+
+  const len = heroItems?.length ?? 0;
+  const mid = Math.ceil(len / 2);
+  const row1 = heroItems ?? [];
+  const row2 = len > 0 ? [...heroItems.slice(mid), ...heroItems.slice(0, mid)] : [];
+
+  const handleClick = (item) => {
+    if (!editMode && item.type) navigate(`/styling/${item.type}`);
+  };
+
   return (
     <section
       id="hero"
@@ -8,31 +90,40 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
     >
       {/* Two rows — top scrolls left, bottom scrolls right */}
       <div className="flex flex-col gap-3 absolute inset-0 justify-center overflow-hidden">
-        {HERO_ROWS.map((order, ri) => (
+        {[row1, row2].map((row, ri) => (
           <div
             key={ri}
-            className={`flex gap-3 w-max hover:[animation-play-state:paused] ${HERO_DIRS[ri] === "left" ? "animate-go-left" : "animate-go-right"}`}
+            className={`flex gap-3 w-max hover:[animation-play-state:paused] ${ri === 0 ? "animate-go-left" : "animate-go-right"}`}
           >
-            {[...order, ...order].map((imgIdx, ci) => (
+            {[...row, ...row].map((item, ci) => (
               <div
                 key={ci}
                 className="w-[260px] md:w-[300px] h-[47vh] flex-shrink-0 overflow-hidden relative cursor-pointer"
-                onClick={() => {
-                  const cats = ["bridal", "bridal", "occasion", "travel", "occasion", "travel"];
-                  const li = LOOKS.findIndex(l => l.id.includes(cats[imgIdx]));
-                  if (li >= 0) onOpenStory(li);
-                }}
+                onClick={() => handleClick(item)}
               >
                 <img
-                  src={HERO_IMGS[imgIdx]}
-                  alt={HERO_LABELS[imgIdx]}
+                  src={item.url}
+                  alt={item.label ?? ""}
                   loading="lazy"
                   className="w-full h-full object-cover block transition-transform duration-500 opacity-90 saturate-90 contrast-[1.02] hover:scale-[1.04] hover:opacity-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                <div className="absolute bottom-3 left-3 right-3 font-['Cormorant_Garamond'] text-[14px] italic text-[rgba(245,240,230,0.8)] leading-tight">
-                  {HERO_LABELS[imgIdx]}
-                </div>
+
+                {/* Non-edit caption */}
+                {!editMode && (
+                  <div className="absolute bottom-3 left-3 right-3 font-['Cormorant_Garamond'] text-[14px] italic text-[rgba(245,240,230,0.8)] leading-tight">
+                    {item.label ?? ""}
+                  </div>
+                )}
+
+                {/* Edit controls — only on original slots (not duplicated) */}
+                {editMode && ci < row.length && (
+                  <HeroCardEdit
+                    item={item}
+                    allItems={heroItems}
+                    onSaved={refetch}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -58,23 +149,17 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
         <div className="flex items-center gap-4 mt-10 pointer-events-auto flex-wrap justify-center">
           <button
             onClick={onBookCall}
-            className="font-['Outfit'] font-semibold uppercase tracking-widest text-[12px] px-8 py-3.5 bg-[#cdccc8] text-[#1a1706] hover:bg-white transition-all duration-300 hover:-translate-y-0.5 border-none cursor-pointer"
+            className="font-['DM_Mono'] text-[9px] tracking-[0.32em] uppercase px-7 py-4 bg-[#f5f0e6] text-[#1a1706] border-none cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-lg"
           >
-            Book a Consultation →
+            Book a Consultation
           </button>
           <button
             onClick={onQuiz}
-            className="font-['Outfit'] font-semibold uppercase tracking-widest text-[12px] px-8 py-3.5 bg-transparent border border-[rgba(245,240,230,0.35)] text-[rgba(245,240,230,0.75)] hover:border-[rgba(245,240,230,0.75)] hover:text-[#f5f0e6] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+            className="font-['DM_Mono'] text-[9px] tracking-[0.32em] uppercase px-7 py-4 bg-transparent text-[rgba(245,240,230,0.75)] border border-[rgba(245,240,230,0.3)] cursor-pointer transition-all duration-300 hover:text-[#f5f0e6] hover:border-[rgba(245,240,230,0.65)]"
           >
-            ✦ Find My Style
+            Find My Style
           </button>
         </div>
-      </div>
-
-      {/* Scroll cue */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-1.5 font-['DM_Mono'] text-[7px] tracking-[0.4em] uppercase text-[rgba(245,240,230,0.35)] z-[7] hidden lg:flex">
-        <div className="w-px h-5 bg-[rgba(245,240,230,0.22)] pulse-v" />
-        scroll
       </div>
     </section>
   );

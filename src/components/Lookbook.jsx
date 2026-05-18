@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
-import { SHOWCASED, LOOKS } from "../data.js";
+import { useData } from "@/providers";
+import { useEditMode } from "@/components/AdminBar";
 
 const PEEK = 68;
-
 const CAT_TYPE = { Bridal: "wedding", Occasion: "occasion", Travel: "travel" };
 
 export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActive, lkVisible, onOpenStory, onBook }) {
-  const total = String(SHOWCASED.length).padStart(2, "0");
+  const { showcased, looks } = useData();
+  const { editMode, openLook } = useEditMode();
+  const total = String(showcased.length).padStart(2, "0");
   const innerH = typeof window !== "undefined" ? window.innerHeight : 800;
 
   return (
@@ -27,14 +29,24 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
             Selected Works
           </h2>
         </div>
-        <p className="font-body text-black/45 text-right text-[clamp(13px,1.2vw,15px)] leading-relaxed max-w-xs flex-shrink-0 hidden md:block font-light">
-          Bridal · Occasion · Travel<br />Lagos · Ibadan · Abroad
-        </p>
+        <div className="flex items-center gap-4">
+          {editMode && (
+            <button
+              onClick={() => openLook("list")}
+              className="font-mono text-[7px] tracking-[0.2em] uppercase border border-[#1a1706]/20 text-[#1a1706]/50 px-3 py-1.5 hover:border-[#1a1706]/50 hover:text-[#1a1706] transition-colors"
+            >
+              ✎ Manage Looks
+            </button>
+          )}
+          <p className="font-body text-black/45 text-right text-[clamp(13px,1.2vw,15px)] leading-relaxed max-w-xs flex-shrink-0 hidden md:block font-light">
+            Bridal · Occasion · Travel<br />Lagos · Ibadan · Abroad
+          </p>
+        </div>
       </motion.div>
 
       <div ref={lkStackRef} style={{ height: lkHeight || undefined }} className="relative">
         <div className="sticky top-0 h-screen overflow-hidden">
-          {SHOWCASED.map((lk, i) => {
+          {showcased.map((lk, i) => {
             let ty;
             if (i === 0) {
               ty = 0;
@@ -50,7 +62,7 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
 
             const num = String(i + 1).padStart(2, "0");
             const teaser = lk.story.split(" ").slice(0, 22).join(" ") + "…";
-            const lookIdx = LOOKS.indexOf(lk);
+            const lookIdx = looks.indexOf(lk);
             const bookType = CAT_TYPE[lk.cat] ?? "occasion";
 
             return (
@@ -67,6 +79,16 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
                   <span className="font-heading italic text-[20px] text-black/40 flex-1 leading-none">{lk.title}</span>
                   <span className="font-mono text-[7px] tracking-[0.25em] uppercase text-black/18 hidden md:block">{lk.sub}</span>
                 </div>
+
+                {/* Inline edit button */}
+                {editMode && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openLook(lk.id); }}
+                    className="absolute top-[76px] right-4 z-30 bg-[#1a1706] text-[#f5f0e6] font-mono text-[6.5px] tracking-[0.18em] uppercase px-2.5 py-1.5 shadow-md hover:bg-black transition-colors pointer-events-auto"
+                  >
+                    ✎ Edit Look
+                  </button>
+                )}
 
                 <div className="absolute inset-0 flex">
                   {/* Left: text panel */}
@@ -87,7 +109,7 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
 
                       <div className="flex items-center gap-3 flex-wrap">
                         <button
-                          onClick={() => onOpenStory(lookIdx)}
+                          onClick={() => onOpenStory(lookIdx >= 0 ? lookIdx : i)}
                           className="font-mono text-[8.5px] tracking-[0.18em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors duration-200 cursor-pointer border-none"
                         >
                           Read the Story
@@ -102,10 +124,10 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
                     </div>
                   </div>
 
-                  {/* Right: image — clickable link to the story */}
+                  {/* Right: image */}
                   <button
                     className="hidden md:block flex-1 relative overflow-hidden bg-[#0a0a0a] cursor-pointer group border-none p-0"
-                    onClick={() => onOpenStory(lookIdx)}
+                    onClick={() => onOpenStory(lookIdx >= 0 ? lookIdx : i)}
                     aria-label={`Open story: ${lk.title}`}
                   >
                     <img
@@ -116,7 +138,6 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
                     />
                     <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 bg-[#0a0a0a]/18 group-hover:bg-[#0a0a0a]/28 transition-colors duration-500 pointer-events-none" />
-
                     <div className="absolute top-6 right-6 font-mono text-[8px] tracking-[0.28em] uppercase text-white/30">{num} / {total}</div>
                     <div className="absolute bottom-8 left-8">
                       <div className="font-heading italic text-white/60 text-xl mb-1">{lk.title}</div>
@@ -130,14 +151,14 @@ export default function Lookbook({ lkStackRef, lkHeight, lkProgress = 0, lkActiv
         </div>
       </div>
 
-      {/* Right-edge progress dots */}
+      {/* Progress dots */}
       <div className={`fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 transition-opacity duration-500 ${lkVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-        {SHOWCASED.map((_, i) => (
+        {showcased.map((_, i) => (
           <div key={i} className={`w-1 rounded-full transition-all duration-300 ${i === lkActive ? "h-6 bg-[#1a1706]" : "h-1.5 bg-[#1a1706]/25"}`} />
         ))}
       </div>
       <div className={`fixed right-12 top-1/2 -translate-y-1/2 z-50 font-mono text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/40 transition-opacity duration-500 ${lkVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-        {String(lkActive + 1).padStart(2, "0")} / {String(SHOWCASED.length).padStart(2, "0")}
+        {String(lkActive + 1).padStart(2, "0")} / {String(showcased.length).padStart(2, "0")}
       </div>
     </div>
   );

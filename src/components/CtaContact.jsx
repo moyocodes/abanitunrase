@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { submitToGoogleForm } from "@/lib/googleForm";
-import { SITE_IMAGES } from "../data.js";
+import { saveContact, saveSettings } from "@/lib/firestore";
+import { useData } from "@/providers";
+import { EditableImage } from "@/components/AdminBar";
 
 export default function CtaContact({ onBookCall }) {
   const [formState, setFormState] = useState({
@@ -22,6 +24,7 @@ export default function CtaContact({ onBookCall }) {
       return;
     }
     setFormSubmitting(true);
+    saveContact(formState);
     submitToGoogleForm({
       name: formState.name,
       email: formState.email,
@@ -39,6 +42,13 @@ export default function CtaContact({ onBookCall }) {
     }, 1400);
   };
 
+  const { ctaBackground, contactBackground, refetch } = useData();
+
+  const saveBg = async (patch) => {
+    await saveSettings("site", { ctaBackground, contactBackground, ...patch });
+    refetch();
+  };
+
   const contactItems = [
     { label: "Phone", val: "+234 812 628 6593", href: "tel:+2348126286593" },
     { label: "Email", val: "Officialabanitunrase@gmail.com", href: "mailto:Officialabanitunrase@gmail.com" },
@@ -51,10 +61,12 @@ export default function CtaContact({ onBookCall }) {
       {/* CTA Section — sticky */}
       <div className="sticky top-0 z-[1] min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0e0d08] to-transparent z-[2] pointer-events-none" />
-        <img
-          src={SITE_IMAGES.ctaBackground}
+        <EditableImage
+          src={ctaBackground}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover saturate-[0.75] opacity-75 pointer-events-none select-none"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.75] opacity-75 select-none"
+          overlay
+          onUpload={(url) => saveBg({ ctaBackground: url })}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-[#1a1706]/50" />
         <motion.div
@@ -84,10 +96,12 @@ export default function CtaContact({ onBookCall }) {
         id="contact"
         className="relative z-[2] bg-[#0e0d08] px-6 md:px-16 py-16 md:py-24 border-b border-white/[0.08]"
       >
-        <img
-          src={SITE_IMAGES.contactBackground}
+        <EditableImage
+          src={contactBackground}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover saturate-[0.6] opacity-[0.22] pointer-events-none select-none"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.6] opacity-[0.22] select-none"
+          overlay
+          onUpload={(url) => saveBg({ contactBackground: url })}
         />
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-2 gap-6 sm:gap-12 md:gap-20">
 

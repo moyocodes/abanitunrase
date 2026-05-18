@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
+import { saveBooking } from "@/lib/firestore";
 import StepIndicator from "./StepIndicator";
 import FormField from "./fields/FormField";
 import TextInput from "./fields/TextInput";
@@ -116,6 +117,7 @@ export default function WeddingForm({ onComplete }) {
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
+    saveBooking("wedding", data);
     submitToGoogleForm({
       name: data.fullName,
       email: data.email,

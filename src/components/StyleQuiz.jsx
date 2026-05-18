@@ -82,7 +82,7 @@ const SERVICES = [
 ];
 
 export default function StyleQuiz({ open, onClose, onBook, onBookCall }) {
-  const [mode, setMode] = useState("browse");
+  const [mode, setMode] = useState("quiz");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [resultKey, setResultKey] = useState(null);

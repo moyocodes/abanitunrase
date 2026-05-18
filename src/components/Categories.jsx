@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { CATEGORIES, BRIDAL, OCCASION, TRAVEL, fmt } from "../data.js";
-
-const RATES = { bridal: BRIDAL, occasion: OCCASION, travel: TRAVEL };
+import { fmt } from "../data.js";
+import { useData } from "@/providers";
+import { EditableText, EditableImage } from "@/components/AdminBar";
+import { saveSettings } from "@/lib/firestore";
 
 const panelReveal = {
   hidden: { opacity: 0, y: 36 },
@@ -13,9 +14,17 @@ const panelReveal = {
 export default function Categories({ onBook }) {
   const [expandedCat, setExpandedCat] = useState(null);
   const navigate = useNavigate();
+  const { categories, bridal, occasion, travel, refetch } = useData();
+  const RATES = { bridal, occasion, travel };
 
   const toggleRates = (type) => setExpandedCat(prev => prev === type ? null : type);
   const goToStories = (catType) => navigate("/stories/" + catType);
+
+  const saveCategory = async (updatedCat) => {
+    const updated = categories.map((c) => c.type === updatedCat.type ? updatedCat : c);
+    await saveSettings("categories", { items: updated });
+    refetch();
+  };
 
   return (
     <section id="categories" className="bg-white border-t border-[rgba(26,23,6,0.06)]">
@@ -42,7 +51,7 @@ export default function Categories({ onBook }) {
       </motion.div>
 
       {/* Editorial alternating rows */}
-      {CATEGORIES.map((cat, i) => {
+      {categories.map((cat, i) => {
         const isFlipped = i % 2 === 1;
         return (
           <div key={cat.type} id={"cpanel-" + cat.type} className="border-b border-[rgba(26,23,6,0.06)] last:border-b-0">
@@ -53,13 +62,14 @@ export default function Categories({ onBook }) {
               viewport={{ once: true, margin: "-60px" }}
               variants={panelReveal}
             >
-              {/* Image — always first in DOM → top on mobile */}
+              {/* Image — editable */}
               <div className={`relative overflow-hidden group bg-[#f0efeb] flex items-center justify-center h-[60vh] md:h-[75vh] ${!isFlipped ? "md:order-last" : ""}`}>
-                <img
-                  className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+                <EditableImage
                   src={cat.img}
                   alt={cat.title}
-                  loading="lazy"
+                  className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+                  overlay
+                  onUpload={async (url) => saveCategory({ ...cat, img: url })}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,23,6,0.45)] via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-6 left-6 right-6 pointer-events-none select-none">
@@ -70,7 +80,6 @@ export default function Categories({ onBook }) {
 
               {/* Text panel */}
               <div className={`flex flex-col justify-center px-8 md:px-14 py-16 md:py-28 relative overflow-hidden border-[rgba(26,23,6,0.06)] ${isFlipped ? "md:border-l" : "md:border-r"}`}>
-                {/* Looping ghost number */}
                 <motion.div
                   className="absolute bottom-[-0.08em] right-[-0.02em] font-['Outfit'] font-medium text-transparent leading-none tracking-[-0.05em] select-none pointer-events-none text-[clamp(100px,13vw,155px)] ghost-stroke-dark"
                   animate={{ opacity: [0.55, 1, 0.55] }}
@@ -85,13 +94,23 @@ export default function Categories({ onBook }) {
                     initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                  >{cat.yoruba}</motion.div>
+                  >
+                    <EditableText
+                      value={cat.yoruba}
+                      onSave={(v) => saveCategory({ ...cat, yoruba: v })}
+                    />
+                  </motion.div>
                   <motion.h3
                     className="font-['Cormorant_Garamond'] italic font-normal text-[#1a1706] text-[clamp(32px,3.5vw,54px)] leading-[1.03] mb-4"
                     initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
-                  >{cat.title}</motion.h3>
+                  >
+                    <EditableText
+                      value={cat.title}
+                      onSave={(v) => saveCategory({ ...cat, title: v })}
+                    />
+                  </motion.h3>
                   <motion.div
                     className="w-8 h-px bg-[rgba(26,23,6,0.15)] mb-6"
                     initial={{ scaleX: 0, originX: 0 }} whileInView={{ scaleX: 1 }}
@@ -103,7 +122,13 @@ export default function Categories({ onBook }) {
                     initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
-                  >{cat.desc}</motion.p>
+                  >
+                    <EditableText
+                      value={cat.desc}
+                      onSave={(v) => saveCategory({ ...cat, desc: v })}
+                      multiline
+                    />
+                  </motion.p>
                   <motion.div
                     className="flex items-center gap-2.5 font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.35)] mb-8"
                     initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
@@ -137,7 +162,7 @@ export default function Categories({ onBook }) {
               </div>
             </motion.div>
 
-            {/* Rate drawer — below this category row */}
+            {/* Rate drawer */}
             <AnimatePresence>
               {expandedCat === cat.type && (
                 <motion.div
@@ -160,7 +185,7 @@ export default function Categories({ onBook }) {
                       </button>
                     </div>
                     <div className="grid gap-px border border-[rgba(26,23,6,0.06)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] bg-[rgba(26,23,6,0.06)]">
-                      {RATES[cat.type].map((r, idx) => (
+                      {(RATES[cat.type] ?? []).map((r, idx) => (
                         <div
                           key={idx}
                           className={`relative overflow-hidden flex flex-col px-8 py-9 transition-[background] duration-[250ms] ${r.featured ? "bg-[#1a1706] hover:bg-[#111]" : "bg-white hover:bg-[#fafaf9]"}`}

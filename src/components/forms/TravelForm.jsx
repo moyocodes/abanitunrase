@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
+import { saveBooking } from "@/lib/firestore";
 import StepIndicator from "./StepIndicator";
 import FormField from "./fields/FormField";
 import TextInput from "./fields/TextInput";
@@ -74,6 +75,7 @@ export default function TravelForm({ onComplete }) {
   const handleSubmit = () => {
     if (!data.acknowledge) { setError("Please acknowledge the terms before submitting."); return; }
     setError("");
+    saveBooking("travel", data);
     submitToGoogleForm({
       name: data.fullName,
       email: data.email,
