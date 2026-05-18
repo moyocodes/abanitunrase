@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { BRIDAL, OCCASION, TRAVEL, fmt } from "../data.js";
 
 const tabs = [
@@ -47,38 +48,41 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   }, [hoveredCard]);
 
   return (
-    <section id="rates" className="bg-[#0a0a0a] border-t border-white/5">
-      {/* Header bar */}
-      <div className="bg-[#1a1706] px-6 md:px-16 py-16 md:py-20 flex items-end justify-between gap-8 flex-wrap">
-        <div>
-          <div className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#f5f0e6]/50 flex items-center gap-3 mb-4">
-            <span className="block w-6 h-px bg-[#f5f0e6]/25" />
-            Investment
+    <section id="rates" className="bg-[#0a0a0a]">
+      {/* Header + Tabs */}
+      <motion.div
+        className="bg-[#1a1706]"
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="px-6 md:px-16 pt-6 pb-5 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/40 hidden md:block">Investment</span>
+            <span className="block w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
+            <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">The Rates.</h2>
           </div>
-          <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(52px,7vw,96px)] leading-none tracking-tight">The Rates.</h2>
+          <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/35 text-right leading-relaxed hidden md:block">
+            All prices NGN<br />Non-deductible consultation
+          </p>
         </div>
-        <p className="font-['Outfit'] text-[#f5f0e6]/60 text-right text-[clamp(14px,1.3vw,17px)] leading-relaxed max-w-xs flex-shrink-0">
-          All prices in Nigerian Naira (₦).<br />Consultation is non-deductible upon booking.
-        </p>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-[#1a1706] border-t border-white/[0.06] flex">
-        {tabs.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-6 px-4 text-center font-['Outfit'] font-medium text-sm uppercase tracking-wider border-b-2 transition-all duration-300 border-r border-white/[0.06] last:border-r-0 ${
-              activeTab === tab.key
-                ? "text-[#f5f0e6] border-b-[#f5f0e6]"
-                : "text-[#f5f0e6]/30 border-b-transparent hover:text-[#f5f0e6]/70"
-            }`}
-          >
-            {tab.label}
-            <span className="block text-xs opacity-50 mt-1 normal-case tracking-normal font-normal">{tab.sub}</span>
-          </button>
-        ))}
-      </div>
+        <div className="border-t border-white/[0.06] flex">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 py-3.5 px-4 text-center font-['Outfit'] font-medium text-[11px] uppercase tracking-wider border-b-2 transition-all duration-300 border-r border-white/[0.06] last:border-r-0 ${
+                activeTab === tab.key
+                  ? "text-[#f5f0e6] border-b-[#f5f0e6]"
+                  : "text-[#f5f0e6]/30 border-b-transparent hover:text-[#f5f0e6]/70"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Cards grid */}
       <div
@@ -87,10 +91,17 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         onMouseLeave={() => setHoveredCard(false)}
       >
         {cards.map((r, i) => (
-          <div
+          <motion.div
             key={i}
+            className="border-r border-black/[0.07] last:border-r-0"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: i * 0.09 }}
+          >
+          <div
             onClick={() => setSpotlightIdx(i)}
-            className={`relative p-8 md:p-11 border-r border-black/[0.07] last:border-r-0 cursor-pointer flex flex-col overflow-hidden transition-all duration-500 ${
+            className={`relative p-5 md:p-7 cursor-pointer flex flex-col overflow-hidden h-full transition-all duration-500 ${
               r.featured ? "bg-[#1a1706]" : "bg-white hover:bg-white"
             } ${i === spotlightIdx ? "opacity-100 scale-[1.01] shadow-lg z-10" : "opacity-60"}`}
           >
@@ -104,7 +115,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             </div>
 
             <div
-              className={`font-mono text-[7.5px] tracking-[0.36em] uppercase mb-5 ${
+              className={`font-mono text-[7.5px] tracking-[0.36em] uppercase mb-3 ${
                 r.featured ? "text-[#f5f0e6]/30" : "text-[#1a1706]/30"
               }`}
             >
@@ -118,14 +129,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             </div>
 
             <h3
-              className={`font-['Cormorant_Garamond'] italic text-3xl md:text-4xl leading-tight mb-6 ${
+              className={`font-['Cormorant_Garamond'] italic text-2xl md:text-3xl leading-tight mb-4 ${
                 r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"
               }`}
             >
               {r.package}
             </h3>
 
-            <div className="flex-1 mb-8">
+            <div className="flex-1 mb-4">
               {(
                 r.includes || [
                   `${r.looks} Curated Looks`,
@@ -135,7 +146,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
               ).map((inc, j) => (
                 <div
                   key={j}
-                  className={`flex items-start gap-2.5 py-2.5 border-b text-[15px] md:text-base font-['Outfit'] font-light leading-relaxed ${
+                  className={`flex items-start gap-2.5 py-1.5 border-b text-[13px] md:text-[15px] font-['Outfit'] font-light leading-relaxed ${
                     r.featured
                       ? "text-[#f5f0e6]/80 border-white/[0.08]"
                       : "text-[#1a1706]/75 border-black/[0.06]"
@@ -155,7 +166,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
             <div className="mb-2">
               <div
-                className={`font-['Cormorant_Garamond'] text-5xl tracking-tight ${
+                className={`font-['Cormorant_Garamond'] text-4xl tracking-tight ${
                   r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"
                 }`}
               >
@@ -197,11 +208,18 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
               </div>
             )}
           </div>
+          </motion.div>
         ))}
       </div>
 
       {/* Consult banner */}
-      <div className="bg-white grid grid-cols-1 md:grid-cols-2 border-b border-black/[0.07]">
+      <motion.div
+        className="bg-white grid grid-cols-1 md:grid-cols-2 border-b border-black/[0.07]"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {[
           { label: "General Consultation", note: "One-on-one styling session", price: "₦100,000" },
           { label: "Couple's Consultation", note: "Joint styling & alignment session", price: "₦150,000" },
@@ -209,16 +227,19 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
           <button
             key={i}
             onClick={onBookCall}
-            className="px-6 md:px-16 py-8 md:py-10 flex items-center justify-between gap-4 border-r border-black/[0.07] last:border-r-0 hover:bg-black/[0.02] transition-colors duration-200 text-left cursor-pointer bg-transparent w-full"
+            className="px-6 md:px-16 py-4 md:py-5 flex items-center justify-between gap-4 border-r border-black/[0.07] last:border-r-0 hover:bg-black/[0.02] transition-all duration-200 text-left cursor-pointer bg-transparent w-full group"
           >
             <div>
-              <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(22px,2.2vw,34px)] mb-1">{c.label}</div>
-              <div className="font-mono text-[8px] tracking-[0.24em] uppercase text-[#1a1706]/50">{c.note}</div>
+              <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(18px,1.8vw,28px)] mb-0.5">{c.label}</div>
+              <div className="font-mono text-[7.5px] tracking-[0.24em] uppercase text-[#1a1706]/45">{c.note}</div>
             </div>
-            <div className="font-['Cormorant_Garamond'] text-[clamp(28px,3vw,46px)] text-[#1a1706] flex-shrink-0">{c.price}</div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="font-['Cormorant_Garamond'] text-[clamp(22px,2.4vw,36px)] text-[#1a1706]">{c.price}</div>
+              <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-lg">→</span>
+            </div>
           </button>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

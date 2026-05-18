@@ -181,7 +181,7 @@ export const CATEGORIES = [
     looks: 5,
     desc: "Birthdays, red carpets, family portraits, headshots — the party where everyone will be looking.",
     catIdx: 1,
-    img: "https://res.cloudinary.com/drxxei318/image/upload/v1778719175/SaveClip.App_658322783_17934033228254973_2161621233586694312_n_lm6t64.jpg",
+    img: " https://res.cloudinary.com/drxxei318/image/upload/v1778719174/SaveClip.App_657232149_17934033264254973_4508186931635539950_n_pw0voh.jpg",
     type: "occasion",
   },
   {
@@ -190,7 +190,7 @@ export const CATEGORIES = [
     looks: 4,
     desc: "Destination-based wardrobe curation with a physical Polaroid Guide to your trip.",
     catIdx: 2,
-    img: "https://res.cloudinary.com/drxxei318/image/upload/v1778719179/SaveClip.App_696190760_17942426766254973_6528501205889293125_n_htzssr.jpg",
+    img: "https://res.cloudinary.com/drxxei318/image/upload/v1778719178/SaveClip.App_698324782_17942426784254973_429270856261881943_n_e1xw4h.jpg",
     type: "travel",
   },
 ];
@@ -277,9 +277,8 @@ export const HERO_LABELS = [
 export const HERO_ROWS = [
   [0, 1, 2, 3, 4, 5],
   [3, 4, 5, 0, 1, 2],
-  [1, 3, 5, 0, 2, 4],
 ];
-export const HERO_DIRS = ["left", "right", "left"];
+export const HERO_DIRS = ["left", "right"];
 
 export const INTRO_STEPS = 4;
 export const INTRO_TRIGGER = 300;

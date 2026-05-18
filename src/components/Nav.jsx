@@ -2,6 +2,21 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+const NAV_VARIANTS = {
+  hidden: {
+    y: "-100%",
+    rotateX: -75,
+    opacity: 0,
+    transition: { duration: 0.45, ease: [0.4, 0, 1, 1] },
+  },
+  visible: {
+    y: 0,
+    rotateX: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export default function Nav({ onBookCall, hidden }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,11 +39,11 @@ export default function Nav({ onBookCall, hidden }) {
   return (
     <>
       <motion.nav
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-[200] flex items-center justify-between px-6 md:px-[52px] py-5 border-b transition-all duration-500 ${
-          hidden ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"
+        initial="hidden"
+        animate={hidden ? "hidden" : "visible"}
+        variants={NAV_VARIANTS}
+        className={`fixed top-0 left-0 right-0 z-[200] flex items-center justify-between px-6 md:px-[52px] py-5 border-b origin-top transition-[background-color,border-color] duration-500 ${
+          hidden ? "pointer-events-none" : ""
         } ${
           scrolled
             ? "bg-white border-black/10"

@@ -66,7 +66,14 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
     const utt = new SpeechSynthesisUtterance(text);
     utt.rate = 0.88; utt.pitch = 1.0; utt.lang = "en-GB";
     const voices = window.speechSynthesis.getVoices();
-    const pref = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Samantha") || v.name.includes("Karen") || v.name.includes("Moira"))) || voices.find(v => v.lang.startsWith("en")) || null;
+    const pref =
+      voices.find(v => v.name.includes("Google UK English Female")) ||
+      voices.find(v => v.name.includes("Serena") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.includes("Daniel") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.includes("Samantha") && v.lang.startsWith("en")) ||
+      voices.find(v => v.lang === "en-GB") ||
+      voices.find(v => v.lang.startsWith("en")) ||
+      null;
     if (pref) utt.voice = pref;
     const estDuration = (text.length / 14) * 1000;
     let startTime = Date.now();
@@ -177,8 +184,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 z-[700] bg-black/45"
-              style={{ backdropFilter: "blur(6px)" }}
+              className="fixed inset-0 z-[700] bg-black/45 backdrop-blur-md"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -188,7 +194,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
 
             {/* Sheet */}
             <motion.div
-              className="fixed inset-0 z-[701] flex overflow-hidden bg-white"
+              className="fixed inset-0 z-[701] flex flex-col md:flex-row overflow-hidden bg-white"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
@@ -202,11 +208,28 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                 &#10005;
               </button>
 
-              {/* Left: Media Panel */}
+              {/* Mobile-only image strip */}
+              {look?.img && (
+                <div className="block md:hidden flex-shrink-0 h-[42vw] max-h-[280px] bg-[#0a0a0a] relative overflow-hidden">
+                  <img
+                    src={look.img}
+                    alt={look.title || ""}
+                    className="w-full h-full object-cover saturate-[0.85]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-4">
+                    <div className="font-['Cormorant_Garamond'] italic text-white/80 text-base">{look.title}</div>
+                    <div className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-white/45">{look.sub}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Left: Media Panel — desktop only */}
               <div className="w-[55%] flex-shrink-0 relative overflow-hidden bg-[#0a0a0a] hidden md:block">
-                {/* Thumbnail strip */}
+                {/* Thumbnail strip — only shown when there are multiple photos or a video */}
+                {(look?.thumbs?.length > 1 || look?.video) && (
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 z-[5] flex flex-col gap-1.5">
-                  {look && (look.thumbs || [look.img]).map((src, ti) => (
+                  {look?.thumbs?.length > 1 && look.thumbs.map((src, ti) => (
                     <div
                       key={ti}
                       className={`w-[42px] h-[54px] overflow-hidden cursor-pointer border-[1.5px] transition-[border-color,opacity] duration-200 ${
@@ -220,8 +243,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                         src={src}
                         alt=""
                         loading="lazy"
-                        className="w-full h-full object-cover block"
-                        style={{ filter: "saturate(0.7)" }}
+                        className="w-full h-full object-cover block saturate-[0.7]"
                       />
                     </div>
                   ))}
@@ -240,8 +262,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                         src={look.img}
                         alt=""
                         loading="lazy"
-                        className="w-full h-full object-cover block"
-                        style={{ filter: "saturate(0.5) brightness(0.55)" }}
+                        className="w-full h-full object-cover block saturate-[0.5] brightness-[0.55]"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center text-[#1a1706] text-[8px] pl-0.5">
@@ -251,6 +272,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* Media toggle */}
                 <div className="absolute top-4 left-[68px] z-[6] flex gap-1">
@@ -280,20 +302,13 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
 
                 {/* Main image */}
                 <img
-                  className="absolute inset-0 w-full h-full object-contain block transition-opacity duration-[400ms]"
-                  style={{
-                    filter: "saturate(0.9)",
-                    display: mediaType === "photo" ? "block" : "none",
-                  }}
+                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-[400ms] saturate-[0.9] ${mediaType === "photo" ? "block" : "hidden"}`}
                   src={currentThumb}
                   alt={look?.title || ""}
                 />
 
                 {/* Video wrap */}
-                <div
-                  className="absolute inset-0"
-                  style={{ display: mediaType === "video" ? "block" : "none" }}
-                >
+                <div className={`absolute inset-0 ${mediaType === "video" ? "block" : "hidden"}`}>
                   <iframe
                     className="w-full h-full border-none"
                     src={mediaType === "video" && look?.video ? ytEmbedUrl(look.video) : ""}
@@ -304,16 +319,10 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                 </div>
 
                 {/* Right-edge gradient */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-[1]"
-                  style={{ background: "linear-gradient(to right, transparent 55%, rgba(255,255,255,0.95) 100%)" }}
-                />
+                <div className="absolute inset-0 pointer-events-none z-[1] bg-[linear-gradient(to_right,transparent_55%,rgba(255,255,255,0.95)_100%)]" />
 
                 {/* Bottom gradient */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-[200px] pointer-events-none z-[1]"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)" }}
-                />
+                <div className="absolute bottom-0 left-0 right-0 h-[200px] pointer-events-none z-[1] bg-gradient-to-t from-black/60 to-transparent" />
 
                 {/* Media info */}
                 <div className="absolute bottom-6 left-[68px] z-[5]">
@@ -328,8 +337,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
 
               {/* Right: Story Panel */}
               <div
-                className="flex-1 overflow-y-auto relative flex flex-col bg-white w-full pt-11 pb-6 px-[18px] md:pt-[52px] md:pb-8 md:pr-12 md:pl-10"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(26,23,6,0.1) transparent" }}
+                className="flex-1 overflow-y-auto relative flex flex-col bg-white w-full pt-11 pb-6 px-[18px] md:pt-[52px] md:pb-8 md:pr-12 md:pl-10 scrollbar-thin"
               >
                 {/* Category nav */}
                 <div className="flex gap-1 mb-7 flex-wrap">
@@ -371,8 +379,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                           }}
                         >
                           <img
-                            className="w-8 h-10 object-cover flex-shrink-0"
-                            style={{ filter: "saturate(0.7)" }}
+                            className="w-8 h-10 object-cover flex-shrink-0 saturate-[0.7]"
                             src={l.thumbs ? l.thumbs[0] : l.img}
                             alt={l.title}
                             loading="lazy"
@@ -402,16 +409,24 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                 {/* Voice bar */}
                 <div className="flex items-center gap-3 px-4 py-[11px] bg-[rgba(26,23,6,0.03)] border border-[rgba(26,23,6,0.07)] mb-6">
                   <button
-                    className="w-8 h-8 rounded-full border border-[rgba(26,23,6,0.18)] bg-[rgba(26,23,6,0.04)] text-[#1a1706] flex items-center justify-center cursor-pointer text-[14px] transition-all duration-200 flex-shrink-0 hover:bg-[rgba(26,23,6,0.1)]"
+                    className="w-8 h-8 rounded-full border border-[rgba(26,23,6,0.18)] bg-[rgba(26,23,6,0.04)] text-[#1a1706] flex items-center justify-center cursor-pointer transition-all duration-200 flex-shrink-0 hover:bg-[rgba(26,23,6,0.1)]"
                     onClick={toggleVoice}
                   >
-                    {voicePlaying ? "⏸" : "▶"}
+                    {voicePlaying ? (
+                      <svg width="10" height="11" viewBox="0 0 10 11" fill="currentColor">
+                        <rect x="0" y="0" width="3.5" height="11" rx="0.8" />
+                        <rect x="6.5" y="0" width="3.5" height="11" rx="0.8" />
+                      </svg>
+                    ) : (
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
+                        <polygon points="0,0 10,6 0,12" />
+                      </svg>
+                    )}
                   </button>
                   <div className="flex-1 h-[2px] bg-[rgba(26,23,6,0.08)] rounded-[1px]">
                     <div
                       ref={voiceProgRef}
-                      className="h-full w-0 bg-[rgba(26,23,6,0.5)] rounded-[1px]"
-                      style={{ transition: "width 0.1s linear" }}
+                      className="h-full w-0 bg-[rgba(26,23,6,0.5)] rounded-[1px] transition-[width] duration-100 ease-linear"
                     />
                   </div>
                   <div className="font-['DM_Mono'] text-[7px] tracking-[0.25em] uppercase text-[rgba(26,23,6,0.32)] whitespace-nowrap">

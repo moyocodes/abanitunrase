@@ -102,8 +102,6 @@ export default function WeddingForm({ onComplete }) {
   };
 
   const handleNext = () => {
-    const err = validateStep();
-    if (err) { setError(err); return; }
     setError("");
     setStep((s) => s + 1);
   };

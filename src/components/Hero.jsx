@@ -6,25 +6,17 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
       id="hero"
       className="h-screen flex flex-col justify-center overflow-hidden relative bg-[#0a0a0a]"
     >
-      {/* Grid of scrolling image rows */}
+      {/* Two rows — top scrolls left, bottom scrolls right */}
       <div className="flex flex-col gap-3 absolute inset-0 justify-center overflow-hidden">
         {HERO_ROWS.map((order, ri) => (
           <div
             key={ri}
-            className="flex gap-3 w-max"
-            style={{
-              animation:
-                HERO_DIRS[ri] === "left"
-                  ? "go-left 38s linear infinite"
-                  : "go-right 38s linear infinite",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.animationPlayState = "paused")}
-            onMouseLeave={e => (e.currentTarget.style.animationPlayState = "running")}
+            className={`flex gap-3 w-max hover:[animation-play-state:paused] ${HERO_DIRS[ri] === "left" ? "animate-go-left" : "animate-go-right"}`}
           >
             {[...order, ...order].map((imgIdx, ci) => (
               <div
                 key={ci}
-                className="w-[240px] h-[300px] flex-shrink-0 overflow-hidden relative cursor-pointer"
+                className="w-[260px] md:w-[300px] h-[47vh] flex-shrink-0 overflow-hidden relative cursor-pointer"
                 onClick={() => {
                   const cats = ["bridal", "bridal", "occasion", "travel", "occasion", "travel"];
                   const li = LOOKS.findIndex(l => l.id.includes(cats[imgIdx]));
@@ -35,12 +27,9 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
                   src={HERO_IMGS[imgIdx]}
                   alt={HERO_LABELS[imgIdx]}
                   loading="lazy"
-                  className="w-full h-full object-cover block transition-transform duration-500 opacity-[0.88] saturate-90 contrast-[1.02] hover:scale-[1.04] hover:opacity-100"
-                  style={{ opacity: 0.9 }}
+                  className="w-full h-full object-cover block transition-transform duration-500 opacity-90 saturate-90 contrast-[1.02] hover:scale-[1.04] hover:opacity-100"
                 />
-                {/* Dark gradient overlay at bottom */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                {/* Label */}
                 <div className="absolute bottom-3 left-3 right-3 font-['Cormorant_Garamond'] text-[14px] italic text-[rgba(245,240,230,0.8)] leading-tight">
                   {HERO_LABELS[imgIdx]}
                 </div>
@@ -50,16 +39,9 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
         ))}
       </div>
 
-      {/* Soft dark vignette — lighter feel */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[5]"
-        style={{
-          background: [
-            "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(10,8,2,0.28) 0%, transparent 100%)",
-            "linear-gradient(to bottom, rgba(10,8,2,0.42) 0%, rgba(10,8,2,0.08) 40%, rgba(10,8,2,0.08) 60%, rgba(10,8,2,0.38) 100%)",
-          ].join(", "),
-        }}
-      />
+      {/* Soft dark vignette */}
+      <div className="absolute inset-0 pointer-events-none z-[5] bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(10,8,2,0.28)_0%,transparent_100%)]" />
+      <div className="absolute inset-0 pointer-events-none z-[5] bg-[linear-gradient(to_bottom,rgba(10,8,2,0.42)_0%,rgba(10,8,2,0.08)_40%,rgba(10,8,2,0.08)_60%,rgba(10,8,2,0.38)_100%)]" />
 
       {/* Center text overlay */}
       <div className="absolute inset-0 z-[6] flex flex-col items-center justify-center pointer-events-none select-none">
@@ -90,11 +72,8 @@ export default function Hero({ onOpenStory, onBookCall, onQuiz }) {
       </div>
 
       {/* Scroll cue */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 font-['DM_Mono'] text-[7px] tracking-[0.4em] uppercase text-[rgba(245,240,230,0.35)] z-[7] max-[900px]:hidden">
-        <div
-          className="w-px h-5 bg-[rgba(245,240,230,0.22)]"
-          style={{ animation: "pulse-v 2s infinite" }}
-        />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-1.5 font-['DM_Mono'] text-[7px] tracking-[0.4em] uppercase text-[rgba(245,240,230,0.35)] z-[7] hidden lg:flex">
+        <div className="w-px h-5 bg-[rgba(245,240,230,0.22)] pulse-v" />
         scroll
       </div>
     </section>

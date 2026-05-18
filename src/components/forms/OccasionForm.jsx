@@ -74,8 +74,6 @@ export default function OccasionForm({ onComplete }) {
   };
 
   const handleNext = () => {
-    const err = validateStep();
-    if (err) { setError(err); return; }
     setError("");
     setStep((s) => s + 1);
   };

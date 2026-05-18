@@ -27,6 +27,9 @@ export default {
         "fade-in": "fadeIn 1s ease forwards",
         "marquee": "marquee 22s linear infinite",
         "spotlight-fill": "spotlight-fill 3s linear forwards",
+        "go-left": "go-left 38s linear infinite",
+        "go-right": "go-right 38s linear infinite",
+        "pulse-v": "pulse-v 2s infinite",
       },
       keyframes: {
         fadeUp: { "0%": { opacity: "0", transform: "translateY(22px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },

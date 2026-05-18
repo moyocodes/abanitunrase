@@ -38,37 +38,68 @@ export default function BeforeYouBook() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-[#cdccc8]/10 border-t border-[rgba(26,23,6,0.06)]">
-      <div className="px-6 md:px-16 py-20 max-w-[1100px] mx-auto">
-        <div className="flex items-end justify-between mb-12 gap-6 flex-wrap">
+    <section ref={sectionRef} className="bg-[#f4f3f0] border-t border-[rgba(26,23,6,0.06)]">
+      <div className="px-6 md:px-16 py-10 md:py-12 max-w-[1100px] mx-auto">
+
+        {/* Header */}
+        <motion.div
+          className="flex items-end justify-between mb-7 gap-6 flex-wrap"
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div>
-            <div className="flex items-center gap-3.5 mb-4 font-mono text-[8px] tracking-[0.4em] uppercase text-[rgba(26,23,6,0.4)]">
+            <motion.div
+              className="flex items-center gap-3.5 mb-3 font-mono text-[8px] tracking-[0.4em] uppercase text-[rgba(26,23,6,0.4)]"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            >
               <span className="block w-6 h-px bg-[rgba(26,23,6,0.2)]" />
               Before You Book
-            </div>
-            <h2 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(36px,5vw,64px)] leading-none tracking-tight font-normal">
+            </motion.div>
+            <motion.h2
+              className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(26px,3vw,44px)] leading-none tracking-tight font-normal"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
+            >
               Good to know.
-            </h2>
+            </motion.h2>
           </div>
-          <p className="font-mono text-[8px] tracking-[0.24em] uppercase text-[rgba(26,23,6,0.3)] leading-[2.2] text-right hidden md:block">
+          <motion.p
+            className="font-mono text-[8px] tracking-[0.24em] uppercase text-[rgba(26,23,6,0.3)] leading-[2.2] text-right hidden md:block"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
+          >
             Questions we get asked<br />before every booking
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
+        {/* FAQ list — each item slides up with stagger */}
         <div className="border-t border-[rgba(26,23,6,0.08)]">
           {FAQ.map((item, i) => (
-            <div key={i} className="border-b border-[rgba(26,23,6,0.08)]">
+            <motion.div
+              key={i}
+              className="border-b border-[rgba(26,23,6,0.08)]"
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: i * 0.12 }}
+            >
               <button
-                className="w-full flex items-center justify-between gap-4 py-6 text-left group cursor-pointer bg-transparent border-none"
+                className="w-full flex items-center justify-between gap-4 py-3.5 text-left group cursor-pointer bg-transparent border-none"
                 onClick={() => setOpen(open === i ? null : i)}
               >
-                <span className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(19px,2vw,28px)] leading-snug group-hover:opacity-70 transition-opacity duration-200">
+                <span className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(16px,1.6vw,22px)] leading-snug group-hover:opacity-70 transition-opacity duration-200">
                   {item.q}
                 </span>
-                <span
-                  className="font-mono text-[20px] text-[rgba(26,23,6,0.3)] flex-shrink-0 leading-none transition-transform duration-300"
-                  style={{ transform: open === i ? "rotate(45deg)" : "none" }}
-                >
+                <span className={`font-mono text-[18px] text-[rgba(26,23,6,0.3)] flex-shrink-0 leading-none transition-transform duration-300 ${open === i ? "rotate-45" : "rotate-0"}`}>
                   +
                 </span>
               </button>
@@ -81,13 +112,13 @@ export default function BeforeYouBook() {
                     transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                     className="overflow-hidden"
                   >
-                    <p className="font-['Outfit'] text-[rgba(26,23,6,0.75)] text-[clamp(15px,1.5vw,18px)] leading-[1.85] font-light pb-7 pr-6 md:pr-16 max-w-3xl">
+                    <p className="font-['Outfit'] text-[rgba(26,23,6,0.75)] text-[clamp(14px,1.3vw,16px)] leading-[1.85] font-light pb-4 pr-6 md:pr-16 max-w-3xl">
                       {item.a}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

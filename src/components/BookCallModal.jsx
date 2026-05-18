@@ -40,8 +40,7 @@ export default function BookCallModal({ open, onClose }) {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-[rgba(26,23,6,0.55)] z-[900]"
-            style={{ backdropFilter: "blur(8px)" }}
+            className="fixed inset-0 bg-[rgba(26,23,6,0.55)] z-[900] backdrop-blur-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

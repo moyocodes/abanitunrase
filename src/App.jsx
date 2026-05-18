@@ -20,7 +20,6 @@ import Gallery from "./components/Gallery";
 import Footer from "./components/Footer";
 import StoryModal from "./components/StoryModal";
 import Lightbox from "./components/Lightbox";
-import StoriesView from "./components/StoriesView";
 import {
   FormModal,
   WeddingForm,
@@ -30,19 +29,19 @@ import {
 import StyleQuiz from "./components/StyleQuiz";
 import RatesStickyBar from "./components/RatesStickyBar";
 
-/* ── Inline StoriesRoute component ── */
-function StoriesRoute({ onOpenStory, onBook, onBookCall }) {
+/* ── StoriesRoute: opens StoryModal directly, no full-page grid ── */
+function StoriesRoute({ onOpenStory }) {
   const { category } = useParams();
   const navigate = useNavigate();
-  const catIdx = category === "bridal" ? 0 : category === "occasion" ? 1 : 2;
 
-  return (
-    <StoriesView
-      initialCatIdx={catIdx}
-      onBack={() => navigate("/")}
-      onOpenStory={onOpenStory}
-    />
-  );
+  useEffect(() => {
+    const catIdx = category === "bridal" ? 0 : category === "occasion" ? 1 : 2;
+    const firstIdx = LOOKS.findIndex(l => l.catIdx === catIdx);
+    onOpenStory(firstIdx >= 0 ? firstIdx : 0);
+    navigate("/", { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return null;
 }
 
 export default function App() {
@@ -242,59 +241,53 @@ export default function App() {
   /* ── Home page content — plain JSX (not a component) so React diffs stably ── */
   const homeContent = (
     <>
-      {/* Hero — fades into warm cream Atelier */}
-      <div className="relative">
-        <Hero onOpenStory={openStory} onBookCall={() => setBookCallOpen(true)} onQuiz={() => setQuizOpen(true)} />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#40403f] pointer-events-none z-[6]" />
+      <Hero onOpenStory={openStory} onBookCall={() => setBookCallOpen(true)} onQuiz={() => setQuizOpen(true)} />
+
+      {/* Atelier sticks — Categories slides over it */}
+      <div className="sticky top-0 z-[10]">
+        <Atelier />
+      </div>
+      <div className="relative z-[20]">
+        <Categories onBook={(type) => setFormType(type)} />
+
+        <Lookbook
+          lkStackRef={lkStackRef}
+          lkHeight={lkHeight}
+          lkProgress={lkProgress}
+          lkActive={lkActive}
+          lkVisible={lkVisible}
+          onOpenStory={openStory}
+          onBook={(type) => setFormType(type)}
+        />
+        <BeforeYouBook />
       </div>
 
-      {/* Atelier — white */}
-      <Atelier />
-
-      {/* Atelier → Categories: soft bottom shadow */}
-      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(26,23,6,0.08)] to-transparent" />
-
-      <Categories onBook={(type) => setFormType(type)} />
-
-      {/* Categories (white) → Lookbook (white) — seamless */}
-      <Lookbook
-        lkStackRef={lkStackRef}
-        lkHeight={lkHeight}
-        lkProgress={lkProgress}
-        lkActive={lkActive}
-        lkVisible={lkVisible}
-        onOpenStory={openStory}
-        onOpenLightbox={openLightbox}
-      />
-
-      {/* Lookbook (white) → BeforeYouBook (white) — seamless */}
-      <BeforeYouBook />
-
-      {/* BeforeYouBook dark consult strip flows into dark Rates header */}
-      <Rates
-        onBookCall={() => setBookCallOpen(true)}
-        onBook={(type) => setFormType(type)}
-        activeTab={ratesTab}
-        setActiveTab={setRatesTab}
-      />
-
-      {/* Rates white consult banner → dark Gallery */}
-      <div className="h-14 bg-gradient-to-b from-white to-[#0e0d08]" />
-      <div className="relative">
-        <Gallery
-          items={collageItems}
-          onAdd={handleFiles}
-          onRemove={removeCollageItem}
-          onOpen={openCollageItem}
-          dragOver={dragOver}
-          setDragOver={setDragOver}
+      {/* Rates sticks — Gallery slides over it */}
+      <div className="sticky top-0 z-[30]">
+        <Rates
+          onBookCall={() => setBookCallOpen(true)}
+          onBook={(type) => setFormType(type)}
+          activeTab={ratesTab}
+          setActiveTab={setRatesTab}
         />
       </div>
+      {/* Gallery sticks — CtaContact + Footer slide over it */}
+      <div className="relative z-[40]">
+        <div className="sticky top-0">
+          <Gallery
+            items={collageItems}
+            onAdd={handleFiles}
+            onRemove={removeCollageItem}
+            onOpen={openCollageItem}
+            dragOver={dragOver}
+            setDragOver={setDragOver}
+          />
+        </div>
 
-      <CtaContact onBookCall={() => setBookCallOpen(true)} />
+        <CtaContact onBookCall={() => setBookCallOpen(true)} />
 
-      {/* CtaContact (dark) → Footer (near-black) — seamless */}
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 
@@ -308,8 +301,7 @@ export default function App() {
         <video
           src="/savessss.mp4"
           autoPlay muted loop playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none"
-          style={{ filter: "saturate(0.4) brightness(0.6)" }}
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none saturate-[0.4] brightness-[0.6]"
         />
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 flex gap-[3px] px-1.5 h-[3px] z-20">
@@ -358,7 +350,7 @@ export default function App() {
             {
               tag: "Step Three",
               big: (
-                <span style={{ fontSize: "clamp(32px,5.5vw,68px)" }}>
+                <span className="text-[clamp(32px,5.5vw,68px)]">
                   Arrive in looks that stand out,
                   <br />
                   stay clean, remain timeless.
@@ -380,9 +372,9 @@ export default function App() {
                   : "opacity-0 translate-y-[18px]"
               }`}
             >
-              <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#f5f0e6]/30 mb-[18px]">
+              {/* <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#f5f0e6]/30 mb-[18px]">
                 {ch.tag}
-              </div>
+              </div> */}
               <div className="font-heading italic font-normal text-[clamp(52px,9vw,100px)] text-[#f5f0e6] leading-[1.05] tracking-[-0.025em]">
                 {ch.big}
               </div>
@@ -413,19 +405,13 @@ export default function App() {
 
       <div
         id="site"
-        style={{ pointerEvents: introDismissed ? "auto" : "none" }}
+        className={introDismissed ? "pointer-events-auto" : "pointer-events-none"}
       >
         <Routes>
           <Route path="/" element={homeContent} />
           <Route
             path="/stories/:category"
-            element={
-              <StoriesRoute
-                onOpenStory={openStory}
-                onBook={(type) => setFormType(type)}
-                onBookCall={() => setBookCallOpen(true)}
-              />
-            }
+            element={<StoriesRoute onOpenStory={openStory} />}
           />
         </Routes>
       </div>

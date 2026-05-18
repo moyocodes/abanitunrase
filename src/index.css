@@ -33,3 +33,11 @@ body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
 .fade-up { opacity:0; transform:translateY(28px); transition:opacity 0.9s cubic-bezier(0.16,1,0.3,1),transform 0.9s cubic-bezier(0.16,1,0.3,1); }
 .fade-up.visible { opacity:1; transform:none; }
+
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(26,23,6,0.1) transparent; }
+.pulse-v { animation: pulse-v 2s infinite; }
+
+/* Ghost text outline — WebkitTextStroke not available in Tailwind */
+.ghost-stroke { -webkit-text-stroke: 1px rgba(26,23,6,0.04); }
+.ghost-stroke-featured { -webkit-text-stroke: 1px rgba(245,240,230,0.055); }
+.ghost-stroke-dark { -webkit-text-stroke: 1px rgba(26,23,6,0.055); }
