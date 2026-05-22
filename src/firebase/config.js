@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCkQDGeeSPMePD9FJRsmKsf4--3KfHyHcs",
@@ -16,12 +17,14 @@ const configured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
 
 let db = null;
 let auth = null;
+let storage = null;
 
 if (configured) {
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    storage = getStorage(app);
   } catch (e) {
     console.warn("[Firebase] Init failed:", e.message);
   }
@@ -31,4 +34,4 @@ if (configured) {
   );
 }
 
-export { db, auth };
+export { db, auth, storage };

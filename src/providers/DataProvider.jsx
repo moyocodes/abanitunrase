@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getLooks, getPricing, getSettings, getGallery, addGalleryItem, removeGalleryItem } from "@/lib/firestore";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToStorage } from "@/lib/storage";
 import {
   LOOKS as STATIC_LOOKS,
   CATEGORIES as STATIC_CATEGORIES,
@@ -36,8 +36,16 @@ const DEFAULT_CTA = {
 
 const DEFAULT_FOOTER = {
   tagline: "Dressed with\nintention.",
+  brandSub: "Lagos Styling House",
   location: "Lagos, Nigeria",
   locationSub: "Available for travel worldwide",
+  instagramUrl: "https://instagram.com/Abanitunrase",
+  instagramHandle: "@Abanitunrase",
+  whatsappUrl: "https://wa.me/2348126286593",
+  whatsappNumber: "+234 812 628 6593",
+  email: "Officialabanitunrase@gmail.com",
+  copyrightYear: "2026",
+  estYear: "2026",
 };
 
 export function DataProvider({ children }) {
@@ -87,7 +95,7 @@ export function DataProvider({ children }) {
       const placeholder = { id: tempId, url: blobUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name, uploading: true };
       setGalleryItems(prev => [...prev, placeholder]);
       try {
-        const url = await uploadToCloudinary(file);
+        const url = await uploadToStorage(file);
         const item = { url, type: placeholder.type, name: file.name };
         const savedId = await addGalleryItem(item).catch(() => tempId);
         URL.revokeObjectURL(blobUrl);

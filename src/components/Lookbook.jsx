@@ -8,7 +8,7 @@ export default function Lookbook({ lkStackRef, lkProgress = 0, lkActive, lkVisib
   const innerH = typeof window !== "undefined" ? window.innerHeight : 800;
 
   return (
-    <div id="lookbook-section" className="bg-[#cdccc8]/20 border-t border-black/[0.05]">
+    <div id="lookbook-section" className="bg-[#f0efeb] border-t border-black/[0.05]">
       <motion.div
         className="px-6 md:px-16 pt-14 pb-10 flex items-end justify-between gap-8 border-b border-black/[0.06]"
         initial={{ opacity: 0, y: 24 }}
