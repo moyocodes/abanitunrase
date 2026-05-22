@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ytEmbedUrl } from "../data.js";
-import { useEditMode } from "@/components/AdminBar";
-
 export default function StoryModal({ open, onClose, looks, initialLookIdx, onBook, onBookCall }) {
   const [curLook, setCurLook] = useState(initialLookIdx || 0);
   const [curActiveCatIdx, setCurActiveCatIdx] = useState(0);
@@ -17,7 +15,6 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
   const voiceTimerRef = useRef(null);
   const voiceUttRef = useRef(null);
 
-  const { editMode, openLook } = useEditMode();
   const look = looks[curLook];
   const catLooks = looks.filter(l => l.catIdx === curActiveCatIdx);
 
@@ -209,15 +206,6 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
               >
                 &#10005;
               </button>
-              {/* Admin edit button */}
-              {editMode && look && (
-                <button
-                  onClick={() => openLook(look.id)}
-                  className="absolute top-4 right-14 z-[12] bg-[#1a1706] text-[#f5f0e6] font-mono text-[6.5px] tracking-[0.18em] uppercase px-2.5 py-1.5 hover:bg-black transition-colors shadow-md"
-                >
-                  ✎ Edit
-                </button>
-              )}
 
               {/* Mobile-only image strip */}
               {look?.img && (

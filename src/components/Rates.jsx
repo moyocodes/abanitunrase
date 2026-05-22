@@ -137,14 +137,17 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
       {/* Cards grid */}
       <div
-        className="bg-white grid grid-cols-2 lg:grid-cols-4 border-b border-black/[0.07]"
+        className="bg-white grid grid-cols-2 lg:grid-cols-4"
         onMouseEnter={() => setHoveredCard(true)}
         onMouseLeave={() => setHoveredCard(false)}
       >
         {cards.map((r, i) => (
           <motion.div
             key={i}
-            className="border-r border-black/[0.07] last:border-r-0"
+            className={`border-b border-r border-black/[0.07]
+              [&:nth-child(2n)]:border-r-0
+              lg:[&:nth-child(2n)]:border-r lg:last:border-r-0
+              [&:nth-last-child(-n+2)]:border-b-0 lg:border-b-0`}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
@@ -153,12 +156,12 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             <div
               onClick={() => !editMode && setSpotlightIdx(i)}
               className={`relative p-3 md:p-7 cursor-pointer flex flex-col overflow-hidden h-full transition-all duration-500 ${
-                r.featured ? "bg-[#1a1706]" : "bg-white hover:bg-white"
-              } ${!editMode && i === spotlightIdx ? "opacity-100 scale-[1.01] shadow-lg z-10" : editMode ? "opacity-100" : "opacity-60"}`}
+                r.featured ? "bg-[#1a1706]" : "bg-white"
+              } ${!editMode && i === spotlightIdx ? "opacity-100 md:scale-[1.01] md:shadow-lg z-10" : editMode ? "opacity-100" : "opacity-60"}`}
             >
               {/* Ghost tier number */}
               <div
-                className={`absolute -bottom-2 -right-1 font-['Outfit'] font-medium text-[120px] leading-none tracking-tighter pointer-events-none select-none ${
+                className={`absolute -bottom-1 -right-0.5 font-['Outfit'] font-medium text-[70px] md:text-[120px] leading-none tracking-tighter pointer-events-none select-none ${
                   r.featured ? "text-[#f5f0e6]/[0.06]" : "text-[#1a1706]/[0.06]"
                 }`}
               >
@@ -166,21 +169,21 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
               </div>
 
               <div
-                className={`font-mono text-[7.5px] tracking-[0.36em] uppercase mb-3 ${
+                className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.3em] md:tracking-[0.36em] uppercase mb-2 md:mb-3 leading-relaxed ${
                   r.featured ? "text-[#f5f0e6]/30" : "text-[#1a1706]/30"
                 }`}
               >
                 {r.featured
-                  ? "— Most Popular —"
+                  ? "Most Popular"
                   : activeTab === "bridal"
-                  ? `Bridal Package · ${r.tier}`
+                  ? `Bridal · ${r.tier}`
                   : activeTab === "occasion"
                   ? `Occasion · ${r.tier}`
-                  : "Travel Package"}
+                  : "Travel"}
               </div>
 
               <h3
-                className={`font-['Cormorant_Garamond'] italic text-xl md:text-3xl leading-tight mb-3 md:mb-4 ${
+                className={`font-['Cormorant_Garamond'] italic text-[18px] md:text-3xl leading-tight mb-2 md:mb-4 ${
                   r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"
                 }`}
               >
@@ -190,7 +193,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 />
               </h3>
 
-              <div className="flex-1 mb-4">
+              <div className="flex-1 mb-3 md:mb-4">
                 {(r.includes || [
                   `${r.looks} Curated Looks`,
                   "Polaroid Guide Included",
@@ -198,27 +201,27 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 ]).map((inc, j) => (
                   <div
                     key={j}
-                    className={`flex items-start gap-1.5 md:gap-2.5 py-1 md:py-1.5 border-b text-[11px] md:text-[15px] font-['Outfit'] font-light leading-relaxed ${
+                    className={`flex items-start gap-1.5 md:gap-2.5 py-[3px] md:py-1.5 border-b text-[10px] md:text-[15px] font-['Outfit'] font-light leading-snug md:leading-relaxed ${
                       r.featured
-                        ? "text-[#f5f0e6]/80 border-white/[0.08]"
-                        : "text-[#1a1706]/75 border-black/[0.06]"
+                        ? "text-[#f5f0e6]/75 border-white/[0.08]"
+                        : "text-[#1a1706]/70 border-black/[0.06]"
                     }`}
                   >
-                    <span className={`text-[10px] mt-0.5 flex-shrink-0 ${r.featured ? "text-[#f5f0e6]/20" : "text-[#1a1706]/20"}`}>—</span>
+                    <span className={`mt-0.5 flex-shrink-0 text-[8px] md:text-[10px] ${r.featured ? "text-[#f5f0e6]/20" : "text-[#1a1706]/20"}`}>—</span>
                     {inc}
                   </div>
                 ))}
               </div>
 
-              <div className="mb-2">
-                <div className={`font-['Cormorant_Garamond'] text-2xl md:text-4xl tracking-tight ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>
+              <div className="mb-1 md:mb-2">
+                <div className={`font-['Cormorant_Garamond'] text-[22px] md:text-4xl tracking-tight leading-none ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>
                   <EditablePrice
                     value={r.price}
                     onSave={(v) => updateCard(i, { price: v })}
                     featured={r.featured}
                   />
                 </div>
-                <div className={`font-mono text-[7.5px] tracking-[0.22em] uppercase mt-1 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}>
+                <div className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.2em] md:tracking-[0.22em] uppercase mt-0.5 md:mt-1 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}>
                   NGN{activeTab === "occasion" ? " · Per Look" : ""}
                 </div>
               </div>
@@ -230,13 +233,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                     ? onBook(activeTab === "bridal" ? "wedding" : activeTab)
                     : onBookCall?.();
                 }}
-                className={`mt-4 pt-4 border-t font-['Outfit'] font-medium text-sm uppercase tracking-wider text-left flex items-center gap-2.5 transition-colors duration-200 w-full bg-transparent border-l-0 border-r-0 border-b-0 cursor-pointer ${
+                className={`mt-3 md:mt-4 pt-3 md:pt-4 border-t font-['Outfit'] font-medium text-[9px] md:text-sm uppercase tracking-wider text-left flex items-center justify-between transition-colors duration-200 w-full bg-transparent border-l-0 border-r-0 border-b-0 cursor-pointer group/book ${
                   r.featured
                     ? "text-[#f5f0e6]/40 border-white/10 hover:text-[#f5f0e6]"
                     : "text-[#1a1706]/45 border-black/10 hover:text-[#1a1706]"
                 }`}
               >
-                Book this package <span className="text-base">→</span>
+                <span>Book<span className="hidden md:inline"> this package</span></span>
+                <span className="transition-transform duration-200 group-hover/book:translate-x-0.5">→</span>
               </button>
 
               {!editMode && i === spotlightIdx && (

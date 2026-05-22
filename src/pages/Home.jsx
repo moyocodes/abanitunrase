@@ -49,7 +49,6 @@ export default function Home() {
   const [lkActive, setLkActive] = useState(0);
   const [lkProgress, setLkProgress] = useState(0);
   const [lkVisible, setLkVisible] = useState(false);
-  const [lkHeight, setLkHeight] = useState(0);
   const lkStackRef = useRef(null);
 
   /* ── Gallery ── */
@@ -92,16 +91,6 @@ export default function Home() {
     }
   };
 
-  /* ── lkHeight ── */
-  useEffect(() => {
-    // Need at least 2× viewport so sticky has room to dwell on the last card
-    const compute = () =>
-      setLkHeight(window.innerHeight * Math.max(SHOWCASED.length, 2));
-    compute();
-    window.addEventListener("resize", compute);
-    return () => window.removeEventListener("resize", compute);
-  }, []);
-
   /* ── Scroll: intro + lkStack + nav + rates ── */
   useEffect(() => {
     const handleScroll = () => {
@@ -115,7 +104,7 @@ export default function Home() {
         const inLk = sr.top <= 0 && sr.bottom > 0;
         setLkVisible(inLk);
         if (inLk) {
-          setLkActive(Math.min(Math.floor(-sr.top / window.innerHeight), 2));
+          setLkActive(Math.min(Math.floor(-sr.top / window.innerHeight), SHOWCASED.length - 1));
           const rawP = -sr.top / window.innerHeight;
           setLkProgress(Math.max(0, Math.min(rawP, SHOWCASED.length - 1)));
         }
@@ -304,12 +293,11 @@ export default function Home() {
 
           <Lookbook
             lkStackRef={lkStackRef}
-            lkHeight={lkHeight}
             lkProgress={lkProgress}
             lkActive={lkActive}
             lkVisible={lkVisible}
             onOpenStory={openStory}
-            onBook={(type) => setFormType(type)}
+            onOpenLightbox={(idx) => { setLbIdx(idx); setLbOpen(true); }}
           />
           <BeforeYouBook />
         </div>

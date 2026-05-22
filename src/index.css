@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; scroll-snap-type: y proximity; }
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
 body { overflow-x: hidden; max-width: 100%; -webkit-font-smoothing: antialiased; }
 
 /* Scroll-snap — only the sections that are safe to snap to */

@@ -177,7 +177,8 @@ export function AdminEditProvider({ children }) {
 
   return (
     <Ctx.Provider value={{ editMode, openLook, activePanel, openPanel, closePanel, showToast }}>
-      {user && <div className="h-9" />}
+      {/* spacer grows when sections subbar is visible */}
+      {user && <div style={{ height: editMode ? 68 : 36 }} />}
       {children}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9998] bg-[#1a1706] text-[#f5f0e6] font-mono text-[8px] tracking-[0.3em] uppercase px-5 py-2.5 shadow-xl pointer-events-none whitespace-nowrap">
@@ -191,6 +192,7 @@ export function AdminEditProvider({ children }) {
           looksPanel={looksPanel}
           setLooksPanel={setLooksPanel}
           closeLooks={closeLooks}
+          openPanel={openPanel}
         />
       )}
     </Ctx.Provider>
@@ -433,8 +435,16 @@ function LookForm({ lookId, looks, onBack, onSaved }) {
   );
 }
 
+const SECTIONS = [
+  { id: "atelier",    label: "Atelier" },
+  { id: "categories", label: "What We Do" },
+  { id: "gallery",    label: "Gallery" },
+  { id: "cta",        label: "CTA / Contact" },
+  { id: "footer",     label: "Footer" },
+];
+
 /* ── InlineAdminBar ─────────────────────────────────────── */
-function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, closeLooks }) {
+function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, closeLooks, openPanel }) {
   const { signOut } = useAuth();
   const { looks, refetch } = useData();
 
@@ -458,12 +468,6 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
           >
             Bookings
           </Link>
-          <button
-            onClick={() => setLooksPanel("list")}
-            className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#f5f0e6]/55 hover:text-[#f5f0e6] transition-colors"
-          >
-            Manage Looks
-          </button>
         </div>
         <div className="flex items-center gap-4">
           <button
@@ -474,7 +478,7 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
                 : "border-[#f5f0e6]/20 text-[#f5f0e6]/50 hover:border-[#f5f0e6]/40 hover:text-[#f5f0e6]/80"
             }`}
           >
-            {editMode ? "✎ Editing On" : "Edit Mode"}
+            {editMode ? "✎ Editing" : "Edit Mode"}
           </button>
           <button
             onClick={signOut}
@@ -484,6 +488,28 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
           </button>
         </div>
       </div>
+
+      {/* Sections subbar — only when editing */}
+      {editMode && (
+        <div className="fixed top-9 left-0 right-0 z-[9998] h-8 bg-[#f8f7f3] border-b border-[#1a1706]/10 flex items-center px-4 gap-1 overflow-x-auto">
+          <span className="font-mono text-[6px] tracking-[0.3em] uppercase text-[#1a1706]/25 mr-2 flex-shrink-0">Sections</span>
+          <button
+            onClick={() => setLooksPanel("list")}
+            className="flex-shrink-0 font-mono text-[6.5px] tracking-[0.18em] uppercase px-2.5 py-1 border border-[#1a1706]/15 text-[#1a1706]/50 hover:border-[#1a1706]/40 hover:text-[#1a1706] hover:bg-[#1a1706]/[0.03] transition-colors bg-transparent cursor-pointer"
+          >
+            Looks
+          </button>
+          {SECTIONS.map(s => (
+            <button
+              key={s.id}
+              onClick={() => openPanel(s.id)}
+              className="flex-shrink-0 font-mono text-[6.5px] tracking-[0.18em] uppercase px-2.5 py-1 border border-[#1a1706]/15 text-[#1a1706]/50 hover:border-[#1a1706]/40 hover:text-[#1a1706] hover:bg-[#1a1706]/[0.03] transition-colors bg-transparent cursor-pointer"
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Looks side drawer */}
       {panelOpen && (
@@ -566,20 +592,8 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
    edit-icon button + slide-in panel + field helpers.
 ═══════════════════════════════════════════════════════════ */
 
-/* ── SectionEditButton — amber pencil icon per section ── */
-export function SectionEditButton({ panelId }) {
-  const { editMode, openPanel } = useEditMode();
-  if (!editMode) return null;
-  return (
-    <button
-      onClick={(e) => { e.stopPropagation(); openPanel(panelId); }}
-      title="Edit section"
-      className="absolute top-3 right-3 z-[200] flex items-center gap-1 font-mono text-[6.5px] tracking-[0.22em] uppercase px-2.5 py-1.5 bg-amber-400 text-[#1a1706] hover:bg-amber-300 transition-colors shadow cursor-pointer border-none"
-    >
-      ✎ Edit
-    </button>
-  );
-}
+/* ── SectionEditButton — replaced by sections subbar; renders nothing ── */
+export function SectionEditButton() { return null; }
 
 /* ── SectionPanel — slide-in drawer, only one open at a time ── */
 export function SectionPanel({ panelId, title, children }) {
