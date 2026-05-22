@@ -21,14 +21,14 @@ export default function NotFound() {
       </h1>
       <p className="font-body text-[#f5f0e6]/38 text-sm mb-12 max-w-xs leading-relaxed">
         The page you&apos;re looking for may have moved or never existed.
-        Let&apos;s get you back to the atelier.
+        Let&apos;s get you back to the styling house.
       </p>
 
       <Link
         to="/"
         className="font-mono text-[9px] tracking-[0.3em] uppercase px-10 py-3.5 border border-[#f5f0e6]/18 text-[#f5f0e6]/50 hover:border-[#f5f0e6]/45 hover:text-[#f5f0e6] transition-all duration-300"
       >
-        ← Back to the Atelier
+        ← Back to the Styling House
       </Link>
     </div>
   );

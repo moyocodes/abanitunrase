@@ -45,7 +45,7 @@ export default function FormModal({ open, onClose, children, title }) {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-black/[0.07] sticky top-0 bg-white z-10">
-              <span className="font-heading italic text-[#1a1706] text-sm tracking-[0.15em]">
+              <span className="text-[#1a1706] text-sm tracking-[0.15em]">
                 ABÁNITÚNRASE
               </span>
               <button

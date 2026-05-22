@@ -7,6 +7,7 @@ import {
   getPricing,
   savePricing,
 } from "@/lib/firestore";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import {
   LOOKS as STATIC_LOOKS,
   BRIDAL,
@@ -14,6 +15,131 @@ import {
   TRAVEL,
   fmt,
 } from "@/data";
+
+/* ── Shared upload-capable field helpers ─────────────────── */
+function ULbl({ children }) {
+  return (
+    <label className="block font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/35 mb-1.5">
+      {children}
+    </label>
+  );
+}
+
+function UploadImageField({ label, value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file);
+      onChange(url);
+    } catch (ex) {
+      alert(ex.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <ULbl>{label}</ULbl>
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Paste URL or upload →"
+          className="flex-1 bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 text-sm font-body outline-none focus:border-[#1a1706]/40 transition-colors"
+        />
+        <label className={`shrink-0 cursor-pointer font-mono text-[6.5px] tracking-[0.2em] uppercase px-2.5 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/40 hover:text-[#1a1706]/80 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          {uploading ? "…" : "Upload"}
+          <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+        </label>
+      </div>
+      {value && <img src={value} alt="" className="w-full h-20 object-cover saturate-0 opacity-40 mt-2" />}
+    </div>
+  );
+}
+
+function UploadMediaField({ label, value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file);
+      onChange(url);
+    } catch (ex) {
+      alert(ex.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <ULbl>{label}</ULbl>
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Paste URL or upload →"
+          className="flex-1 bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 text-sm font-body outline-none focus:border-[#1a1706]/40 transition-colors"
+        />
+        <label className={`shrink-0 cursor-pointer font-mono text-[6.5px] tracking-[0.2em] uppercase px-2.5 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/40 hover:text-[#1a1706]/80 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          {uploading ? "…" : "Upload"}
+          <input type="file" accept="image/*,video/*" className="hidden" onChange={handleFile} disabled={uploading} />
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function UploadThumbsField({ label, value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file);
+      const existing = value?.trim() ? value.trim() + "\n" : "";
+      onChange(existing + url);
+    } catch (ex) {
+      alert(ex.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <ULbl>{label}</ULbl>
+        <label className={`cursor-pointer font-mono text-[6.5px] tracking-[0.2em] uppercase px-2.5 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/40 hover:text-[#1a1706]/80 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          {uploading ? "…" : "+ Upload"}
+          <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+        </label>
+      </div>
+      <textarea
+        rows={4}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="One URL per line"
+        className="w-full bg-white border border-[#1a1706]/12 p-3 text-[#1a1706]/80 text-xs font-body outline-none focus:border-[#1a1706]/30 transition-colors resize-none"
+      />
+    </div>
+  );
+}
 
 /* ─── Looks Tab ─────────────────────────────────────────────────────────── */
 function LooksTab() {
@@ -124,12 +250,27 @@ function LooksTab() {
             {field("Category (Bridal / Occasion / Travel)", "cat")}
             {field("Sub-heading", "sub")}
             {field("Category Index (0=Bridal 1=Occasion 2=Travel)", "catIdx")}
-            {field("Main Image URL", "img")}
-            {field("Video URL", "video")}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <UploadImageField
+              label="Main Image"
+              value={editing.img}
+              onChange={(v) => setEditing((d) => ({ ...d, img: v }))}
+            />
+            <UploadMediaField
+              label="Video"
+              value={editing.video}
+              onChange={(v) => setEditing((d) => ({ ...d, video: v }))}
+            />
           </div>
 
           <div className="mb-6">
-            {field("Thumbnail URLs (one per line)", "thumbs", true)}
+            <UploadThumbsField
+              label="Thumbnails (one per line)"
+              value={editing.thumbs}
+              onChange={(v) => setEditing((d) => ({ ...d, thumbs: v }))}
+            />
           </div>
           <div className="mb-8">{field("Story", "story", true)}</div>
 

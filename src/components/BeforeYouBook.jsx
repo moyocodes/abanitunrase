@@ -38,7 +38,7 @@ export default function BeforeYouBook() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-[#f4f3f0] border-t border-[rgba(26,23,6,0.06)]">
+    <section ref={sectionRef} className="bg-[#f4f3f0] border-t border-[#1a1706]/6">
       <div className="px-6 md:px-16 py-10 md:py-12 max-w-[1100px] mx-auto">
 
         {/* Header */}
@@ -51,13 +51,13 @@ export default function BeforeYouBook() {
         >
           <div>
             <motion.div
-              className="flex items-center gap-3.5 mb-3 font-mono text-[8px] tracking-[0.4em] uppercase text-[rgba(26,23,6,0.4)]"
+              className="flex items-center gap-3.5 mb-3 font-mono text-[8px] tracking-[0.4em] uppercase text-[#1a1706]/40"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             >
-              <span className="block w-6 h-px bg-[rgba(26,23,6,0.2)]" />
+              <span className="block w-6 h-px bg-[#1a1706]/20" />
               Before You Book
             </motion.div>
             <motion.h2
@@ -71,7 +71,7 @@ export default function BeforeYouBook() {
             </motion.h2>
           </div>
           <motion.p
-            className="font-mono text-[8px] tracking-[0.24em] uppercase text-[rgba(26,23,6,0.3)] leading-[2.2] text-right hidden md:block"
+            className="font-mono text-[8px] tracking-[0.24em] uppercase text-[#1a1706]/30 leading-[2.2] text-right hidden sm:block"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -82,11 +82,11 @@ export default function BeforeYouBook() {
         </motion.div>
 
         {/* FAQ list — each item slides up with stagger */}
-        <div className="border-t border-[rgba(26,23,6,0.08)]">
+        <div className="border-t border-[#1a1706]/8">
           {FAQ.map((item, i) => (
             <motion.div
               key={i}
-              className="border-b border-[rgba(26,23,6,0.08)]"
+              className="border-b border-[#1a1706]/8"
               initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-30px" }}
@@ -99,7 +99,7 @@ export default function BeforeYouBook() {
                 <span className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(16px,1.6vw,22px)] leading-snug group-hover:opacity-70 transition-opacity duration-200">
                   {item.q}
                 </span>
-                <span className={`font-mono text-[18px] text-[rgba(26,23,6,0.3)] flex-shrink-0 leading-none transition-transform duration-300 ${open === i ? "rotate-45" : "rotate-0"}`}>
+                <span className={`font-mono text-[18px] text-[#1a1706]/30 flex-shrink-0 leading-none transition-transform duration-300 ${open === i ? "rotate-45" : "rotate-0"}`}>
                   +
                 </span>
               </button>
@@ -112,7 +112,7 @@ export default function BeforeYouBook() {
                     transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                     className="overflow-hidden"
                   >
-                    <p className="font-['Outfit'] text-[rgba(26,23,6,0.75)] text-[clamp(14px,1.3vw,16px)] leading-[1.85] font-light pb-4 pr-6 md:pr-16 max-w-3xl">
+                    <p className="font-['Outfit'] text-[#1a1706]/75 text-[clamp(14px,1.3vw,16px)] leading-[1.85] font-light pb-4 pr-6 md:pr-16 max-w-3xl">
                       {item.a}
                     </p>
                   </motion.div>

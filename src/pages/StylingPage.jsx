@@ -23,7 +23,7 @@ const TYPE_META = {
   },
   travel: {
     heading: "Kájáyelo",
-    yoruba: "The Travel Styling Experience",
+    yoruba: "The Travel Styling House",
     description:
       "Destination-based wardrobe curation with a physical Polaroid Guide to your trip. Multiple complete looks, one carry-on, zero compromises. We build wardrobes that travel light and arrive heavy.",
     cta: "Plan Your Travel Wardrobe",
@@ -91,14 +91,14 @@ export default function StylingPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30 pointer-events-none" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <div className="font-mono text-[7px] md:text-[8px] tracking-[0.5em] uppercase text-[rgba(245,240,230,0.55)] mb-4">
+          <div className="font-mono text-[7px] md:text-[8px] tracking-[0.5em] uppercase text-[#f5f0e6]/55 mb-4">
             {meta.yoruba}
           </div>
           <h1 className="font-['Cormorant_Garamond'] italic text-[clamp(48px,8vw,104px)] text-[#f5f0e6] leading-[1.02] tracking-[-0.02em] drop-shadow-lg">
             {meta.heading}
           </h1>
-          <div className="w-12 h-px bg-[rgba(245,240,230,0.28)] my-5" />
-          <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[rgba(245,240,230,0.6)] leading-relaxed font-light max-w-lg">
+          <div className="w-12 h-px bg-[#f5f0e6]/28 my-5" />
+          <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[#f5f0e6]/60 leading-relaxed font-light max-w-lg">
             {meta.description}
           </p>
         </div>
@@ -128,11 +128,11 @@ export default function StylingPage() {
               The Rates.
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-white/[0.06]">
+          <div className="grid grid-cols-4 border-t border-white/[0.06]">
             {pricing.map((r, i) => (
               <div
                 key={i}
-                className={`relative p-6 md:p-8 border-r border-white/[0.06] last:border-r-0 flex flex-col overflow-hidden ${
+                className={`relative p-3 sm:p-6 md:p-8 border-r border-white/[0.06] last:border-r-0 flex flex-col overflow-hidden ${
                   r.featured ? "bg-[#1a1706]" : "bg-[#0f0f0f]"
                 }`}
               >
@@ -183,7 +183,7 @@ export default function StylingPage() {
           <h2 className="font-['Cormorant_Garamond'] italic text-[clamp(28px,3.5vw,44px)] text-[#1a1706] leading-tight tracking-tight mb-10">
             From the {meta.heading} Archive
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3 md:gap-4">
             {categoryLooks.map((look) => {
               const globalIdx = looks.indexOf(look);
               return (
@@ -242,7 +242,7 @@ export default function StylingPage() {
           ABÁNITÚNRASE
         </span>
         <span className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/20">
-          Lagos Styling Atelier
+          Lagos Styling House
         </span>
       </footer>
     </div>

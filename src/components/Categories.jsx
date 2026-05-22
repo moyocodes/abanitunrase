@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { fmt } from "../data.js";
 import { useData } from "@/providers";
-import { EditableText, EditableImage } from "@/components/AdminBar";
+import { EditableText, EditableImage, SectionEditButton, SectionPanel, PanelField, PanelImageField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
 
 const panelReveal = {
@@ -15,7 +15,34 @@ export default function Categories({ onBook }) {
   const [expandedCat, setExpandedCat] = useState(null);
   const navigate = useNavigate();
   const { categories, bridal, occasion, travel, refetch } = useData();
+  const { activePanel, showToast } = useEditMode();
   const RATES = { bridal, occasion, travel };
+
+  const [draft, setDraft] = useState([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "categories" && categories?.length) {
+      setDraft(categories.map((c) => ({ ...c })));
+    }
+  }, [activePanel, categories]);
+
+  const isDirty = draft.length > 0 && JSON.stringify(draft) !== JSON.stringify(categories);
+
+  const patchDraft = (type, field, val) =>
+    setDraft((prev) => prev.map((c) => c.type === type ? { ...c, [field]: val } : c));
+
+  const handleSave = async () => {
+    if (!isDirty) return;
+    setSaving(true);
+    try {
+      await saveSettings("categories", { items: draft });
+      refetch();
+      showToast("Categories saved ✓");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const toggleRates = (type) => setExpandedCat(prev => prev === type ? null : type);
   const goToStories = (catType) => navigate("/stories/" + catType);
@@ -27,25 +54,57 @@ export default function Categories({ onBook }) {
   };
 
   return (
-    <section id="categories" className="bg-white border-t border-[rgba(26,23,6,0.06)]">
+    <section id="categories" className="bg-white border-t border-[#1a1706]/6 relative">
+      <SectionEditButton panelId="categories" />
+      <SectionPanel panelId="categories" title="What We Do">
+        <div className="flex flex-col gap-6">
+          {(draft.length ? draft : (categories ?? [])).map((cat) => (
+            <div key={cat.type} className="flex flex-col gap-3 pb-5 border-b border-[#1a1706]/7 last:border-b-0 last:pb-0">
+              <div className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 mb-1">{cat.type}</div>
+              <PanelImageField
+                label="Image"
+                value={draft.find((c) => c.type === cat.type)?.img ?? cat.img}
+                onChange={(v) => patchDraft(cat.type, "img", v)}
+              />
+              <PanelField
+                label="Title"
+                value={draft.find((c) => c.type === cat.type)?.title ?? cat.title}
+                onChange={(v) => patchDraft(cat.type, "title", v)}
+              />
+              <PanelField
+                label="Yoruba Label"
+                value={draft.find((c) => c.type === cat.type)?.yoruba ?? cat.yoruba}
+                onChange={(v) => patchDraft(cat.type, "yoruba", v)}
+              />
+              <PanelField
+                label="Description"
+                value={draft.find((c) => c.type === cat.type)?.desc ?? cat.desc}
+                onChange={(v) => patchDraft(cat.type, "desc", v)}
+                multiline
+              />
+            </div>
+          ))}
+          <PanelSaveBtn onClick={handleSave} saving={saving} disabled={!isDirty} />
+        </div>
+      </SectionPanel>
       {/* Section header */}
       <motion.div
-        className="px-6 md:px-16 py-14 md:py-20 flex items-end justify-between gap-6 border-b border-[rgba(26,23,6,0.06)]"
+        className="px-6 md:px-16 py-14 md:py-20 flex items-end justify-between gap-6 border-b border-[#1a1706]/6"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         variants={panelReveal}
       >
         <div>
-          <div className="flex items-center gap-3 mb-4 font-['DM_Mono'] text-[8px] tracking-[0.4em] uppercase text-[rgba(26,23,6,0.4)]">
-            <span className="block w-6 h-px bg-[rgba(26,23,6,0.2)]" />
+          <div className="flex items-center gap-3 mb-4 font-['DM_Mono'] text-[8px] tracking-[0.4em] uppercase text-[#1a1706]/40">
+            <span className="block w-6 h-px bg-[#1a1706]/20" />
             What We Do
           </div>
           <h2 className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(40px,5vw,70px)] text-[#1a1706] leading-none tracking-[-0.02em]">
             Three ways<br />to dress well.
           </h2>
         </div>
-        <p className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[rgba(26,23,6,0.28)] leading-[2] max-w-[280px] text-right flex-shrink-0 hidden md:block">
+        <p className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[#1a1706]/28 leading-[2] max-w-[280px] text-right flex-shrink-0 hidden md:block">
           Browse stories by category<br />or click See Rates to explore pricing
         </p>
       </motion.div>
@@ -54,24 +113,24 @@ export default function Categories({ onBook }) {
       {categories.map((cat, i) => {
         const isFlipped = i % 2 === 1;
         return (
-          <div key={cat.type} id={"cpanel-" + cat.type} className="border-b border-[rgba(26,23,6,0.06)] last:border-b-0">
+          <div key={cat.type} id={"cpanel-" + cat.type} className="border-b border-[#1a1706]/6 last:border-b-0">
             <motion.div
-              className={`grid grid-cols-1 ${isFlipped ? "md:grid-cols-[3fr_2fr]" : "md:grid-cols-[2fr_3fr]"}`}
+              className="grid grid-cols-[2fr_3fr]"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-60px" }}
               variants={panelReveal}
             >
               {/* Image — editable */}
-              <div className={`relative overflow-hidden group bg-[#f0efeb] flex items-center justify-center h-[60vh] md:h-[75vh] ${!isFlipped ? "md:order-last" : ""}`}>
+              <div className={`relative overflow-hidden group bg-[#f0efeb] flex items-center justify-center h-[55vh] md:h-[75vh] ${!isFlipped ? "order-last" : ""}`}>
                 <EditableImage
                   src={cat.img}
                   alt={cat.title}
-                  className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   overlay
                   onUpload={async (url) => saveCategory({ ...cat, img: url })}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,23,6,0.45)] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1706]/45 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-6 left-6 right-6 pointer-events-none select-none">
                   <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/70 text-[20px] leading-none">{cat.title}</div>
                   <div className="font-['DM_Mono'] text-[7px] tracking-[0.32em] uppercase text-white/30 mt-1.5">{cat.looks} looks · {cat.type}</div>
@@ -79,7 +138,7 @@ export default function Categories({ onBook }) {
               </div>
 
               {/* Text panel */}
-              <div className={`flex flex-col justify-center px-8 md:px-14 py-16 md:py-28 relative overflow-hidden border-[rgba(26,23,6,0.06)] ${isFlipped ? "md:border-l" : "md:border-r"}`}>
+              <div className={`flex flex-col justify-center px-3 md:px-14 py-6 md:py-28 relative overflow-hidden border-[#1a1706]/6 ${isFlipped ? "border-l" : "border-r"}`}>
                 <motion.div
                   className="absolute bottom-[-0.08em] right-[-0.02em] font-['Outfit'] font-medium text-transparent leading-none tracking-[-0.05em] select-none pointer-events-none text-[clamp(100px,13vw,155px)] ghost-stroke-dark"
                   animate={{ opacity: [0.55, 1, 0.55] }}
@@ -90,7 +149,7 @@ export default function Categories({ onBook }) {
 
                 <div className="relative z-[1]">
                   <motion.div
-                    className="font-['DM_Mono'] text-[7.5px] tracking-[0.38em] uppercase text-[rgba(26,23,6,0.35)] mb-5"
+                    className="font-['DM_Mono'] text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/35 mb-5"
                     initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
@@ -112,13 +171,13 @@ export default function Categories({ onBook }) {
                     />
                   </motion.h3>
                   <motion.div
-                    className="w-8 h-px bg-[rgba(26,23,6,0.15)] mb-6"
+                    className="w-8 h-px bg-[#1a1706]/15 mb-6"
                     initial={{ scaleX: 0, originX: 0 }} whileInView={{ scaleX: 1 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
                   />
                   <motion.p
-                    className="font-['Outfit'] text-[rgba(26,23,6,0.7)] text-[clamp(15px,1.3vw,17px)] leading-[1.88] font-light mb-8 max-w-sm"
+                    className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(15px,1.3vw,17px)] leading-[1.88] font-light mb-8 max-w-sm"
                     initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
@@ -130,12 +189,12 @@ export default function Categories({ onBook }) {
                     />
                   </motion.p>
                   <motion.div
-                    className="flex items-center gap-2.5 font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.35)] mb-8"
+                    className="flex items-center gap-2.5 font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[#1a1706]/35 mb-8"
                     initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.36 }}
                   >
-                    <span className="block w-4 h-px bg-[rgba(26,23,6,0.14)]" />
+                    <span className="block w-4 h-px bg-[#1a1706]/14" />
                     {cat.looks} looks
                   </motion.div>
                   <motion.div
@@ -152,7 +211,7 @@ export default function Categories({ onBook }) {
                       <span className={`transition-transform duration-300 inline-block ${expandedCat === cat.type ? "-rotate-180" : "rotate-0"}`}>↓</span>
                     </button>
                     <button
-                      className="font-['DM_Mono'] text-[8.5px] tracking-[0.18em] uppercase px-5 py-[11px] bg-transparent text-[rgba(26,23,6,0.5)] border border-[rgba(26,23,6,0.2)] cursor-pointer transition-all duration-200 hover:text-[#1a1706] hover:border-[rgba(26,23,6,0.55)]"
+                      className="font-['DM_Mono'] text-[8.5px] tracking-[0.18em] uppercase px-5 py-[11px] bg-transparent text-[#1a1706]/50 border border-[#1a1706]/20 cursor-pointer transition-all duration-200 hover:text-[#1a1706] hover:border-[#1a1706]/55"
                       onClick={() => goToStories(cat.type)}
                     >
                       Read Stories
@@ -166,52 +225,75 @@ export default function Categories({ onBook }) {
             <AnimatePresence>
               {expandedCat === cat.type && (
                 <motion.div
-                  className="bg-white border-t border-[rgba(26,23,6,0.07)] overflow-hidden"
+                  className="bg-white border-t border-[#1a1706]/7 overflow-hidden"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <div className="px-6 md:px-16 py-10 md:py-12">
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(24px,2.8vw,38px)] text-[#1a1706] tracking-[-0.02em]">
-                        {cat.type === "bridal" ? "Bridal Styling" : cat.type === "occasion" ? "Occasion Styling" : "Kájáyelo Travel"} Rates
+                  <div className="px-6 md:px-16 py-8 md:py-10">
+                    <div className="flex items-end justify-between mb-7">
+                      <div>
+                        <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mb-2">Pricing</div>
+                        <div className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(22px,2.6vw,34px)] text-[#1a1706] tracking-[-0.02em] leading-none">
+                          {cat.type === "bridal" ? "Bridal Styling" : cat.type === "occasion" ? "Occasion Styling" : "Kájáyelo Travel"}
+                        </div>
                       </div>
                       <button
-                        className="flex items-center gap-2 font-['DM_Mono'] text-[8px] tracking-[0.28em] uppercase text-[rgba(26,23,6,0.35)] bg-transparent border border-[rgba(26,23,6,0.16)] px-4 py-2 cursor-pointer transition-all duration-200 hover:text-[#1a1706] hover:border-[rgba(26,23,6,0.45)]"
+                        className="flex items-center gap-2 font-['DM_Mono'] text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/30 bg-transparent border border-[#1a1706]/14 px-3.5 py-2 cursor-pointer transition-all duration-200 hover:text-[#1a1706] hover:border-[#1a1706]/40"
                         onClick={() => setExpandedCat(null)}
                       >
                         Close ×
                       </button>
                     </div>
-                    <div className="grid gap-px border border-[rgba(26,23,6,0.06)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] bg-[rgba(26,23,6,0.06)]">
+                    <div className="grid grid-cols-2 md:grid-cols-4">
                       {(RATES[cat.type] ?? []).map((r, idx) => (
                         <div
                           key={idx}
-                          className={`relative overflow-hidden flex flex-col px-8 py-9 transition-[background] duration-[250ms] ${r.featured ? "bg-[#1a1706] hover:bg-[#111]" : "bg-white hover:bg-[#fafaf9]"}`}
+                          className={`relative overflow-hidden flex flex-col p-5 md:p-8 border-r border-b border-[#1a1706]/7 last:border-r-0 md:[&:nth-child(2)]:border-r md:[&:nth-child(3)]:border-r transition-[background] duration-[250ms] ${r.featured ? "bg-[#1a1706] hover:bg-[#111]" : "bg-white hover:bg-[#fafaf9]"}`}
                         >
-                          <div className={`font-['Outfit'] font-medium text-transparent pointer-events-none absolute bottom-[-0.08em] right-[-0.02em] leading-none text-[clamp(50px,7vw,80px)] ${r.featured ? "ghost-stroke-featured" : "ghost-stroke"}`}>
+                          {/* Ghost tier */}
+                          <div className={`font-['Outfit'] font-medium text-transparent pointer-events-none select-none absolute bottom-[-0.06em] right-[-0.02em] leading-none text-[clamp(60px,8vw,96px)] ${r.featured ? "ghost-stroke-featured" : "ghost-stroke"}`}>
                             {r.tier || r.looks}
                           </div>
-                          {r.featured && (
-                            <div className="font-['DM_Mono'] text-[7px] tracking-[0.32em] uppercase text-[rgba(245,240,230,0.4)] mb-4">Most Popular</div>
-                          )}
-                          <div className={`font-['Cormorant_Garamond'] italic text-[clamp(20px,2vw,28px)] mb-3 leading-[1.1] ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>{r.package}</div>
-                          <div className={`font-['Outfit'] text-[clamp(15px,1.3vw,17px)] leading-[2] mb-5 flex-1 font-light ${r.featured ? "text-[rgba(245,240,230,0.65)]" : "text-[rgba(26,23,6,0.65)]"}`}>
-                            {(r.includes || [`${r.looks} Curated Looks`, "Polaroid Guide Included", "2-Week Notice Required"]).map((inc, j) => (
-                              <div key={j}>— {inc}</div>
-                            ))}
+
+                          <div className="relative z-[1] flex flex-col h-full">
+                            {/* Badge */}
+                            <div className={`font-['DM_Mono'] text-[7px] tracking-[0.34em] uppercase mb-4 ${r.featured ? "text-[#f5f0e6]/45" : "text-[#1a1706]/28"}`}>
+                              {r.featured ? "— Most Popular —" : cat.type === "bridal" ? `Bridal · ${r.tier}` : cat.type === "occasion" ? `Occasion · ${r.tier}` : "Travel Package"}
+                            </div>
+
+                            {/* Package name */}
+                            <div className={`font-['Cormorant_Garamond'] italic text-[clamp(18px,1.8vw,26px)] leading-[1.1] mb-4 ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>{r.package}</div>
+
+                            {/* Divider */}
+                            <div className={`w-6 h-px mb-4 ${r.featured ? "bg-[#f5f0e6]/15" : "bg-[#1a1706]/12"}`} />
+
+                            {/* Includes */}
+                            <div className="flex-1 mb-5">
+                              {(r.includes || [`${r.looks} Curated Looks`, "Polaroid Guide Included", "2-Week Notice Required"]).map((inc, j) => (
+                                <div key={j} className={`flex items-start gap-2 py-1 md:py-1.5 border-b text-[11px] md:text-[13px] font-['Outfit'] font-light leading-relaxed ${r.featured ? "text-[#f5f0e6]/70 border-[#f5f0e6]/8" : "text-[#1a1706]/65 border-[#1a1706]/6"}`}>
+                                  <span className={`mt-0.5 flex-shrink-0 text-[9px] ${r.featured ? "text-[#f5f0e6]/20" : "text-[#1a1706]/18"}`}>—</span>
+                                  {inc}
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Price */}
+                            <div className={`font-['Cormorant_Garamond'] text-[clamp(24px,2.2vw,36px)] leading-none mb-0.5 ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>{fmt(r.price)}</div>
+                            <div className={`font-['DM_Mono'] text-[6.5px] md:text-[7.5px] tracking-[0.24em] uppercase mb-5 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}>
+                              NGN{cat.type === "occasion" ? " · Per Look" : ""}
+                            </div>
+
+                            {/* CTA */}
+                            <button
+                              className={`flex items-center justify-between font-['DM_Mono'] text-[7.5px] md:text-[8px] tracking-[0.2em] uppercase pt-3 pb-0 bg-transparent border-none cursor-pointer text-left w-full transition-all duration-200 group/book ${r.featured ? "text-[#f5f0e6]/45 hover:text-[#f5f0e6] border-t border-[#f5f0e6]/12" : "text-[#1a1706]/40 hover:text-[#1a1706] border-t border-[#1a1706]/8"}`}
+                              onClick={() => onBook?.(cat.type === "bridal" ? "wedding" : cat.type)}
+                            >
+                              Book this
+                              <span className="transition-transform duration-200 group-hover/book:translate-x-1">→</span>
+                            </button>
                           </div>
-                          <div className={`font-['Cormorant_Garamond'] text-[clamp(28px,2.4vw,38px)] mb-1 ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>{fmt(r.price)}</div>
-                          <div className={`font-['DM_Mono'] text-[7.5px] tracking-[0.24em] uppercase mb-5 ${r.featured ? "text-[rgba(245,240,230,0.28)]" : "text-[rgba(26,23,6,0.28)]"}`}>
-                            NGN{cat.type === "occasion" ? " · Per Look" : ""}
-                          </div>
-                          <button
-                            className={`flex items-center gap-2.5 font-['DM_Mono'] text-[8px] tracking-[0.2em] uppercase py-3 bg-transparent border-none cursor-pointer text-left w-full transition-colors duration-200 after:content-['→'] after:text-[14px] after:transition-transform after:duration-200 hover:after:translate-x-1 ${r.featured ? "text-[rgba(245,240,230,0.4)] hover:text-[#f5f0e6] border-t border-[rgba(245,240,230,0.1)]" : "text-[rgba(26,23,6,0.4)] hover:text-[#1a1706] border-t border-[rgba(26,23,6,0.08)]"}`}
-                            onClick={() => onBook?.(cat.type === "bridal" ? "wedding" : cat.type)}
-                          >
-                            Book this package
-                          </button>
                         </div>
                       ))}
                     </div>

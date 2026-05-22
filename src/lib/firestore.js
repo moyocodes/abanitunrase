@@ -112,5 +112,26 @@ export async function getSettings() {
 
 export async function saveSettings(section, data) {
   guard();
-  await setDoc(doc(db, "settings", section), data);
+  await setDoc(doc(db, "settings", section), data, { merge: true });
+}
+
+export async function getGallery() {
+  if (!db) return [];
+  const q = query(collection(db, "gallery"), orderBy("createdAt", "asc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function addGalleryItem(item) {
+  guard();
+  const ref = await addDoc(collection(db, "gallery"), {
+    ...item,
+    createdAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function removeGalleryItem(id) {
+  guard();
+  await deleteDoc(doc(db, "gallery", id));
 }

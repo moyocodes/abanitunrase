@@ -5,7 +5,6 @@ import {
   INTRO_STEPS,
   INTRO_TRIGGER,
   SHOWCASED,
-  PLACEHOLDER_MEDIA,
 } from "@/data";
 import Nav from "@/components/Nav";
 import BookCallModal from "@/components/BookCallModal";
@@ -31,7 +30,7 @@ import RatesStickyBar from "@/components/RatesStickyBar";
 
 export default function Home() {
   const location = useLocation();
-  const { looks: LOOKS } = useData();
+  const { looks: LOOKS, galleryItems, galleryUploading, addGallery, removeGallery, clearGallery } = useData();
 
   /* ── Modals ── */
   const [bookCallOpen, setBookCallOpen] = useState(false);
@@ -54,7 +53,6 @@ export default function Home() {
   const lkStackRef = useRef(null);
 
   /* ── Gallery ── */
-  const [collageItems, setCollageItems] = useState([...PLACEHOLDER_MEDIA]);
   const [dragOver, setDragOver] = useState(false);
 
   /* ── Rates ── */
@@ -64,8 +62,6 @@ export default function Home() {
   /* ── Style Quiz ── */
   const [quizOpen, setQuizOpen] = useState(false);
 
-  /* ── Nav ── */
-  const [navHidden, setNavHidden] = useState(true);
 
   /* ── Open story from StoriesPage redirect via location state ── */
   useEffect(() => {
@@ -84,36 +80,13 @@ export default function Home() {
   };
 
   /* ── Gallery handlers ── */
-  const ALLOWED_TYPES = [
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "image/gif",
-    "image/webp",
-    "video/mp4",
-    "video/quicktime",
-  ];
-  const handleFiles = (files) => {
-    const newItems = Array.from(files)
-      .filter((f) => ALLOWED_TYPES.includes(f.type))
-      .map((f) => ({
-        url: URL.createObjectURL(f),
-        type: f.type.startsWith("video") ? "video" : "image",
-        name: f.name,
-      }));
-    if (newItems.length) setCollageItems((prev) => [...prev, ...newItems]);
-  };
   const removeCollageItem = (idx, e) => {
     e.stopPropagation();
-    setCollageItems((prev) => {
-      const item = prev[idx];
-      if (item.url.startsWith("blob:")) URL.revokeObjectURL(item.url);
-      return prev.filter((_, i) => i !== idx);
-    });
+    removeGallery(idx);
   };
   const openCollageItem = (idx) => {
-    const item = collageItems[idx];
-    if (item.type === "image") {
+    const item = galleryItems[idx];
+    if (item?.type === "image") {
       setLbCustom({ src: item.url, title: item.name, sub: "The Archive" });
       setLbOpen(true);
     }
@@ -121,8 +94,9 @@ export default function Home() {
 
   /* ── lkHeight ── */
   useEffect(() => {
+    // Need at least 2× viewport so sticky has room to dwell on the last card
     const compute = () =>
-      setLkHeight(window.innerHeight * (SHOWCASED.length + 1));
+      setLkHeight(window.innerHeight * Math.max(SHOWCASED.length, 2));
     compute();
     window.addEventListener("resize", compute);
     return () => window.removeEventListener("resize", compute);
@@ -136,7 +110,6 @@ export default function Home() {
         setIntroStep(Math.min(Math.floor(s / INTRO_TRIGGER), INTRO_STEPS - 1));
         if (s > INTRO_TRIGGER * INTRO_STEPS) setIntroDismissed(true);
       }
-      const inHero = s < window.innerHeight * 0.85;
       if (lkStackRef.current) {
         const sr = lkStackRef.current.getBoundingClientRect();
         const inLk = sr.top <= 0 && sr.bottom > 0;
@@ -147,12 +120,6 @@ export default function Home() {
           setLkProgress(Math.max(0, Math.min(rawP, SHOWCASED.length - 1)));
         }
       }
-      const lkSection = document.getElementById("lookbook-section");
-      const inLkSection = lkSection
-        ? lkSection.getBoundingClientRect().top < window.innerHeight &&
-          lkSection.getBoundingClientRect().bottom > 0
-        : false;
-      setNavHidden(inHero || inLkSection);
       const ratesEl = document.getElementById("rates");
       const galleryEl = document.getElementById("gallery-section");
       if (ratesEl && galleryEl) {
@@ -270,17 +237,18 @@ export default function Home() {
             },
             {
               big: (
-                <span className="text-[clamp(32px,5.5vw,68px)]">
-                  Arrive in looks that stand out,
+                <span className="text-[clamp(18px,5vw,68px)]">
+                  Arrive in looks that stands out,
                   <br />
-                  stay clean, remain timeless.
+                  stays clean, remains timeless.
                 </span>
               ),
               med: null,
             },
             {
               big: "ABÁNITÚNRASE.",
-              med: "A Lagos Styling Atelier",
+              med: "A Lagos Styling House.",
+              plain: true,
             },
           ].map((ch, i) => (
             <div
@@ -291,11 +259,11 @@ export default function Home() {
                   : "opacity-0 translate-y-[18px]"
               }`}
             >
-              <div className="font-heading italic font-normal text-[clamp(52px,9vw,100px)] text-[#f5f0e6] leading-[1.05] tracking-[-0.025em]">
+              <div className={`${ch.plain ? "tracking-[0.12em]" : "font-heading italic tracking-[-0.025em]"} font-normal text-[clamp(28px,8vw,100px)] text-[#f5f0e6] leading-[1.05]`}>
                 {ch.big}
               </div>
               {ch.med && (
-                <div className="font-body text-[clamp(18px,2.2vw,24px)] text-[#f5f0e6]/50 leading-[1.7] mt-3.5 font-light">
+                <div className="font-body text-[clamp(13px,2vw,24px)] text-[#f5f0e6]/50 leading-[1.7] mt-3 font-light">
                   {ch.med}
                 </div>
               )}
@@ -311,7 +279,7 @@ export default function Home() {
         </div>
       </div>
 
-      <Nav hidden={navHidden} onBookCall={() => setBookCallOpen(true)} />
+      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} />
 
       <BookCallModal
         open={bookCallOpen}
@@ -357,12 +325,14 @@ export default function Home() {
         <div id="gallery-section" className="relative z-[40]">
           <div className="sticky top-0">
             <Gallery
-              items={collageItems}
-              onAdd={handleFiles}
+              items={galleryItems}
+              onAdd={addGallery}
               onRemove={removeCollageItem}
+              onClear={clearGallery}
               onOpen={openCollageItem}
               dragOver={dragOver}
               setDragOver={setDragOver}
+              uploading={galleryUploading}
             />
           </div>
 

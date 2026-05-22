@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, useAnimationFrame } from "framer-motion";
+import { SectionEditButton, SectionPanel } from "@/components/AdminBar";
 
-const ALLOWED_TYPES = ["image/png","image/jpeg","image/jpg","image/gif","image/webp","video/mp4","video/quicktime"];
 const AUTO_SPEED = 1.4; // px per frame at 60fps
 const GAP = 16;
 
@@ -161,17 +161,9 @@ function Strip({ items, onOpen, onRemove }) {
   );
 }
 
-export default function Gallery({ items, onAdd, onRemove, onOpen, dragOver, setDragOver }) {
+export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragOver, setDragOver }) {
   const handleFiles = (files) => {
-    const newItems = Array.from(files)
-      .filter(f => ALLOWED_TYPES.includes(f.type))
-      .map(f => ({ url: URL.createObjectURL(f), type: f.type.startsWith("video") ? "video" : "image", name: f.name }));
-    if (newItems.length) onAdd(newItems);
-  };
-
-  const clearAll = () => {
-    items.forEach(item => { if (item.url.startsWith("blob:")) URL.revokeObjectURL(item.url); });
-    onAdd([]);
+    if (files?.length) onAdd(files);
   };
 
   return (
@@ -182,6 +174,12 @@ export default function Gallery({ items, onAdd, onRemove, onOpen, dragOver, setD
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(false); }}
       onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
     >
+      <SectionEditButton panelId="gallery" />
+      <SectionPanel panelId="gallery" title="The Archive">
+        <p className="font-['Outfit'] text-[13px] text-[#1a1706]/55 leading-relaxed">
+          Drag &amp; drop files onto the section, or use the "+ Add to archive" button. Hover a card to remove it.
+        </p>
+      </SectionPanel>
       {dragOver && (
         <div className="absolute inset-0 z-50 bg-[#0e0d08]/90 flex items-center justify-center pointer-events-none">
           <div className="font-mono text-[9px] tracking-[0.44em] uppercase text-white/30">Drop to archive</div>
@@ -207,7 +205,7 @@ export default function Gallery({ items, onAdd, onRemove, onOpen, dragOver, setD
         </div>
         <div className="flex flex-col items-start md:items-end gap-4 md:pb-1">
           <p className="font-['Outfit'] text-white/35 text-[clamp(13px,1.2vw,15px)] leading-relaxed font-light md:text-right max-w-xs">
-            Moments from the atelier — fittings, arrivals, and the quiet work between.
+            Moments from the styling house — fittings, arrivals, and the quiet work between.
           </p>
           <div className="flex items-center gap-4">
             <label
@@ -218,7 +216,7 @@ export default function Gallery({ items, onAdd, onRemove, onOpen, dragOver, setD
             </label>
             {items.length > 0 && (
               <button
-                onClick={clearAll}
+                onClick={onClear}
                 className="font-mono text-[8px] tracking-[0.26em] uppercase text-white/18 border-b border-white/10 pb-px hover:text-white/40 transition-colors bg-transparent cursor-pointer"
               >
                 Clear all

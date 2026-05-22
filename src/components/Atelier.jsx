@@ -1,36 +1,26 @@
 import { useRef, useState } from "react";
 import { motion, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
-
-const QUOTE_LINE_1 = "“Iyawoooo, Oko Iyawoooo!";
-const QUOTE_LINE_2 = "Sé dáadáa lè wà?”";
-const BODY_1 = "I am Fiponmileoluwa — Fifii, for most. Creative director of ABÁNÍTÚRASE. Lawyer by training, stylist by calling. Mostly stylist, actually.";
-const BODY_2 = "Whether you are a bride stepping into ceremony, a guest arriving at owambe, or someone travelling somewhere beautiful wanting to look exactly right — this house is for you. We dress with intention. We dress well.";
-
-const SERVICES = ["Bridal Styling", "Occasion Styling", "Travel — Kájáyelo"];
+import { useData } from "@/providers";
+import { saveSettings } from "@/lib/firestore";
+import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 
 /* Char-by-char reveal tied to scroll progress */
 function ScrollChars({ text, scrollProgress, start, end, className }) {
-  const chars = [...text];
+  const chars = [...(text ?? "")];
   const [count, setCount] = useState(() => {
     const v = scrollProgress.get();
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
     return Math.round(t * chars.length);
   });
-
   useMotionValueEvent(scrollProgress, "change", (v) => {
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
     const next = Math.round(t * chars.length);
     setCount(prev => prev !== next ? next : prev);
   });
-
   return (
     <span className={className} aria-label={text}>
       {chars.map((ch, i) => (
-        <span
-          key={i}
-          className="transition-opacity duration-[120ms]"
-          style={{ opacity: i < count ? 1 : 0 }}
-        >
+        <span key={i} className="transition-opacity duration-[120ms]" style={{ opacity: i < count ? 1 : 0 }}>
           {ch}
         </span>
       ))}
@@ -40,48 +30,51 @@ function ScrollChars({ text, scrollProgress, start, end, className }) {
 
 /* Word-by-word reveal tied to scroll progress */
 function ScrollWords({ text, scrollProgress, start, end, className }) {
-  const words = text.split(" ");
+  const words = (text ?? "").split(" ");
   const [count, setCount] = useState(() => {
     const v = scrollProgress.get();
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
     return Math.round(t * words.length);
   });
-
   useMotionValueEvent(scrollProgress, "change", (v) => {
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
     const next = Math.round(t * words.length);
     setCount(prev => prev !== next ? next : prev);
   });
-
   return (
     <span className={className} aria-label={text}>
       {words.map((word, i) => (
-        <span
-          key={i}
-          className="transition-opacity duration-200"
-          style={{ opacity: i < count ? 1 : 0.06 }}
-        >
-          {word}
-          {i < words.length - 1 ? " " : ""}
+        <span key={i} className="transition-opacity duration-200" style={{ opacity: i < count ? 1 : 0.06 }}>
+          {word}{i < words.length - 1 ? " " : ""}
         </span>
       ))}
     </span>
   );
 }
 
-/* Simple opacity fade tied to scroll progress */
 function ScrollFade({ scrollProgress, start, end, y: yFrom = 16, className, children }) {
   const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
   const y = useTransform(scrollProgress, [start, end], [yFrom, 0]);
-  return (
-    <motion.div style={{ opacity, y }} className={className}>
-      {children}
-    </motion.div>
-  );
+  return <motion.div style={{ opacity, y }} className={className}>{children}</motion.div>;
 }
 
 export default function Atelier() {
   const sectionRef = useRef(null);
+  const { atelier, refetch } = useData();
+  const [draft, setDraft] = useState({ ...atelier });
+  const [saving, setSaving] = useState(false);
+
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("atelier", draft);
+      await refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -89,7 +82,22 @@ export default function Atelier() {
   });
 
   return (
-    <section ref={sectionRef} id="atelier" className="bg-[#f7f6f2] relative overflow-hidden">
+    <section ref={sectionRef} id="styling-house" className="bg-[#f7f6f2] relative overflow-hidden">
+      <SectionEditButton panelId="atelier" />
+      <SectionPanel panelId="atelier" title="Styling House">
+        {draft && (
+          <>
+            <PanelField label="Quote Line 1" value={draft.quote1} onChange={v => set("quote1", v)} />
+            <PanelField label="Quote Line 2" value={draft.quote2} onChange={v => set("quote2", v)} />
+            <PanelField label="Body Paragraph 1" value={draft.body1} onChange={v => set("body1", v)} multiline />
+            <PanelField label="Body Paragraph 2" value={draft.body2} onChange={v => set("body2", v)} multiline />
+            <PanelField label="Signature Name" value={draft.sigName} onChange={v => set("sigName", v)} />
+            <PanelField label="Signature Role" value={draft.sigRole} onChange={v => set("sigRole", v)} />
+            <PanelSaveBtn onClick={handleSave} saving={saving} />
+          </>
+        )}
+      </SectionPanel>
+
       {/* Faint bg video */}
       <video
         src="/savessss.mp4"
@@ -98,113 +106,66 @@ export default function Atelier() {
       />
 
       {/* Decorative corner marks */}
-      <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[rgba(26,23,6,0.12)]" />
-      <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[rgba(26,23,6,0.12)]" />
+      <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[#1a1706]/12" />
+      <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[#1a1706]/12" />
 
       <div className="max-w-[1200px] mx-auto px-6 md:px-16 py-20 md:py-32 relative z-[1]">
-
-        {/* Eyebrow */}
         <ScrollFade
           scrollProgress={scrollYProgress}
-          start={0} end={0.1}
-          y={10}
-          className="flex items-center gap-3 mb-12 md:mb-16 font-['DM_Mono'] text-[7.5px] tracking-[0.48em] uppercase text-[rgba(26,23,6,0.35)]"
+          start={0} end={0.1} y={10}
+          className="flex items-center gap-3 mb-12 md:mb-16 font-['DM_Mono'] text-[7.5px] tracking-[0.48em] uppercase text-[#1a1706]/35"
         >
-          <span className="block w-8 h-px bg-[rgba(26,23,6,0.18)]" />
-          A Note from the Atelier
-          <span className="block w-8 h-px bg-[rgba(26,23,6,0.18)]" />
+          <span className="block w-8 h-px bg-[#1a1706]/18" />
+          A Note from the Styling House
+          <span className="block w-8 h-px bg-[#1a1706]/18" />
         </ScrollFade>
 
-        {/* Main grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_240px] gap-12 md:gap-24 items-start">
-
-          {/* Left */}
+        <div className="grid grid-cols-[1fr_100px] md:grid-cols-[1fr_240px] gap-6 md:gap-24 items-start">
           <div>
-            {/* Quote — each line types char by char */}
             <div className="mb-10 md:mb-12">
-              <div className="font-['Cormorant_Garamond'] italic text-[clamp(36px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
-                <ScrollChars
-                  text={QUOTE_LINE_1}
-                  scrollProgress={scrollYProgress}
-                  start={0.04} end={0.22}
-                />
+              <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
+                <ScrollChars text={atelier.quote1} scrollProgress={scrollYProgress} start={0.04} end={0.22} />
               </div>
-              <div className="font-['Cormorant_Garamond'] italic text-[clamp(36px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
-                <ScrollChars
-                  text={QUOTE_LINE_2}
-                  scrollProgress={scrollYProgress}
-                  start={0.19} end={0.34}
-                />
+              <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
+                <ScrollChars text={atelier.quote2} scrollProgress={scrollYProgress} start={0.19} end={0.34} />
               </div>
             </div>
 
-            {/* Divider */}
-            <ScrollFade
-              scrollProgress={scrollYProgress}
-              start={0.31} end={0.38}
-              y={0}
-              className="w-10 h-px bg-[rgba(26,23,6,0.18)] mb-8"
-            />
+            <ScrollFade scrollProgress={scrollYProgress} start={0.31} end={0.38} y={0} className="w-10 h-px bg-[#1a1706]/18 mb-8" />
 
-            {/* Body P1 — word by word */}
-            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[rgba(26,23,6,0.68)] leading-[1.95] font-light max-w-lg mb-5">
-              <ScrollWords
-                text={BODY_1}
-                scrollProgress={scrollYProgress}
-                start={0.33} end={0.60}
-              />
+            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/68 leading-[1.95] font-light max-w-lg mb-5">
+              <ScrollWords text={atelier.body1} scrollProgress={scrollYProgress} start={0.33} end={0.60} />
             </div>
 
-            {/* Body P2 — word by word */}
-            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[rgba(26,23,6,0.68)] leading-[1.95] font-light max-w-lg mb-10">
-              <ScrollWords
-                text={BODY_2}
-                scrollProgress={scrollYProgress}
-                start={0.57} end={0.90}
-              />
+            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/68 leading-[1.95] font-light max-w-lg mb-10">
+              <ScrollWords text={atelier.body2} scrollProgress={scrollYProgress} start={0.57} end={0.90} />
             </div>
 
-            {/* Signature */}
             <ScrollFade
               scrollProgress={scrollYProgress}
-              start={0.84} end={0.97}
-              y={10}
-              className="flex items-center gap-4 pt-6 border-t border-[rgba(26,23,6,0.1)]"
+              start={0.84} end={0.97} y={10}
+              className="flex items-center gap-4 pt-6 border-t border-[#1a1706]/10"
             >
-              <span className="font-['Cormorant_Garamond'] italic text-[24px] text-[#1a1706]">
-                Fiponmileoluwa
-              </span>
-              <span className="w-px h-[13px] bg-[rgba(26,23,6,0.18)]" />
-              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.38)]">
-                Creative Director
-              </span>
+              <span className="font-['Cormorant_Garamond'] italic text-[24px] text-[#1a1706]">{atelier.sigName}</span>
+              <span className="w-px h-[13px] bg-[#1a1706]/18" />
+              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/38">{atelier.sigRole}</span>
             </ScrollFade>
           </div>
 
-          {/* Right — editorial stats */}
           <ScrollFade
             scrollProgress={scrollYProgress}
-            start={0.22} end={0.44}
-            y={20}
-            className="flex flex-row md:flex-col gap-0 border-t md:border-t-0 md:border-l border-[rgba(26,23,6,0.1)] pt-8 md:pt-0 md:pl-10"
+            start={0.22} end={0.44} y={20}
+            className="flex flex-col gap-0 border-l border-[#1a1706]/10 pl-4 md:pl-10"
           >
-            {/* Est. block */}
-            <div className="flex-1 md:flex-none mb-0 md:mb-10 pr-8 md:pr-0 border-r md:border-r-0 border-[rgba(26,23,6,0.08)]">
-              <div className="font-['Cormorant_Garamond'] italic text-[52px] md:text-[60px] text-[rgba(26,23,6,0.08)] leading-none">Est.</div>
-              <div className="font-['Cormorant_Garamond'] text-[52px] md:text-[60px] text-[#1a1706] leading-none -mt-2">2026</div>
-              <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[rgba(26,23,6,0.3)] mt-3">Lagos, Nigeria</div>
+            <div className="mb-6 md:mb-10">
+              <div className="font-['Cormorant_Garamond'] italic text-[36px] md:text-[60px] text-[#1a1706]/8 leading-none">Est.</div>
+              <div className="font-['Cormorant_Garamond'] text-[36px] md:text-[60px] text-[#1a1706] leading-none -mt-1 md:-mt-2">2024</div>
+              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mt-2 md:mt-3">Lagos, Nigeria</div>
             </div>
-
-            {/* Specialisms */}
-            <div className="flex-1 md:flex-none border-t border-[rgba(26,23,6,0.08)] pt-6 md:pt-7 pl-8 md:pl-0">
-              <div className="font-['DM_Mono'] text-[7px] tracking-[0.4em] uppercase text-[rgba(26,23,6,0.3)] mb-4">
-                Specialising in
-              </div>
-              {SERVICES.map((s) => (
-                <div
-                  key={s}
-                  className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[18px] md:text-[20px] py-2.5 border-b border-[rgba(26,23,6,0.07)] last:border-b-0 leading-tight"
-                >
+            <div className="border-t border-[#1a1706]/8 pt-5 md:pt-7">
+              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.4em] uppercase text-[#1a1706]/30 mb-3 md:mb-4">Specialising in</div>
+              {["Bridal Styling", "Occasion Styling", "Travel — Kájáyelo"].map((s) => (
+                <div key={s} className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[13px] md:text-[20px] py-2 md:py-2.5 border-b border-[#1a1706]/7 last:border-b-0 leading-tight">
                   {s}
                 </div>
               ))}
@@ -213,9 +174,8 @@ export default function Atelier() {
         </div>
       </div>
 
-      {/* Bottom accent line */}
       <motion.div
-        className="h-px bg-[rgba(26,23,6,0.07)] mx-6 md:mx-16"
+        className="h-px bg-[#1a1706]/7 mx-6 md:mx-16"
         initial={{ scaleX: 0, originX: 0 }}
         whileInView={{ scaleX: 1 }}
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}

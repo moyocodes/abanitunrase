@@ -32,7 +32,7 @@ export default function BookCallModal({ open, onClose }) {
 
   // Shared input/select base classes — light theme
   const fieldBase =
-    "w-full font-['Outfit'] text-[clamp(16px,1.4vw,19px)] text-[#1a1706] bg-transparent border-0 border-b border-[rgba(26,23,6,0.13)] py-[10px] outline-none transition-[border-color] duration-[250ms] placeholder:text-[rgba(26,23,6,0.25)] focus:border-[#1a1706]";
+    "w-full font-['Outfit'] text-[clamp(16px,1.4vw,19px)] text-[#1a1706] bg-transparent border-0 border-b border-[#1a1706]/13 py-[10px] outline-none transition-[border-color] duration-[250ms] placeholder:text-[#1a1706]/25 focus:border-[#1a1706]";
 
   return (
     <AnimatePresence>
@@ -40,7 +40,7 @@ export default function BookCallModal({ open, onClose }) {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-[rgba(26,23,6,0.55)] z-[900] backdrop-blur-lg"
+            className="fixed inset-0 bg-[#1a1706]/55 z-[900] backdrop-blur-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -50,7 +50,7 @@ export default function BookCallModal({ open, onClose }) {
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[901] bg-white border-t border-[rgba(26,23,6,0.08)] w-full max-w-[680px] px-12 py-12 max-h-[90vh] overflow-y-auto max-md:px-5 max-md:py-10"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[901] bg-white border-t border-[#1a1706]/8 w-full max-w-[680px] px-12 py-12 max-h-[90vh] overflow-y-auto max-md:px-5 max-md:py-10"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -58,7 +58,7 @@ export default function BookCallModal({ open, onClose }) {
           >
             {/* Close button */}
             <button
-              className="absolute top-5 right-5 w-8 h-8 rounded-full border border-[rgba(26,23,6,0.15)] bg-transparent text-[rgba(26,23,6,0.4)] cursor-pointer text-[14px] transition-all duration-200 flex items-center justify-center hover:bg-[rgba(26,23,6,0.06)] hover:text-[#1a1706]"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full border border-[#1a1706]/15 bg-transparent text-[#1a1706]/40 cursor-pointer text-[14px] transition-all duration-200 flex items-center justify-center hover:bg-[#1a1706]/6 hover:text-[#1a1706]"
               onClick={handleClose}
             >
               &#10005;
@@ -67,7 +67,7 @@ export default function BookCallModal({ open, onClose }) {
             {/* Inner */}
             <div className="relative">
               {/* Eyebrow */}
-              <div className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.3)] mb-2">
+              <div className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase text-[#1a1706]/30 mb-2">
                 Book a Fitting
               </div>
 
@@ -79,15 +79,15 @@ export default function BookCallModal({ open, onClose }) {
               {done ? (
                 /* Done state */
                 <div className="text-center py-10">
-                  <div className="text-[32px] text-[rgba(26,23,6,0.35)] mb-4">&#10003;</div>
+                  <div className="text-[32px] text-[#1a1706]/35 mb-4">&#10003;</div>
                   <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,2.8vw,36px)] text-[#1a1706] mb-[10px]">
                     Call Scheduled
                   </div>
-                  <div className="font-['Outfit'] text-[clamp(16px,1.4vw,19px)] text-[rgba(26,23,6,0.68)] leading-[1.7] mb-7">
+                  <div className="font-['Outfit'] text-[clamp(16px,1.4vw,19px)] text-[#1a1706]/68 leading-[1.7] mb-7">
                     We&apos;ll be in touch within 24 hours to confirm your time.
                   </div>
                   <button
-                    className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase px-6 py-[10px] bg-[rgba(26,23,6,0.05)] text-[rgba(26,23,6,0.45)] border border-[rgba(26,23,6,0.15)] cursor-pointer transition-all duration-200 hover:bg-[rgba(26,23,6,0.1)] hover:text-[#1a1706]"
+                    className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase px-6 py-[10px] bg-[#1a1706]/5 text-[#1a1706]/45 border border-[#1a1706]/15 cursor-pointer transition-all duration-200 hover:bg-[#1a1706]/10 hover:text-[#1a1706]"
                     onClick={handleClose}
                   >
                     Close
@@ -98,7 +98,7 @@ export default function BookCallModal({ open, onClose }) {
                   {/* Name */}
                   <div className="flex flex-col gap-2">
                     <label
-                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[rgba(26,23,6,0.55)]"
+                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/55"
                       htmlFor="bcm-name"
                     >
                       Full Name
@@ -116,7 +116,7 @@ export default function BookCallModal({ open, onClose }) {
                   {/* Phone */}
                   <div className="flex flex-col gap-2">
                     <label
-                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[rgba(26,23,6,0.55)]"
+                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/55"
                       htmlFor="bcm-phone"
                     >
                       Phone / WhatsApp
@@ -134,7 +134,7 @@ export default function BookCallModal({ open, onClose }) {
                   {/* Service */}
                   <div className="flex flex-col gap-2">
                     <label
-                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[rgba(26,23,6,0.55)]"
+                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/55"
                       htmlFor="bcm-service"
                     >
                       Service
@@ -157,7 +157,7 @@ export default function BookCallModal({ open, onClose }) {
                   {/* Time */}
                   <div className="flex flex-col gap-2">
                     <label
-                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[rgba(26,23,6,0.55)]"
+                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/55"
                       htmlFor="bcm-time"
                     >
                       Preferred Call Time

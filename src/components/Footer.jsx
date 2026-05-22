@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { useData } from "@/providers";
+import { saveSettings } from "@/lib/firestore";
+import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 
 const navLinks = [
-  { label: "Atelier", href: "#atelier" },
+  { label: "Styling House", href: "#styling-house" },
   { label: "What We Do", href: "#categories" },
   { label: "Lookbook", href: "#lookbook-section" },
   { label: "Rates", href: "#rates" },
@@ -51,12 +55,36 @@ const colItem = {
 };
 
 export default function Footer() {
+  const { footerData, refetch } = useData();
+  const [draft, setDraft] = useState({ ...footerData });
+  const [saving, setSaving] = useState(false);
+
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("footer", draft);
+      await refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <footer className="bg-[#0a0a0a] px-6 md:px-16 pt-16 pb-10 border-t border-white/[0.05]">
+    <footer className="bg-[#0a0a0a] px-6 md:px-16 pt-16 pb-10 border-t border-white/[0.05] relative">
+      <SectionEditButton panelId="footer" />
+      <SectionPanel panelId="footer" title="Footer">
+        <PanelField label="Tagline" value={draft.tagline} onChange={v => set("tagline", v)} multiline />
+        <PanelField label="Location" value={draft.location} onChange={v => set("location", v)} />
+        <PanelField label="Location sub-text" value={draft.locationSub} onChange={v => set("locationSub", v)} />
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
+      </SectionPanel>
+
       <div className="max-w-[1100px] mx-auto">
 
         {/* Top row */}
-        <div className="flex items-start justify-between mb-12 gap-10 flex-wrap">
+        <div className="flex items-start justify-between mb-12 gap-8 flex-wrap">
 
           {/* Brand */}
           <motion.div
@@ -66,11 +94,11 @@ export default function Footer() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/80 text-3xl mb-1">
+            <div className="text-[#f5f0e6]/80 text-3xl mb-1 tracking-[0.1em]">
               ABÁNITÚNRASE
             </div>
             <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/35 mt-2">
-              Lagos Styling Atelier
+              Lagos Styling House
             </div>
           </motion.div>
 
@@ -141,11 +169,11 @@ export default function Footer() {
               Location
             </div>
             <div className="font-['Outfit'] text-sm text-[#f5f0e6]/55 font-light leading-relaxed mb-6">
-              Lagos, Nigeria<br />
-              Available for travel worldwide
+              {footerData.location}<br />
+              {footerData.locationSub}
             </div>
-            <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/35 text-lg leading-snug">
-              Dressed with<br />intention.
+            <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/35 text-lg leading-snug whitespace-pre-line">
+              {footerData.tagline}
             </div>
           </motion.div>
         </div>

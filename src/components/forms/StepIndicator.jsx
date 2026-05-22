@@ -5,10 +5,10 @@ export default function StepIndicator({ steps, current }) {
 
   return (
     <div className="py-5">
-      <div className={cn("font-mono text-[10px] tracking-[0.25em] uppercase text-[rgba(26,23,6,0.38)] mb-3")}>
+      <div className={cn("font-mono text-[10px] tracking-[0.25em] uppercase text-[#1a1706]/38 mb-3")}>
         Step {current + 1} of {steps}
       </div>
-      <div className="w-full h-px bg-[rgba(26,23,6,0.1)] relative">
+      <div className="w-full h-px bg-[#1a1706]/10 relative">
         <div
           className="absolute left-0 top-0 h-px bg-[#1a1706] transition-all duration-500"
           style={{ width: `${pct}%` }}

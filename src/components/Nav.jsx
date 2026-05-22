@@ -29,7 +29,7 @@ export default function Nav({ onBookCall, hidden }) {
   }, []);
 
   const links = [
-    { label: "Atelier", href: "#atelier" },
+    { label: "Styling House", href: "#styling-house" },
     { label: "What We Do", href: "#categories" },
     { label: "Lookbook", href: "#lookbook-section" },
     { label: "Rates", href: "#rates" },
@@ -59,7 +59,7 @@ export default function Nav({ onBookCall, hidden }) {
         </button>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex gap-7">
+        <div className="hidden sm:flex gap-5 md:gap-7">
           {links.map(({ label, href }) => (
             <a
               key={label}
@@ -74,7 +74,7 @@ export default function Nav({ onBookCall, hidden }) {
         {/* Desktop CTA */}
         <button
           onClick={onBookCall}
-          className="hidden md:block font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
+          className="hidden sm:block font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
         >
           Book a Fitting
         </button>
@@ -82,7 +82,7 @@ export default function Nav({ onBookCall, hidden }) {
         {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col justify-center gap-[5px] w-6 h-6 cursor-pointer bg-transparent border-none p-0 z-10"
+          className="sm:hidden flex flex-col justify-center gap-[5px] w-6 h-6 cursor-pointer bg-transparent border-none p-0 z-10"
         >
           <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
           <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
@@ -95,7 +95,7 @@ export default function Nav({ onBookCall, hidden }) {
         initial={false}
         animate={{ opacity: menuOpen ? 1 : 0, y: menuOpen ? 0 : -8 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-[199] pt-24 pb-10 px-6 bg-white border-b border-black/10 flex flex-col gap-6 md:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={`fixed top-0 left-0 right-0 z-[199] pt-24 pb-10 px-6 bg-white border-b border-black/10 flex flex-col gap-6 sm:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       >
         {links.map(({ label, href }) => (
           <a

@@ -138,13 +138,13 @@ export default function PaystackPayment({ email, amount, onSuccess, onClose, for
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className={cn(
-          "w-16 h-16 rounded-full border border-[rgba(26,23,6,0.2)] flex items-center justify-center mb-6",
+          "w-16 h-16 rounded-full border border-[#1a1706]/20 flex items-center justify-center mb-6",
           "text-2xl text-[#1a1706]"
         )}>
           &#10003;
         </div>
         <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-2xl mb-3">Booking Confirmed</h3>
-        <p className="text-[rgba(26,23,6,0.45)] text-sm">Check your email for details.</p>
+        <p className="text-[#1a1706]/45 text-sm">Check your email for details.</p>
       </div>
     );
   }
@@ -152,16 +152,16 @@ export default function PaystackPayment({ email, amount, onSuccess, onClose, for
   return (
     <div className="py-8">
       <div className={cn(
-        "border border-[rgba(26,23,6,0.1)] rounded-none p-8 mb-6",
-        "bg-[rgba(26,23,6,0.02)]"
+        "border border-[#1a1706]/10 rounded-none p-8 mb-6",
+        "bg-[#1a1706]/2"
       )}>
-        <p className={cn("font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.38)] mb-4")}>
+        <p className={cn("font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4")}>
           Consultation Deposit
         </p>
         <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-2">
           {formatAmount(amount)}
         </div>
-        <p className="text-[rgba(26,23,6,0.28)] text-xs font-['DM_Mono'] tracking-wide mb-8">
+        <p className="text-[#1a1706]/28 text-xs font-['DM_Mono'] tracking-wide mb-8">
           Secure payment powered by Paystack
         </p>
 
@@ -177,14 +177,14 @@ export default function PaystackPayment({ email, amount, onSuccess, onClose, for
           {loading ? "Processing…" : "Proceed to Payment →"}
         </button>
 
-        <p className="text-[rgba(26,23,6,0.25)] text-xs text-center mt-4">
+        <p className="text-[#1a1706]/25 text-xs text-center mt-4">
           Your spot is confirmed after payment. We&apos;ll be in touch shortly.
         </p>
       </div>
 
       <button
         onClick={onClose}
-        className="w-full text-[rgba(26,23,6,0.3)] text-xs font-['DM_Mono'] tracking-[0.2em] uppercase hover:text-[rgba(26,23,6,0.55)] transition-colors py-2"
+        className="w-full text-[#1a1706]/30 text-xs font-['DM_Mono'] tracking-[0.2em] uppercase hover:text-[#1a1706]/55 transition-colors py-2"
       >
         Go Back
       </button>

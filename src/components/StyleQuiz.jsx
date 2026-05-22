@@ -167,7 +167,7 @@ export default function StyleQuiz({ open, onClose, onBook, onBookCall }) {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-7 py-4 border-b border-black/[0.07] sticky top-0 bg-white z-10">
-              <div className="flex gap-1 bg-[rgba(26,23,6,0.05)] p-1 rounded-full">
+              <div className="flex gap-1 bg-[#1a1706]/5 p-1 rounded-full">
                 {["browse", "quiz"].map(m => (
                   <button
                     key={m}
@@ -231,7 +231,7 @@ function BrowseMode({ onBook, onBookCall }) {
       </p>
       <div className="flex flex-col gap-2.5">
         {SERVICES.map(s => (
-          <div key={s.type} className="border border-[rgba(26,23,6,0.1)] p-5 hover:border-[rgba(26,23,6,0.3)] transition-colors duration-200 group">
+          <div key={s.type} className="border border-[#1a1706]/10 p-5 hover:border-[#1a1706]/30 transition-colors duration-200 group">
             <div className="flex items-start justify-between gap-4 mb-2.5">
               <div>
                 <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(20px,2vw,26px)] leading-tight">{s.label}</div>
@@ -244,7 +244,7 @@ function BrowseMode({ onBook, onBookCall }) {
             <p className="font-['Outfit'] text-[#1a1706]/65 text-[14px] leading-relaxed font-light mb-4">{s.desc}</p>
             <button
               onClick={() => onBook(s.type)}
-              className="font-mono text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/50 border border-[rgba(26,23,6,0.15)] px-5 py-2 hover:bg-[#1a1706] hover:text-[#f5f0e6] hover:border-[#1a1706] transition-all duration-200 cursor-pointer bg-transparent"
+              className="font-mono text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/50 border border-[#1a1706]/15 px-5 py-2 hover:bg-[#1a1706] hover:text-[#f5f0e6] hover:border-[#1a1706] transition-all duration-200 cursor-pointer bg-transparent"
             >
               Book {s.label} →
             </button>
@@ -287,7 +287,7 @@ function QuizMode({ questions, step, onPick, onBack }) {
           <button
             key={opt.value}
             onClick={() => onPick(q, opt.value)}
-            className="flex items-center justify-between w-full px-5 py-4 border border-[rgba(26,23,6,0.12)] hover:border-[#1a1706]/50 hover:bg-[rgba(26,23,6,0.03)] transition-all duration-200 cursor-pointer bg-transparent text-left group"
+            className="flex items-center justify-between w-full px-5 py-4 border border-[#1a1706]/12 hover:border-[#1a1706]/50 hover:bg-[#1a1706]/3 transition-all duration-200 cursor-pointer bg-transparent text-left group"
           >
             <span className="font-['Outfit'] text-[#1a1706] text-[clamp(15px,1.5vw,17px)] font-light">{opt.label}</span>
             {opt.mark && (
@@ -317,7 +317,7 @@ function ResultView({ rec, typed, typing, onBook, onRedo }) {
       <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(28px,3.5vw,44px)] leading-tight mb-1">{rec.label}</div>
       <div className="font-mono text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/40 mb-7">{rec.sub}</div>
 
-      <div className="bg-[rgba(26,23,6,0.03)] border border-[rgba(26,23,6,0.08)] p-6 mb-7 min-h-[100px]">
+      <div className="bg-[#1a1706]/3 border border-[#1a1706]/8 p-6 mb-7 min-h-[100px]">
         <p className="font-['Outfit'] text-[#1a1706]/80 text-[clamp(15px,1.5vw,17px)] leading-[1.85] font-light">
           {typed}
           {typing && (

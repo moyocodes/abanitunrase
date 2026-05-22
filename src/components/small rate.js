@@ -6,12 +6,27 @@ import { useEditMode, EditableText } from "@/components/AdminBar";
 import { savePricing } from "@/lib/firestore";
 
 const tabs = [
-  { key: "bridal", label: "Bridal Styling", short: "Bridal", sub: "Ìyàwó & Oko Ìyàwó" },
-  { key: "occasion", label: "Occasion Styling", short: "Occasion", sub: "Ìgbà Ayẹyẹ" },
-  { key: "travel", label: "Travel — Kájáyelo", short: "Travel", sub: "Destination Wardrobe" },
+  {
+    key: "bridal",
+    label: "Bridal Styling",
+    short: "Bridal",
+    sub: "Ìyàwó & Oko Ìyàwó",
+  },
+  {
+    key: "occasion",
+    label: "Occasion Styling",
+    short: "Occasion",
+    sub: "Ìgbà Ayẹyẹ",
+  },
+  {
+    key: "travel",
+    label: "Travel — Kájáyelo",
+    short: "Travel",
+    sub: "Destination Wardrobe",
+  },
 ];
 
-const TAB_KEYS = tabs.map(t => t.key);
+const TAB_KEYS = tabs.map((t) => t.key);
 
 /* Inline-editable price number */
 function EditablePrice({ value, onSave, featured }) {
@@ -19,7 +34,9 @@ function EditablePrice({ value, onSave, featured }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value ?? ""));
 
-  useEffect(() => { if (!editing) setDraft(String(value ?? "")); }, [value, editing]);
+  useEffect(() => {
+    if (!editing) setDraft(String(value ?? ""));
+  }, [value, editing]);
 
   if (!editMode) return <>{fmt(value)}</>;
 
@@ -34,9 +51,15 @@ function EditablePrice({ value, onSave, featured }) {
       <input
         type="text"
         value={draft}
-        onChange={e => setDraft(e.target.value)}
+        onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
-        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commit(); } if (e.key === "Escape") setEditing(false); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+          if (e.key === "Escape") setEditing(false);
+        }}
         autoFocus
         className={`w-full outline-none border-b-2 border-amber-400/70 bg-transparent font-[inherit] text-[inherit] tracking-[inherit]`}
       />
@@ -46,7 +69,10 @@ function EditablePrice({ value, onSave, featured }) {
   return (
     <span
       className={`cursor-text relative group/ep`}
-      onClick={() => { setDraft(String(value ?? "")); setEditing(true); }}
+      onClick={() => {
+        setDraft(String(value ?? ""));
+        setEditing(true);
+      }}
       title="Click to edit price"
     >
       {fmt(value)}
@@ -55,7 +81,12 @@ function EditablePrice({ value, onSave, featured }) {
   );
 }
 
-export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, setActiveTab: setActiveTabProp }) {
+export default function Rates({
+  onBookCall,
+  onBook,
+  activeTab: activeTabProp,
+  setActiveTab: setActiveTabProp,
+}) {
   const [localTab, setLocalTab] = useState("bridal");
   const activeTab = activeTabProp ?? localTab;
   const setActiveTab = setActiveTabProp ?? setLocalTab;
@@ -67,14 +98,20 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const { editMode } = useEditMode();
 
   const cards =
-    activeTab === "bridal" ? (bridal ?? []) : activeTab === "occasion" ? (occasion ?? []) : (travel ?? []);
+    activeTab === "bridal"
+      ? (bridal ?? [])
+      : activeTab === "occasion"
+        ? (occasion ?? [])
+        : (travel ?? []);
 
-  useEffect(() => { setSpotlightIdx(0); }, [activeTab]);
+  useEffect(() => {
+    setSpotlightIdx(0);
+  }, [activeTab]);
 
   useEffect(() => {
     if (hoveredCard || editMode) return;
     intervalRef.current = setInterval(() => {
-      setSpotlightIdx(i => (i + 1) % cards.length);
+      setSpotlightIdx((i) => (i + 1) % cards.length);
     }, 3000);
     return () => clearInterval(intervalRef.current);
   }, [hoveredCard, editMode, activeTab, cards.length]);
@@ -82,7 +119,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   useEffect(() => {
     if (hoveredCard || editMode) return;
     tabIntervalRef.current = setInterval(() => {
-      setActiveTab(prev => {
+      setActiveTab((prev) => {
         const idx = TAB_KEYS.indexOf(prev);
         return TAB_KEYS[(idx + 1) % TAB_KEYS.length];
       });
@@ -90,15 +127,43 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     return () => clearInterval(tabIntervalRef.current);
   }, [hoveredCard, editMode]);
 
+  const getCurrent = () =>
+    activeTab === "bridal"
+      ? bridal
+      : activeTab === "occasion"
+        ? occasion
+        : travel;
+
   const updateCard = async (idx, patch) => {
-    const current = activeTab === "bridal" ? bridal : activeTab === "occasion" ? occasion : travel;
-    const next = current.map((c, i) => i === idx ? { ...c, ...patch } : c);
+    const next = getCurrent().map((c, i) =>
+      i === idx ? { ...c, ...patch } : c,
+    );
     await savePricing(activeTab, next);
     refetch();
   };
 
+  const deleteCard = async (idx) => {
+    if (!window.confirm("Remove this package?")) return;
+    const next = getCurrent().filter((_, i) => i !== idx);
+    await savePricing(activeTab, next);
+    refetch();
+  };
+
+  const addCard = async () => {
+    const current = getCurrent();
+    const newPkg = {
+      tier: String(current.length + 1),
+      package: "New Package",
+      price: 0,
+      featured: false,
+      includes: ["Feature 1", "Feature 2", "Feature 3"],
+    };
+    await savePricing(activeTab, [...current, newPkg]);
+    refetch();
+  };
+
   return (
-    <section id="rates" className="bg-[#0a0a0a]">
+    <section id="rates" className="bg-[#0a0a0a] min-h-screen flex flex-col">
       {/* Header + Tabs */}
       <motion.div
         className="bg-[#1a1706]"
@@ -109,16 +174,22 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
       >
         <div className="px-6 md:px-16 pt-6 pb-5 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/40 hidden md:block">Investment</span>
+            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/40 hidden md:block">
+              Investment
+            </span>
             <span className="block w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
-            <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">The Rates.</h2>
+            <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(18px,2.8vw,44px)] leading-none tracking-tight">
+              The Rates.
+            </h2>
           </div>
           <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/35 text-right leading-relaxed hidden md:block">
-            All prices NGN<br />Non-deductible consultation
+            All prices NGN
+            <br />
+            Non-deductible consultation
           </p>
         </div>
         <div className="border-t border-white/[0.06] flex">
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -137,22 +208,26 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
       {/* Cards grid */}
       <div
-        className="bg-white grid grid-cols-2 lg:grid-cols-4 border-b border-black/[0.07]"
+        className="bg-white grid grid-cols-4 border-b border-black/[0.07] flex-1"
         onMouseEnter={() => setHoveredCard(true)}
         onMouseLeave={() => setHoveredCard(false)}
       >
         {cards.map((r, i) => (
           <motion.div
             key={i}
-            className="border-r border-black/[0.07] last:border-r-0"
+            className="border-r border-black/[0.07] last:border-r-0 h-full"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: i * 0.09 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.16, 1, 0.3, 1],
+              delay: i * 0.09,
+            }}
           >
             <div
               onClick={() => !editMode && setSpotlightIdx(i)}
-              className={`relative p-3 md:p-7 cursor-pointer flex flex-col overflow-hidden h-full transition-all duration-500 ${
+              className={`relative p-2 md:p-7 cursor-pointer flex flex-col overflow-hidden h-full min-h-[320px] transition-all duration-500 ${
                 r.featured ? "bg-[#1a1706]" : "bg-white hover:bg-white"
               } ${!editMode && i === spotlightIdx ? "opacity-100 scale-[1.01] shadow-lg z-10" : editMode ? "opacity-100" : "opacity-60"}`}
             >
@@ -173,14 +248,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 {r.featured
                   ? "— Most Popular —"
                   : activeTab === "bridal"
-                  ? `Bridal Package · ${r.tier}`
-                  : activeTab === "occasion"
-                  ? `Occasion · ${r.tier}`
-                  : "Travel Package"}
+                    ? `Bridal Package · ${r.tier}`
+                    : activeTab === "occasion"
+                      ? `Occasion · ${r.tier}`
+                      : "Travel Package"}
               </div>
 
               <h3
-                className={`font-['Cormorant_Garamond'] italic text-xl md:text-3xl leading-tight mb-3 md:mb-4 ${
+                className={`font-['Cormorant_Garamond'] italic text-lg md:text-2xl leading-tight mb-3 ${
                   r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"
                 }`}
               >
@@ -191,40 +266,50 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
               </h3>
 
               <div className="flex-1 mb-4">
-                {(r.includes || [
-                  `${r.looks} Curated Looks`,
-                  "Polaroid Guide Included",
-                  "2-Week Notice Required",
-                ]).map((inc, j) => (
+                {(
+                  r.includes || [
+                    `${r.looks} Curated Looks`,
+                    "Polaroid Guide Included",
+                    "2-Week Notice Required",
+                  ]
+                ).map((inc, j) => (
                   <div
                     key={j}
-                    className={`flex items-start gap-1.5 md:gap-2.5 py-1 md:py-1.5 border-b text-[11px] md:text-[15px] font-['Outfit'] font-light leading-relaxed ${
+                    className={`flex items-start gap-2.5 py-1 border-b text-[11px] md:text-[13px] font-['Outfit'] font-light leading-snug ${
                       r.featured
                         ? "text-[#f5f0e6]/80 border-white/[0.08]"
                         : "text-[#1a1706]/75 border-black/[0.06]"
                     }`}
                   >
-                    <span className={`text-[10px] mt-0.5 flex-shrink-0 ${r.featured ? "text-[#f5f0e6]/20" : "text-[#1a1706]/20"}`}>—</span>
+                    <span
+                      className={`text-[10px] mt-0.5 flex-shrink-0 ${r.featured ? "text-[#f5f0e6]/20" : "text-[#1a1706]/20"}`}
+                    >
+                      —
+                    </span>
                     {inc}
                   </div>
                 ))}
               </div>
 
               <div className="mb-2">
-                <div className={`font-['Cormorant_Garamond'] text-2xl md:text-4xl tracking-tight ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}>
+                <div
+                  className={`font-['Cormorant_Garamond'] text-2xl md:text-3xl tracking-tight ${r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"}`}
+                >
                   <EditablePrice
                     value={r.price}
                     onSave={(v) => updateCard(i, { price: v })}
                     featured={r.featured}
                   />
                 </div>
-                <div className={`font-mono text-[7.5px] tracking-[0.22em] uppercase mt-1 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}>
+                <div
+                  className={`font-mono text-[7.5px] tracking-[0.22em] uppercase mt-1 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}
+                >
                   NGN{activeTab === "occasion" ? " · Per Look" : ""}
                 </div>
               </div>
 
               <button
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   onBook
                     ? onBook(activeTab === "bridal" ? "wedding" : activeTab)
@@ -239,14 +324,41 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 Book this package <span className="text-base">→</span>
               </button>
 
+              {editMode && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteCard(i);
+                  }}
+                  className="absolute top-2 right-2 z-20 font-mono text-[6px] tracking-[0.15em] uppercase px-2 py-1 bg-red-700/80 text-white hover:bg-red-700 transition-colors border-none cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+
               {!editMode && i === spotlightIdx && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden">
-                  <div className={`h-full ${r.featured ? "bg-[#f5f0e6]/60" : "bg-[#1a1706]/60"} animate-[spotlight-fill_3s_linear_forwards]`} />
+                  <div
+                    className={`h-full ${r.featured ? "bg-[#f5f0e6]/60" : "bg-[#1a1706]/60"} animate-[spotlight-fill_3s_linear_forwards]`}
+                  />
                 </div>
               )}
             </div>
           </motion.div>
         ))}
+
+        {/* Add package button — edit mode only */}
+        {editMode && (
+          <div className="border-r border-black/[0.07] last:border-r-0">
+            <button
+              onClick={addCard}
+              className="w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-2 font-mono text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/35 hover:text-[#1a1706] hover:bg-[#fafaf9] transition-all duration-200 cursor-pointer bg-white border-none"
+            >
+              <span className="text-2xl leading-none">+</span>
+              Add Package
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Consult banner */}
@@ -258,8 +370,16 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         {[
-          { label: "General Consultation", note: "One-on-one styling session", price: "₦100,000" },
-          { label: "Couple's Consultation", note: "Joint styling & alignment session", price: "₦150,000" },
+          {
+            label: "General Consultation",
+            note: "One-on-one styling session",
+            price: "₦100,000",
+          },
+          {
+            label: "Couple's Consultation",
+            note: "Joint styling & alignment session",
+            price: "₦150,000",
+          },
         ].map((c, i) => (
           <button
             key={i}
@@ -267,12 +387,20 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             className="px-5 md:px-16 py-4 md:py-5 flex items-center justify-between gap-3 border-r border-black/[0.07] last:border-r-0 hover:bg-black/[0.02] transition-all duration-200 text-left cursor-pointer bg-transparent w-full group"
           >
             <div className="min-w-0">
-              <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(16px,1.8vw,28px)] mb-0.5 leading-tight">{c.label}</div>
-              <div className="font-mono text-[7px] md:text-[7.5px] tracking-[0.22em] uppercase text-[#1a1706]/45">{c.note}</div>
+              <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(13px,1.4vw,22px)] mb-0.5 leading-tight">
+                {c.label}
+              </div>
+              <div className="font-mono text-[6.5px] md:text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/45">
+                {c.note}
+              </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-              <div className="font-['Cormorant_Garamond'] text-[clamp(18px,2.4vw,36px)] text-[#1a1706]">{c.price}</div>
-              <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-base md:text-lg">→</span>
+              <div className="font-['Cormorant_Garamond'] text-[clamp(14px,1.8vw,28px)] text-[#1a1706]">
+                {c.price}
+              </div>
+              <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-base md:text-lg">
+                →
+              </span>
             </div>
           </button>
         ))}

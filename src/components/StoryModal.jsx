@@ -204,7 +204,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
             >
               {/* Close button */}
               <button
-                className="absolute top-4 right-4 z-[12] w-8 h-8 rounded-full border border-[rgba(26,23,6,0.12)] bg-white/90 text-[rgba(26,23,6,0.5)] flex items-center justify-center cursor-pointer text-[14px] transition-all duration-200 hover:bg-[#1a1706] hover:text-[#f5f0e6]"
+                className="absolute top-4 right-4 z-[12] w-8 h-8 rounded-full border border-[#1a1706]/12 bg-white/90 text-[#1a1706]/50 flex items-center justify-center cursor-pointer text-[14px] transition-all duration-200 hover:bg-[#1a1706] hover:text-[#f5f0e6]"
                 onClick={handleClose}
               >
                 &#10005;
@@ -358,7 +358,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                       className={`font-['Outfit'] text-[clamp(13px,1.2vw,15px)] tracking-[0.08em] uppercase px-4 py-2 cursor-pointer transition-all duration-200 font-medium ${
                         c.idx === curActiveCatIdx
                           ? "bg-[#1a1706] border border-[#1a1706] text-[#f5f0e6]"
-                          : "bg-[rgba(26,23,6,0.04)] border border-[rgba(26,23,6,0.1)] text-[rgba(26,23,6,0.4)] hover:bg-[rgba(26,23,6,0.08)] hover:border-[rgba(26,23,6,0.2)] hover:text-[#1a1706]"
+                          : "bg-[#1a1706]/4 border border-[#1a1706]/10 text-[#1a1706]/40 hover:bg-[#1a1706]/8 hover:border-[#1a1706]/20 hover:text-[#1a1706]"
                       }`}
                       onClick={() => switchStoryCat(c.idx)}
                     >
@@ -370,7 +370,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                 {/* Look nav */}
                 {catLooks.length > 1 && (
                   <div className="mb-8">
-                    <div className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[rgba(26,23,6,0.28)] mb-2.5">
+                    <div className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/28 mb-2.5">
                       Other looks in this category
                     </div>
                     <div className="flex flex-col gap-[3px]">
@@ -379,8 +379,8 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                           key={l.id}
                           className={`flex items-center gap-3 px-3.5 py-2.5 cursor-pointer border transition-all duration-200 ${
                             l.id === look?.id
-                              ? "bg-[rgba(26,23,6,0.05)] border-[rgba(26,23,6,0.2)]"
-                              : "border-[rgba(26,23,6,0.06)] hover:bg-[rgba(26,23,6,0.03)] hover:border-[rgba(26,23,6,0.14)]"
+                              ? "bg-[#1a1706]/5 border-[#1a1706]/20"
+                              : "border-[#1a1706]/6 hover:bg-[#1a1706]/3 hover:border-[#1a1706]/14"
                           }`}
                           onClick={() => {
                             stopVoice();
@@ -396,10 +396,10 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                             loading="lazy"
                           />
                           <div>
-                            <div className="font-['Cormorant_Garamond'] italic text-[clamp(15px,1.3vw,17px)] text-[rgba(26,23,6,0.65)]">
+                            <div className="font-['Cormorant_Garamond'] italic text-[clamp(15px,1.3vw,17px)] text-[#1a1706]/65">
                               {l.title}
                             </div>
-                            <div className="font-['DM_Mono'] text-[7px] tracking-[0.22em] uppercase text-[rgba(26,23,6,0.32)] mt-0.5">
+                            <div className="font-['DM_Mono'] text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/32 mt-0.5">
                               {l.sub}
                             </div>
                           </div>
@@ -413,14 +413,14 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                 <div className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(30px,3.4vw,48px)] text-[#1a1706] leading-[1.05] mb-2">
                   {look?.title}
                 </div>
-                <div className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[rgba(26,23,6,0.55)] mb-7">
+                <div className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[#1a1706]/55 mb-7">
                   {look?.sub} &middot; {look?.cat}
                 </div>
 
                 {/* Voice bar */}
-                <div className="flex items-center gap-3 px-4 py-[11px] bg-[rgba(26,23,6,0.03)] border border-[rgba(26,23,6,0.07)] mb-6">
+                <div className="flex items-center gap-3 px-4 py-[11px] bg-[#1a1706]/3 border border-[#1a1706]/7 mb-6">
                   <button
-                    className="w-8 h-8 rounded-full border border-[rgba(26,23,6,0.18)] bg-[rgba(26,23,6,0.04)] text-[#1a1706] flex items-center justify-center cursor-pointer transition-all duration-200 flex-shrink-0 hover:bg-[rgba(26,23,6,0.1)]"
+                    className="w-8 h-8 rounded-full border border-[#1a1706]/18 bg-[#1a1706]/4 text-[#1a1706] flex items-center justify-center cursor-pointer transition-all duration-200 flex-shrink-0 hover:bg-[#1a1706]/10"
                     onClick={toggleVoice}
                   >
                     {voicePlaying ? (
@@ -434,26 +434,26 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                       </svg>
                     )}
                   </button>
-                  <div className="flex-1 h-[2px] bg-[rgba(26,23,6,0.08)] rounded-[1px]">
+                  <div className="flex-1 h-[2px] bg-[#1a1706]/8 rounded-[1px]">
                     <div
                       ref={voiceProgRef}
-                      className="h-full w-0 bg-[rgba(26,23,6,0.5)] rounded-[1px] transition-[width] duration-100 ease-linear"
+                      className="h-full w-0 bg-[#1a1706]/50 rounded-[1px] transition-[width] duration-100 ease-linear"
                     />
                   </div>
-                  <div className="font-['DM_Mono'] text-[7px] tracking-[0.25em] uppercase text-[rgba(26,23,6,0.32)] whitespace-nowrap">
+                  <div className="font-['DM_Mono'] text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/32 whitespace-nowrap">
                     {voiceLabel}
                   </div>
                 </div>
 
                 {/* Story text */}
-                <div className="font-['Outfit'] text-[clamp(16px,1.5vw,19px)] text-[rgba(26,23,6,0.80)] leading-[1.9] mb-7 font-light flex-1">
+                <div className="font-['Outfit'] text-[clamp(16px,1.5vw,19px)] text-[#1a1706]/80 leading-[1.9] mb-7 font-light flex-1">
                   {look?.story.split("\n\n").map((para, pi) => (
                     <span key={pi}>{pi > 0 && <><br /><br /></>}{para}</span>
                   ))}
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2.5 flex-wrap pt-[18px] border-t border-[rgba(26,23,6,0.07)]">
+                <div className="flex gap-2.5 flex-wrap pt-[18px] border-t border-[#1a1706]/7">
                   <button
                     className="font-['Outfit'] text-[clamp(13px,1.2vw,15px)] tracking-[0.08em] uppercase px-7 py-3.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer transition-[background] duration-200 font-semibold hover:bg-black"
                     onClick={handleBook}
@@ -461,7 +461,7 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
                     Book This Look &rarr;
                   </button>
                   <button
-                    className="font-['Outfit'] text-[clamp(13px,1.2vw,15px)] tracking-[0.08em] uppercase px-6 py-3.5 bg-transparent border border-[rgba(26,23,6,0.18)] text-[rgba(26,23,6,0.5)] cursor-pointer flex items-center gap-2 transition-all duration-200 font-semibold hover:border-[rgba(26,23,6,0.5)] hover:text-[#1a1706]"
+                    className="font-['Outfit'] text-[clamp(13px,1.2vw,15px)] tracking-[0.08em] uppercase px-6 py-3.5 bg-transparent border border-[#1a1706]/18 text-[#1a1706]/50 cursor-pointer flex items-center gap-2 transition-all duration-200 font-semibold hover:border-[#1a1706]/50 hover:text-[#1a1706]"
                     onClick={shareStory}
                   >
                     &uarr; &nbsp; Share Look
