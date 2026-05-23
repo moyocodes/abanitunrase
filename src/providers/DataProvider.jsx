@@ -18,8 +18,8 @@ const DataContext = createContext(null);
 const GALLERY_TYPES = ["image/png","image/jpeg","image/jpg","image/gif","image/webp","video/mp4","video/quicktime"];
 
 const DEFAULT_ATELIER = {
-  quote1: “”Iyawoooo, Oko Iyawoooo!”,
-  quote2: “Sé dáadáa lè wà?””,
+  quote1: "\u201cIyawoooo, Oko Iyawoooo!",
+  quote2: "S\u00e9 d\u00e1ad\u00e1a l\u00e8 w\u00e0?\u201d",
   body1: “I am Fiponmileoluwa — Fifii, for most. Creative director of ABÁNÍTÚRASE. Lawyer by training, stylist by calling. Mostly stylist, actually.”,
   body2: “Whether you are a bride stepping into ceremony, a guest arriving at owambe, or someone travelling somewhere beautiful wanting to look exactly right — this house is for you. We dress with intention, We dress well.”,
   sigName: “Fiponmileoluwa”,
