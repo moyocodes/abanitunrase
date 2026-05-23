@@ -1,14 +1,44 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { SHOWCASED, LOOKS } from "../data.js";
+import { useData } from "@/providers";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { saveSettings } from "@/lib/firestore";
 
 const PEEK = 68;
 
 export default function Lookbook({ lkStackRef, lkProgress = 0, lkActive, lkVisible, onOpenStory, onOpenLightbox }) {
+  const { lookbookData, refetch } = useData();
+  const { activePanel } = useEditMode();
+  const [draft, setDraft] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "lookbook") setDraft({ ...lookbookData });
+  }, [activePanel]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("lookbook", draft);
+      refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const total = String(SHOWCASED.length).padStart(2, "0");
   const innerH = typeof window !== "undefined" ? window.innerHeight : 800;
 
   return (
     <div id="lookbook-section" className="bg-[#f0efeb] border-t border-black/[0.05]">
+      <SectionEditButton panelId="lookbook" />
+      <SectionPanel panelId="lookbook" title="Lookbook">
+        <PanelField label="Heading" value={draft.heading} onChange={v => setDraft(d => ({ ...d, heading: v }))} />
+        <PanelField label="Season label" value={draft.season} onChange={v => setDraft(d => ({ ...d, season: v }))} />
+        <PanelField label="Sub-text (right column)" value={draft.sub} onChange={v => setDraft(d => ({ ...d, sub: v }))} multiline />
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
+      </SectionPanel>
       <motion.div
         className="px-6 md:px-16 pt-14 pb-10 flex items-end justify-between gap-8 border-b border-black/[0.06]"
         initial={{ opacity: 0, y: 24 }}
@@ -19,14 +49,14 @@ export default function Lookbook({ lkStackRef, lkProgress = 0, lkActive, lkVisib
         <div>
           <div className="font-mono text-[8px] tracking-[0.4em] uppercase text-black/35 flex items-center gap-3 mb-3">
             <span className="block w-6 h-px bg-black/15" />
-            The Lookbook · SS 2026
+            The Lookbook · {lookbookData.season}
           </div>
           <h2 className="font-heading italic text-[#1a1706] text-[clamp(36px,5vw,72px)] leading-none tracking-tight font-normal">
-            Selected Works
+            {lookbookData.heading}
           </h2>
         </div>
-        <p className="font-body text-black/45 text-right text-[clamp(13px,1.2vw,15px)] leading-relaxed max-w-xs flex-shrink-0 hidden md:block font-light">
-          Bridal · Occasion · Travel<br />Lagos · Ibadan · Abroad
+        <p className="font-body text-black/45 text-right text-[clamp(13px,1.2vw,15px)] leading-relaxed max-w-xs flex-shrink-0 hidden md:block font-light whitespace-pre-line">
+          {lookbookData.sub}
         </p>
       </motion.div>
 

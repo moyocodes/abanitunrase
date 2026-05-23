@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getLooks, getPricing, getSettings, getGallery, addGalleryItem, removeGalleryItem } from "@/lib/firestore";
-import { uploadToStorage } from "@/lib/storage";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import {
   LOOKS as STATIC_LOOKS,
   CATEGORIES as STATIC_CATEGORIES,
@@ -18,12 +18,27 @@ const DataContext = createContext(null);
 const GALLERY_TYPES = ["image/png","image/jpeg","image/jpg","image/gif","image/webp","video/mp4","video/quicktime"];
 
 const DEFAULT_ATELIER = {
-  quote1: "“Iyawoooo, Oko Iyawoooo!",
-  quote2: "Sé dáadáa lè wà?”",
-  body1: "I am Fiponmileoluwa — Fifii, for most. Creative director of ABÁNÍTÚRASE. Lawyer by training, stylist by calling. Mostly stylist, actually.",
-  body2: "Whether you are a bride stepping into ceremony, a guest arriving at owambe, or someone travelling somewhere beautiful wanting to look exactly right — this house is for you. We dress with intention, We dress well.",
-  sigName: "Fiponmileoluwa",
-  sigRole: "Creative Director",
+  quote1: “”Iyawoooo, Oko Iyawoooo!”,
+  quote2: “Sé dáadáa lè wà?””,
+  body1: “I am Fiponmileoluwa — Fifii, for most. Creative director of ABÁNÍTÚRASE. Lawyer by training, stylist by calling. Mostly stylist, actually.”,
+  body2: “Whether you are a bride stepping into ceremony, a guest arriving at owambe, or someone travelling somewhere beautiful wanting to look exactly right — this house is for you. We dress with intention, We dress well.”,
+  sigName: “Fiponmileoluwa”,
+  sigRole: “Creative Director”,
+  estYear: “2024”,
+};
+
+const DEFAULT_RATES = {
+  note: “All prices NGN\nNon-deductible consultation”,
+  consultations: [
+    { label: “General Consultation”, note: “One-on-one styling session”, price: “₦100,000” },
+    { label: “Couple's Consultation”, note: “Joint styling & alignment session”, price: “₦150,000” },
+  ],
+};
+
+const DEFAULT_LOOKBOOK = {
+  heading: “Selected Works”,
+  season: “SS 2026”,
+  sub: “Bridal · Occasion · Travel\nLagos · Ibadan · Abroad”,
 };
 
 const DEFAULT_CTA = {
@@ -95,7 +110,7 @@ export function DataProvider({ children }) {
       const placeholder = { id: tempId, url: blobUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name, uploading: true };
       setGalleryItems(prev => [...prev, placeholder]);
       try {
-        const url = await uploadToStorage(file);
+        const url = await uploadToCloudinary(file);
         const item = { url, type: placeholder.type, name: file.name };
         const savedId = await addGalleryItem(item).catch(() => tempId);
         URL.revokeObjectURL(blobUrl);
@@ -143,6 +158,12 @@ export function DataProvider({ children }) {
   const atelier = { ...DEFAULT_ATELIER, ...(settings.atelier ?? {}) };
   const ctaData = { ...DEFAULT_CTA, ...(settings.site ?? {}) };
   const footerData = { ...DEFAULT_FOOTER, ...(settings.footer ?? {}) };
+  const ratesData = {
+    ...DEFAULT_RATES,
+    ...(settings.rates ?? {}),
+    consultations: settings.rates?.consultations ?? DEFAULT_RATES.consultations,
+  };
+  const lookbookData = { ...DEFAULT_LOOKBOOK, ...(settings.lookbook ?? {}) };
 
   return (
     <DataContext.Provider
@@ -163,6 +184,8 @@ export function DataProvider({ children }) {
         atelier,
         ctaData,
         footerData,
+        ratesData,
+        lookbookData,
         galleryItems,
         galleryUploading,
         addGallery,

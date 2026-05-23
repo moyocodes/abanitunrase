@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
 import { useData } from "@/providers";
 import { saveSettings } from "@/lib/firestore";
-import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
 
 /* Char-by-char reveal tied to scroll progress */
 function ScrollChars({ text, scrollProgress, start, end, className }) {
@@ -61,8 +61,13 @@ function ScrollFade({ scrollProgress, start, end, y: yFrom = 16, className, chil
 export default function Atelier() {
   const sectionRef = useRef(null);
   const { atelier, refetch } = useData();
-  const [draft, setDraft] = useState({ ...atelier });
+  const { activePanel } = useEditMode();
+  const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "atelier") setDraft({ ...atelier });
+  }, [activePanel]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -93,6 +98,7 @@ export default function Atelier() {
             <PanelField label="Body Paragraph 2" value={draft.body2} onChange={v => set("body2", v)} multiline />
             <PanelField label="Signature Name" value={draft.sigName} onChange={v => set("sigName", v)} />
             <PanelField label="Signature Role" value={draft.sigRole} onChange={v => set("sigRole", v)} />
+            <PanelField label="Est. Year" value={draft.estYear} onChange={v => set("estYear", v)} />
             <PanelSaveBtn onClick={handleSave} saving={saving} />
           </>
         )}
@@ -159,7 +165,7 @@ export default function Atelier() {
           >
             <div className="mb-6 md:mb-10">
               <div className="font-['Cormorant_Garamond'] italic text-[36px] md:text-[60px] text-[#1a1706]/8 leading-none">Est.</div>
-              <div className="font-['Cormorant_Garamond'] text-[36px] md:text-[60px] text-[#1a1706] leading-none -mt-1 md:-mt-2">2024</div>
+              <div className="font-['Cormorant_Garamond'] text-[36px] md:text-[60px] text-[#1a1706] leading-none -mt-1 md:-mt-2">{atelier.estYear}</div>
               <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mt-2 md:mt-3">Lagos, Nigeria</div>
             </div>
             <div className="border-t border-[#1a1706]/8 pt-5 md:pt-7">

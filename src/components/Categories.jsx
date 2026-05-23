@@ -82,6 +82,11 @@ export default function Categories({ onBook }) {
                 onChange={(v) => patchDraft(cat.type, "desc", v)}
                 multiline
               />
+              <PanelField
+                label="Looks count"
+                value={String(draft.find((c) => c.type === cat.type)?.looks ?? cat.looks ?? "")}
+                onChange={(v) => patchDraft(cat.type, "looks", Number(v) || 0)}
+              />
             </div>
           ))}
           <PanelSaveBtn onClick={handleSave} saving={saving} disabled={!isDirty} />

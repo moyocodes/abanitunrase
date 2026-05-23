@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { fmt } from "../data.js";
 import { useData } from "@/providers";
-import { useEditMode, EditableText } from "@/components/AdminBar";
-import { savePricing } from "@/lib/firestore";
+import { useEditMode, EditableText, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { savePricing, saveSettings } from "@/lib/firestore";
 
 const tabs = [
   { key: "bridal", label: "Bridal Styling", short: "Bridal", sub: "Ìyàwó & Oko Ìyàwó" },
@@ -63,8 +63,27 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const [hoveredCard, setHoveredCard] = useState(false);
   const intervalRef = useRef(null);
   const tabIntervalRef = useRef(null);
-  const { bridal, occasion, travel, refetch } = useData();
-  const { editMode } = useEditMode();
+  const { bridal, occasion, travel, ratesData, refetch } = useData();
+  const { editMode, activePanel } = useEditMode();
+  const [draft, setDraft] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "rates") setDraft({ ...ratesData, consultations: ratesData.consultations.map(c => ({ ...c })) });
+  }, [activePanel]);
+
+  const setConsultation = (idx, field, val) =>
+    setDraft(d => ({ ...d, consultations: d.consultations.map((c, i) => i === idx ? { ...c, [field]: val } : c) }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("rates", draft);
+      refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const cards =
     activeTab === "bridal" ? (bridal ?? []) : activeTab === "occasion" ? (occasion ?? []) : (travel ?? []);
@@ -99,6 +118,20 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
   return (
     <section id="rates" className="bg-[#0a0a0a]">
+      <SectionEditButton panelId="rates" />
+      <SectionPanel panelId="rates" title="Rates">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Header</p>
+        <PanelField label="Note (header right)" value={draft.note} onChange={v => setDraft(d => ({ ...d, note: v }))} multiline />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Consultations</p>
+        {(draft.consultations ?? []).map((c, i) => (
+          <div key={i} className="flex flex-col gap-2 pb-3 border-b border-[#1a1706]/8 last:border-b-0">
+            <PanelField label={`Label ${i + 1}`} value={c.label} onChange={v => setConsultation(i, "label", v)} />
+            <PanelField label="Note" value={c.note} onChange={v => setConsultation(i, "note", v)} />
+            <PanelField label="Price" value={c.price} onChange={v => setConsultation(i, "price", v)} />
+          </div>
+        ))}
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
+      </SectionPanel>
       {/* Header + Tabs */}
       <motion.div
         className="bg-[#1a1706]"
@@ -113,8 +146,8 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             <span className="block w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
             <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">The Rates.</h2>
           </div>
-          <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/35 text-right leading-relaxed hidden md:block">
-            All prices NGN<br />Non-deductible consultation
+          <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/35 text-right leading-relaxed hidden md:block whitespace-pre-line">
+            {ratesData.note}
           </p>
         </div>
         <div className="border-t border-white/[0.06] flex">
@@ -261,10 +294,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         viewport={{ once: true, margin: "-40px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        {[
-          { label: "General Consultation", note: "One-on-one styling session", price: "₦100,000" },
-          { label: "Couple's Consultation", note: "Joint styling & alignment session", price: "₦150,000" },
-        ].map((c, i) => (
+        {ratesData.consultations.map((c, i) => (
           <button
             key={i}
             onClick={onBookCall}

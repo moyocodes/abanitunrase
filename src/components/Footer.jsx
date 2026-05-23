@@ -1,47 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useData } from "@/providers";
 import { saveSettings } from "@/lib/firestore";
-import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
 
 const navLinks = [
   { label: "Styling House", href: "#styling-house" },
   { label: "What We Do", href: "#categories" },
   { label: "Lookbook", href: "#lookbook-section" },
   { label: "Rates", href: "#rates" },
-];
-
-const socialLinks = [
-  {
-    label: "Instagram",
-    href: "https://instagram.com/Abanitunrase",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-        <circle cx="12" cy="12" r="4"/>
-        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
-      </svg>
-    ),
-  },
-  {
-    label: "WhatsApp",
-    href: "https://wa.me/2348126286593",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-      </svg>
-    ),
-  },
-  {
-    label: "Email",
-    href: "mailto:Officialabanitunrase@gmail.com",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
-      </svg>
-    ),
-  },
 ];
 
 const col = {
@@ -56,8 +23,13 @@ const colItem = {
 
 export default function Footer() {
   const { footerData, refetch } = useData();
-  const [draft, setDraft] = useState({ ...footerData });
+  const { activePanel } = useEditMode();
+  const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "footer") setDraft({ ...footerData });
+  }, [activePanel]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -71,13 +43,74 @@ export default function Footer() {
     }
   };
 
+  const igUrl = footerData.instagramUrl || "https://instagram.com/Abanitunrase";
+  const igHandle = footerData.instagramHandle || "@Abanitunrase";
+  const waUrl = footerData.whatsappUrl || "https://wa.me/2348126286593";
+  const waNumber = footerData.whatsappNumber || "+234 812 628 6593";
+  const emailAddr = footerData.email || "Officialabanitunrase@gmail.com";
+  const brandSub = footerData.brandSub || "Lagos Styling House";
+  const copyrightYear = footerData.copyrightYear || "2026";
+  const estYear = footerData.estYear || "2026";
+
+  const socialLinks = [
+    {
+      label: "Instagram",
+      href: igUrl,
+      display: igHandle,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+        </svg>
+      ),
+    },
+    {
+      label: "WhatsApp",
+      href: waUrl,
+      display: waNumber,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      ),
+    },
+    {
+      label: "Email",
+      href: `mailto:${emailAddr}`,
+      display: emailAddr,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <footer className="bg-[#0a0a0a] px-6 md:px-16 pt-16 pb-10 border-t border-white/[0.05] relative">
       <SectionEditButton panelId="footer" />
       <SectionPanel panelId="footer" title="Footer">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Brand</p>
+        <PanelField label="Brand sub-label" value={draft.brandSub} onChange={v => set("brandSub", v)} />
         <PanelField label="Tagline" value={draft.tagline} onChange={v => set("tagline", v)} multiline />
+
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Location</p>
         <PanelField label="Location" value={draft.location} onChange={v => set("location", v)} />
         <PanelField label="Location sub-text" value={draft.locationSub} onChange={v => set("locationSub", v)} />
+
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Social &amp; Contact</p>
+        <PanelField label="Instagram URL" value={draft.instagramUrl} onChange={v => set("instagramUrl", v)} />
+        <PanelField label="Instagram handle" value={draft.instagramHandle} onChange={v => set("instagramHandle", v)} />
+        <PanelField label="WhatsApp URL" value={draft.whatsappUrl} onChange={v => set("whatsappUrl", v)} />
+        <PanelField label="WhatsApp number (display)" value={draft.whatsappNumber} onChange={v => set("whatsappNumber", v)} />
+        <PanelField label="Email address" value={draft.email} onChange={v => set("email", v)} />
+
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Bottom bar</p>
+        <PanelField label="Copyright year" value={draft.copyrightYear} onChange={v => set("copyrightYear", v)} />
+        <PanelField label="Est. year" value={draft.estYear} onChange={v => set("estYear", v)} />
+
         <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
 
@@ -98,11 +131,11 @@ export default function Footer() {
               ABÁNITÚNRASE
             </div>
             <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/35 mt-2">
-              Lagos Styling House
+              {brandSub}
             </div>
           </motion.div>
 
-          {/* Nav links — stagger up */}
+          {/* Nav links */}
           <motion.div
             className="flex flex-col gap-3"
             initial="hidden"
@@ -128,7 +161,7 @@ export default function Footer() {
             ))}
           </motion.div>
 
-          {/* Social + contact — stagger from right */}
+          {/* Social + contact */}
           <motion.div
             className="flex flex-col gap-3"
             initial="hidden"
@@ -142,7 +175,7 @@ export default function Footer() {
             >
               Connect
             </motion.div>
-            {socialLinks.map(({ label, href, icon }) => (
+            {socialLinks.map(({ label, href, display, icon }) => (
               <motion.a
                 key={label}
                 href={href}
@@ -152,12 +185,12 @@ export default function Footer() {
                 className="flex items-center gap-3 text-[#f5f0e6]/55 no-underline hover:text-[#f5f0e6] transition-colors duration-200 group"
               >
                 <span className="opacity-70 group-hover:opacity-100 transition-opacity">{icon}</span>
-                <span className="font-['Outfit'] text-sm font-light">{label}</span>
+                <span className="font-['Outfit'] text-sm font-light">{display || label}</span>
               </motion.a>
             ))}
           </motion.div>
 
-          {/* Location + tagline — slides from right */}
+          {/* Location + tagline */}
           <motion.div
             className="max-w-[200px]"
             initial={{ opacity: 0, x: 30 }}
@@ -187,10 +220,10 @@ export default function Footer() {
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.3 }}
         >
           <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/28">
-            &copy; 2026 ABÁNITÚNRASE &nbsp;·&nbsp; All rights reserved
+            &copy; {copyrightYear} ABÁNITÚNRASE &nbsp;·&nbsp; All rights reserved
           </div>
           <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/28">
-            Est. 2026 &nbsp;·&nbsp; Lagos, Nigeria
+            Est. {estYear} &nbsp;·&nbsp; Lagos, Nigeria
           </div>
         </motion.div>
       </div>

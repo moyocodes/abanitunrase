@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/providers";
 import { useData } from "@/providers";
 import { saveLook, deleteLook } from "@/lib/firestore";
-import { uploadToStorage } from "@/lib/storage";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { fmt } from "@/data";
 
 /* ── Context ────────────────────────────────────────────── */
@@ -95,7 +95,7 @@ export function EditableImage({
     setUploading(true);
     setErr("");
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       await onUpload(url);
       showToast("Image updated ✓");
     } catch (ex) {
@@ -239,7 +239,7 @@ function UploadImageField({ label, value, onChange }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       onChange(url);
       showToast("Uploaded ✓");
     } catch (ex) {
@@ -280,7 +280,7 @@ function UploadMediaField({ label, value, onChange }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       onChange(url);
       showToast("Uploaded ✓");
     } catch (ex) {
@@ -320,7 +320,7 @@ function UploadThumbsField({ label, value, onChange }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       const existing = value?.trim() ? value.trim() + "\n" : "";
       onChange(existing + url);
       showToast("Thumbnail added ✓");
@@ -438,6 +438,8 @@ function LookForm({ lookId, looks, onBack, onSaved }) {
 const SECTIONS = [
   { id: "atelier",    label: "Atelier" },
   { id: "categories", label: "What We Do" },
+  { id: "lookbook",   label: "Lookbook" },
+  { id: "rates",      label: "Rates" },
   { id: "gallery",    label: "Gallery" },
   { id: "cta",        label: "CTA / Contact" },
   { id: "footer",     label: "Footer" },
@@ -681,7 +683,7 @@ export function PanelImageField({ label, value, onChange }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       onChange(url);
       showToast("Image uploaded ✓");
     } catch (ex) {

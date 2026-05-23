@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useData } from "@/providers";
 import { useEditMode, EditableText } from "@/components/AdminBar";
-import { uploadToStorage } from "@/lib/storage";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { saveSettings } from "@/lib/firestore";
 import { useState } from "react";
 
@@ -23,7 +23,7 @@ function HeroCardEdit({ item, allItems, onSaved }) {
     setUploading(true);
     setErr("");
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       await save({ ...item, url });
     } catch (ex) {
       setErr(ex.message ?? "Upload failed");
@@ -114,7 +114,7 @@ export default function Hero({ onBookCall, onQuiz }) {
     setAdding(true);
     setAddErr("");
     try {
-      const url = await uploadToStorage(file);
+      const url = await uploadToCloudinary(file);
       const next = [...(heroItems ?? []), { url, label: "", type: "" }];
       await saveSettings("hero", { images: next });
       refetch();

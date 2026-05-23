@@ -22,7 +22,7 @@ export default function CtaContact({ onBookCall }) {
     setTimeout(() => { setFormSubmitting(false); setFormDone(true); }, 1400);
   };
 
-  const { ctaBackground, contactBackground, ctaData, refetch } = useData();
+  const { ctaBackground, contactBackground, ctaData, footerData, refetch } = useData();
   const { activePanel } = useEditMode();
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -47,10 +47,10 @@ export default function CtaContact({ onBookCall }) {
   const saveBg = async (patch) => { await saveSettings("site", patch); refetch(); };
 
   const contactItems = [
-    { label: "Phone", val: "+234 812 628 6593", href: "tel:+2348126286593" },
-    { label: "Email", val: "Officialabanitunrase@gmail.com", href: "mailto:Officialabanitunrase@gmail.com" },
-    { label: "Instagram", val: "@Abanitunrase", href: "https://instagram.com/Abanitunrase", target: "_blank" },
-    { label: "Location", val: "Lagos, Nigeria", href: null },
+    { label: "Phone", val: footerData.whatsappNumber || "+234 812 628 6593", href: footerData.whatsappUrl || "https://wa.me/2348126286593", target: "_blank" },
+    { label: "Email", val: footerData.email || "Officialabanitunrase@gmail.com", href: `mailto:${footerData.email || "Officialabanitunrase@gmail.com"}` },
+    { label: "Instagram", val: footerData.instagramHandle || "@Abanitunrase", href: footerData.instagramUrl || "https://instagram.com/Abanitunrase", target: "_blank" },
+    { label: "Location", val: footerData.location || "Lagos, Nigeria", href: null },
   ];
 
   return (
