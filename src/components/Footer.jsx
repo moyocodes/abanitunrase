@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useData } from "@/providers";
 import { saveSettings } from "@/lib/firestore";
-import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
+import { SectionPanel, PanelField, PanelSaveBtn, useEditMode, SectionEditButton } from "@/components/AdminBar";
 
 const navLinks = [
   { label: "Styling House", href: "#styling-house" },
@@ -29,7 +29,7 @@ export default function Footer() {
 
   useEffect(() => {
     if (activePanel === "footer") setDraft({ ...footerData });
-  }, [activePanel]);
+  }, [activePanel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -93,24 +93,19 @@ export default function Footer() {
       <SectionEditButton panelId="footer" />
       <SectionPanel panelId="footer" title="Footer">
         <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Brand</p>
-        <PanelField label="Brand sub-label" value={draft.brandSub} onChange={v => set("brandSub", v)} />
-        <PanelField label="Tagline" value={draft.tagline} onChange={v => set("tagline", v)} multiline />
-
-        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Location</p>
-        <PanelField label="Location" value={draft.location} onChange={v => set("location", v)} />
-        <PanelField label="Location sub-text" value={draft.locationSub} onChange={v => set("locationSub", v)} />
-
-        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Social &amp; Contact</p>
-        <PanelField label="Instagram URL" value={draft.instagramUrl} onChange={v => set("instagramUrl", v)} />
-        <PanelField label="Instagram handle" value={draft.instagramHandle} onChange={v => set("instagramHandle", v)} />
-        <PanelField label="WhatsApp URL" value={draft.whatsappUrl} onChange={v => set("whatsappUrl", v)} />
-        <PanelField label="WhatsApp number (display)" value={draft.whatsappNumber} onChange={v => set("whatsappNumber", v)} />
-        <PanelField label="Email address" value={draft.email} onChange={v => set("email", v)} />
-
-        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Bottom bar</p>
-        <PanelField label="Copyright year" value={draft.copyrightYear} onChange={v => set("copyrightYear", v)} />
-        <PanelField label="Est. year" value={draft.estYear} onChange={v => set("estYear", v)} />
-
+        <PanelField label="Brand Sub-label" value={draft.brandSub ?? ""} onChange={v => set("brandSub", v)} />
+        <PanelField label="Tagline" value={draft.tagline ?? ""} onChange={v => set("tagline", v)} multiline />
+        <PanelField label="Est. Year" value={draft.estYear ?? ""} onChange={v => set("estYear", v)} />
+        <PanelField label="Copyright Year" value={draft.copyrightYear ?? ""} onChange={v => set("copyrightYear", v)} />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Location</p>
+        <PanelField label="City, Country" value={draft.location ?? ""} onChange={v => set("location", v)} />
+        <PanelField label="Location Sub" value={draft.locationSub ?? ""} onChange={v => set("locationSub", v)} />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Social</p>
+        <PanelField label="Instagram URL" value={draft.instagramUrl ?? ""} onChange={v => set("instagramUrl", v)} />
+        <PanelField label="Instagram Handle" value={draft.instagramHandle ?? ""} onChange={v => set("instagramHandle", v)} />
+        <PanelField label="WhatsApp URL" value={draft.whatsappUrl ?? ""} onChange={v => set("whatsappUrl", v)} />
+        <PanelField label="WhatsApp Number" value={draft.whatsappNumber ?? ""} onChange={v => set("whatsappNumber", v)} />
+        <PanelField label="Email" value={draft.email ?? ""} onChange={v => set("email", v)} />
         <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
 
@@ -130,7 +125,7 @@ export default function Footer() {
             <div className="text-[#f5f0e6]/80 text-3xl mb-1 tracking-[0.1em]">
               ABÁNITÚNRASE
             </div>
-            <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/35 mt-2">
+            <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/45 mt-2">
               {brandSub}
             </div>
           </motion.div>
@@ -145,7 +140,7 @@ export default function Footer() {
           >
             <motion.div
               variants={colItem}
-              className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/25 mb-1"
+              className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/45 mb-1"
             >
               Explore
             </motion.div>
@@ -171,7 +166,7 @@ export default function Footer() {
           >
             <motion.div
               variants={colItem}
-              className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/25 mb-1"
+              className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/45 mb-1"
             >
               Connect
             </motion.div>
@@ -198,14 +193,15 @@ export default function Footer() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
           >
-            <div className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/25 mb-3">
+            <div className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#f5f0e6]/45 mb-3">
               Location
             </div>
             <div className="font-['Outfit'] text-sm text-[#f5f0e6]/55 font-light leading-relaxed mb-6">
-              {footerData.location}<br />
+              {footerData.location}
+              <br />
               {footerData.locationSub}
             </div>
-            <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/35 text-lg leading-snug whitespace-pre-line">
+            <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/45 text-lg leading-snug whitespace-pre-line">
               {footerData.tagline}
             </div>
           </motion.div>
@@ -219,10 +215,10 @@ export default function Footer() {
           viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.3 }}
         >
-          <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/28">
+          <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/35">
             &copy; {copyrightYear} ABÁNITÚNRASE &nbsp;·&nbsp; All rights reserved
           </div>
-          <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/28">
+          <div className="font-mono text-[7px] tracking-[0.26em] uppercase text-[#f5f0e6]/35">
             Est. {estYear} &nbsp;·&nbsp; Lagos, Nigeria
           </div>
         </motion.div>

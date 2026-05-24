@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { fmt } from "../data.js";
 import { useData } from "@/providers";
-import { useEditMode, EditableText, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 import { savePricing, saveSettings } from "@/lib/firestore";
 
 const tabs = [
@@ -14,7 +14,7 @@ const tabs = [
 const TAB_KEYS = tabs.map(t => t.key);
 
 /* Inline-editable price number */
-function EditablePrice({ value, onSave, featured }) {
+function EditablePrice({ value, onSave }) {
   const { editMode } = useEditMode();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value ?? ""));
@@ -38,14 +38,14 @@ function EditablePrice({ value, onSave, featured }) {
         onBlur={commit}
         onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commit(); } if (e.key === "Escape") setEditing(false); }}
         autoFocus
-        className={`w-full outline-none border-b-2 border-amber-400/70 bg-transparent font-[inherit] text-[inherit] tracking-[inherit]`}
+        className="w-full outline-none border-b-2 border-amber-400/70 bg-transparent font-[inherit] text-[inherit] tracking-[inherit]"
       />
     );
   }
 
   return (
     <span
-      className={`cursor-text relative group/ep`}
+      className="cursor-text relative group/ep"
       onClick={() => { setDraft(String(value ?? "")); setEditing(true); }}
       title="Click to edit price"
     >
@@ -64,25 +64,62 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const intervalRef = useRef(null);
   const tabIntervalRef = useRef(null);
   const { bridal, occasion, travel, ratesData, refetch } = useData();
-  const { editMode, activePanel } = useEditMode();
-  const [draft, setDraft] = useState({});
+  const { editMode, activePanel, showToast } = useEditMode();
+  const [draft, setDraft] = useState({ note: "", consultations: [], packages: { bridal: [], occasion: [], travel: [] } });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (activePanel === "rates") setDraft({ ...ratesData, consultations: ratesData.consultations.map(c => ({ ...c })) });
-  }, [activePanel]);
+    if (activePanel === "rates") {
+      setDraft({
+        note: ratesData.note,
+        consultations: ratesData.consultations.map(c => ({ ...c })),
+        packages: {
+          bridal: (bridal ?? []).map(p => ({ ...p })),
+          occasion: (occasion ?? []).map(p => ({ ...p })),
+          travel: (travel ?? []).map(p => ({ ...p })),
+        },
+      });
+    }
+  }, [activePanel, ratesData, bridal, occasion, travel]);
 
-  const setConsultation = (idx, field, val) =>
-    setDraft(d => ({ ...d, consultations: d.consultations.map((c, i) => i === idx ? { ...c, [field]: val } : c) }));
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+
+  const setConsult = (idx, field, val) => setDraft(d => ({
+    ...d,
+    consultations: d.consultations.map((c, i) => i === idx ? { ...c, [field]: val } : c),
+  }));
+  const addConsult = () => setDraft(d => ({
+    ...d,
+    consultations: [...d.consultations, { label: "New Consultation", note: "", price: "₦0" }],
+  }));
+  const removeConsult = (idx) => setDraft(d => ({
+    ...d,
+    consultations: d.consultations.filter((_, i) => i !== idx),
+  }));
+
+  const setPkg = (tab, idx, field, val) => setDraft(d => ({
+    ...d,
+    packages: { ...d.packages, [tab]: d.packages[tab].map((p, i) => i === idx ? { ...p, [field]: val } : p) },
+  }));
+  const addPkg = (tab) => setDraft(d => ({
+    ...d,
+    packages: { ...d.packages, [tab]: [...d.packages[tab], { package: "New Package", tier: "", price: 0, featured: false, looks: 0, includes: [] }] },
+  }));
+  const removePkg = (tab, idx) => setDraft(d => ({
+    ...d,
+    packages: { ...d.packages, [tab]: d.packages[tab].filter((_, i) => i !== idx) },
+  }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveSettings("rates", draft);
+      await saveSettings("rates", { ...ratesData, note: draft.note, consultations: draft.consultations });
+      await savePricing("bridal", draft.packages.bridal);
+      await savePricing("occasion", draft.packages.occasion);
+      await savePricing("travel", draft.packages.travel);
       refetch();
-    } finally {
-      setSaving(false);
-    }
+      showToast("Rates saved ✓");
+    } finally { setSaving(false); }
   };
 
   const cards =
@@ -107,7 +144,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
       });
     }, 8000);
     return () => clearInterval(tabIntervalRef.current);
-  }, [hoveredCard, editMode]);
+  }, [hoveredCard, editMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateCard = async (idx, patch) => {
     const current = activeTab === "bridal" ? bridal : activeTab === "occasion" ? occasion : travel;
@@ -117,19 +154,55 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   };
 
   return (
-    <section id="rates" className="bg-[#0a0a0a]">
+    <section id="rates" className="bg-[#0a0a0a] relative">
       <SectionEditButton panelId="rates" />
-      <SectionPanel panelId="rates" title="Rates">
-        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Header</p>
-        <PanelField label="Note (header right)" value={draft.note} onChange={v => setDraft(d => ({ ...d, note: v }))} multiline />
-        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Consultations</p>
+      <SectionPanel panelId="rates" title="Rates & Pricing">
+        <PanelField label="Header Note" value={draft.note ?? ""} onChange={v => set("note", v)} multiline />
+
+        {/* Consultations */}
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Consultations</p>
         {(draft.consultations ?? []).map((c, i) => (
-          <div key={i} className="flex flex-col gap-2 pb-3 border-b border-[#1a1706]/8 last:border-b-0">
-            <PanelField label={`Label ${i + 1}`} value={c.label} onChange={v => setConsultation(i, "label", v)} />
-            <PanelField label="Note" value={c.note} onChange={v => setConsultation(i, "note", v)} />
-            <PanelField label="Price" value={c.price} onChange={v => setConsultation(i, "price", v)} />
+          <div key={i} className="flex flex-col gap-1.5 pt-2 pb-2 border-b border-[#1a1706]/6">
+            <div className="flex items-center justify-between">
+              <div className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/30">Consultation {i + 1}</div>
+              <button onClick={() => removeConsult(i)} className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer">✕ Remove</button>
+            </div>
+            <PanelField label="Label" value={c.label ?? ""} onChange={v => setConsult(i, "label", v)} />
+            <PanelField label="Note" value={c.note ?? ""} onChange={v => setConsult(i, "note", v)} />
+            <PanelField label="Price" value={c.price ?? ""} onChange={v => setConsult(i, "price", v)} />
           </div>
         ))}
+        <button onClick={addConsult} className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full">
+          + Add Consultation
+        </button>
+
+        {/* Pricing packages per tab */}
+        {["bridal", "occasion", "travel"].map(tab => (
+          <div key={tab}>
+            <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-3">Packages — {tab}</p>
+            {(draft.packages?.[tab] ?? []).map((p, i) => (
+              <div key={i} className="flex flex-col gap-1.5 pt-2 pb-2 border-b border-[#1a1706]/6">
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/30">{p.package || `Package ${i + 1}`}</div>
+                  <button onClick={() => removePkg(tab, i)} className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer">✕</button>
+                </div>
+                <PanelField label="Name" value={p.package ?? ""} onChange={v => setPkg(tab, i, "package", v)} />
+                <PanelField label="Tier" value={p.tier ?? ""} onChange={v => setPkg(tab, i, "tier", v)} />
+                <PanelField label="Price (NGN)" value={String(p.price ?? "")} onChange={v => setPkg(tab, i, "price", Number(String(v).replace(/[^0-9]/g, "")) || 0)} />
+                <PanelField label="Looks count" value={String(p.looks ?? "")} onChange={v => setPkg(tab, i, "looks", Number(v) || 0)} />
+                <PanelField label="Includes (one per line)" value={(p.includes ?? []).join("\n")} onChange={v => setPkg(tab, i, "includes", v.split("\n").filter(Boolean))} multiline />
+                <label className="flex items-center gap-2 font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/50 cursor-pointer">
+                  <input type="checkbox" checked={!!p.featured} onChange={e => setPkg(tab, i, "featured", e.target.checked)} className="accent-amber-500" />
+                  Featured
+                </label>
+              </div>
+            ))}
+            <button onClick={() => addPkg(tab)} className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full mt-1">
+              + Add Package
+            </button>
+          </div>
+        ))}
+
         <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
       {/* Header + Tabs */}
@@ -142,11 +215,11 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
       >
         <div className="px-6 md:px-16 pt-6 pb-5 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/40 hidden md:block">Investment</span>
-            <span className="block w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
+            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/50 hidden md:block">Investment</span>
+            <span className="w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
             <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">The Rates.</h2>
           </div>
-          <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/35 text-right leading-relaxed hidden md:block whitespace-pre-line">
+          <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/45 text-right leading-relaxed hidden md:block whitespace-pre-line">
             {ratesData.note}
           </p>
         </div>
@@ -203,7 +276,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
               <div
                 className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.3em] md:tracking-[0.36em] uppercase mb-2 md:mb-3 leading-relaxed ${
-                  r.featured ? "text-[#f5f0e6]/30" : "text-[#1a1706]/30"
+                  r.featured ? "text-[#f5f0e6]/45" : "text-[#1a1706]/45"
                 }`}
               >
                 {r.featured
@@ -220,10 +293,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                   r.featured ? "text-[#f5f0e6]" : "text-[#1a1706]"
                 }`}
               >
-                <EditableText
-                  value={r.package}
-                  onSave={(v) => updateCard(i, { package: v })}
-                />
+                {r.package}
               </h3>
 
               <div className="flex-1 mb-3 md:mb-4">
@@ -251,10 +321,9 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                   <EditablePrice
                     value={r.price}
                     onSave={(v) => updateCard(i, { price: v })}
-                    featured={r.featured}
                   />
                 </div>
-                <div className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.2em] md:tracking-[0.22em] uppercase mt-0.5 md:mt-1 ${r.featured ? "text-[#f5f0e6]/28" : "text-[#1a1706]/28"}`}>
+                <div className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.2em] md:tracking-[0.22em] uppercase mt-0.5 md:mt-1 ${r.featured ? "text-[#f5f0e6]/35" : "text-[#1a1706]/35"}`}>
                   NGN{activeTab === "occasion" ? " · Per Look" : ""}
                 </div>
               </div>
@@ -295,20 +364,22 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         {ratesData.consultations.map((c, i) => (
-          <button
+          <div
             key={i}
-            onClick={onBookCall}
-            className="px-5 md:px-16 py-4 md:py-5 flex items-center justify-between gap-3 border-r border-black/[0.07] last:border-r-0 hover:bg-black/[0.02] transition-all duration-200 text-left cursor-pointer bg-transparent w-full group"
+            onClick={!editMode ? onBookCall : undefined}
+            className={`px-5 md:px-16 py-4 md:py-5 flex items-center justify-between gap-3 border-r border-black/[0.07] last:border-r-0 hover:bg-black/[0.02] transition-all duration-200 text-left ${editMode ? "cursor-default" : "cursor-pointer"} bg-transparent w-full group`}
           >
             <div className="min-w-0">
               <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(16px,1.8vw,28px)] mb-0.5 leading-tight">{c.label}</div>
-              <div className="font-mono text-[7px] md:text-[7.5px] tracking-[0.22em] uppercase text-[#1a1706]/45">{c.note}</div>
+              <div className="font-mono text-[7px] md:text-[7.5px] tracking-[0.22em] uppercase text-[#1a1706]/50">{c.note}</div>
             </div>
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
               <div className="font-['Cormorant_Garamond'] text-[clamp(18px,2.4vw,36px)] text-[#1a1706]">{c.price}</div>
-              <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-base md:text-lg">→</span>
+              {!editMode && (
+                <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-base md:text-lg">→</span>
+              )}
             </div>
-          </button>
+          </div>
         ))}
       </motion.div>
     </section>

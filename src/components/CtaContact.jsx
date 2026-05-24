@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveContact, saveSettings } from "@/lib/firestore";
 import { useData } from "@/providers";
-import { EditableImage, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, PanelImageField, useEditMode } from "@/components/AdminBar";
+import { EditableImage, useEditMode, SectionEditButton, SectionPanel, PanelField, PanelImageField, PanelVideoField, PanelSaveBtn } from "@/components/AdminBar";
 
 export default function CtaContact({ onBookCall }) {
   const [formState, setFormState] = useState({ name: "", phone: "", email: "", service: "", date: "", message: "" });
@@ -23,28 +23,32 @@ export default function CtaContact({ onBookCall }) {
   };
 
   const { ctaBackground, contactBackground, ctaData, footerData, refetch } = useData();
-  const { activePanel } = useEditMode();
-  const [draft, setDraft] = useState(null);
+  const { editMode, activePanel, showToast } = useEditMode();
+  const [draft, setDraft] = useState({});
+  const [footerDraft, setFooterDraft] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (activePanel === "cta") setDraft({ ...ctaData, ctaBackground, contactBackground });
-  }, [activePanel]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (activePanel === "cta") {
+      setDraft({ heading: ctaData.heading, sub: ctaData.sub, btn: ctaData.btn, contactHeading: ctaData.contactHeading, contactBody: ctaData.contactBody, introVideo: ctaData.introVideo });
+      setFooterDraft({ whatsappNumber: footerData.whatsappNumber, email: footerData.email, instagramHandle: footerData.instagramHandle, location: footerData.location });
+    }
+  }, [activePanel, ctaData, footerData]);
 
-  const setD = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+  const setFoot = (k, v) => setFooterDraft(d => ({ ...d, [k]: v }));
 
   const handleSave = async () => {
-    if (!draft) return;
     setSaving(true);
     try {
-      await saveSettings("site", draft);
+      await saveSettings("site", { ...ctaData, ctaBackground, contactBackground, ...draft });
+      await saveSettings("footer", { ...footerData, ...footerDraft });
       refetch();
-    } finally {
-      setSaving(false);
-    }
+      showToast("Contact section saved ✓");
+    } finally { setSaving(false); }
   };
 
-  const saveBg = async (patch) => { await saveSettings("site", patch); refetch(); };
+  const saveBg = async (patch) => { await saveSettings("site", { ...ctaData, ctaBackground, contactBackground, ...patch }); refetch(); };
 
   const contactItems = [
     { label: "Phone", val: footerData.whatsappNumber || "+234 812 628 6593", href: footerData.whatsappUrl || "https://wa.me/2348126286593", target: "_blank" },
@@ -56,34 +60,35 @@ export default function CtaContact({ onBookCall }) {
   return (
     <div className="relative bg-[#0e0d08]">
       <SectionEditButton panelId="cta" />
-      <SectionPanel panelId="cta" title="CTA &amp; Contact">
-        {draft && (
-          <>
-            <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">CTA Section</p>
-            <PanelField label="Heading" value={draft.heading} onChange={v => setD("heading", v)} />
-            <PanelField label="Subtext" value={draft.sub} onChange={v => setD("sub", v)} multiline />
-            <PanelField label="Button text" value={draft.btn} onChange={v => setD("btn", v)} />
-            <PanelImageField label="CTA Background" value={draft.ctaBackground} onChange={v => setD("ctaBackground", v)} />
-            <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 pt-2">Contact Section</p>
-            <PanelField label="Heading" value={draft.contactHeading} onChange={v => setD("contactHeading", v)} multiline />
-            <PanelField label="Body text" value={draft.contactBody} onChange={v => setD("contactBody", v)} multiline />
-            <PanelImageField label="Contact Background" value={draft.contactBackground} onChange={v => setD("contactBackground", v)} />
-            <PanelSaveBtn onClick={handleSave} saving={saving} />
-          </>
-        )}
+      <SectionPanel panelId="cta" title="CTA / Contact">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">CTA Block</p>
+        <PanelField label="Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} multiline />
+        <PanelField label="Sub-text" value={draft.sub ?? ""} onChange={v => set("sub", v)} multiline />
+        <PanelField label="Button Text" value={draft.btn ?? ""} onChange={v => set("btn", v)} />
+        <PanelVideoField label="Intro Video" value={draft.introVideo ?? ""} onChange={v => set("introVideo", v)} />
+        <PanelImageField label="CTA Background" value={ctaBackground} onChange={async url => { await saveBg({ ctaBackground: url }); }} />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Contact Block</p>
+        <PanelField label="Heading" value={draft.contactHeading ?? ""} onChange={v => set("contactHeading", v)} multiline />
+        <PanelField label="Body" value={draft.contactBody ?? ""} onChange={v => set("contactBody", v)} multiline />
+        <PanelImageField label="Contact Background" value={contactBackground} onChange={async url => { await saveBg({ contactBackground: url }); }} />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Contact Info</p>
+        <PanelField label="Phone / WhatsApp" value={footerDraft.whatsappNumber ?? ""} onChange={v => setFoot("whatsappNumber", v)} />
+        <PanelField label="Email" value={footerDraft.email ?? ""} onChange={v => setFoot("email", v)} />
+        <PanelField label="Instagram Handle" value={footerDraft.instagramHandle ?? ""} onChange={v => setFoot("instagramHandle", v)} />
+        <PanelField label="Location" value={footerDraft.location ?? ""} onChange={v => setFoot("location", v)} />
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
-
       {/* CTA Section — sticky */}
       <div className="sticky top-0 z-[1] min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0e0d08] to-transparent z-[2] pointer-events-none" />
         <EditableImage
           src={ctaBackground}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover saturate-[0.75] opacity-75 select-none"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.85] opacity-85 select-none"
           overlay
           onUpload={(url) => saveBg({ ctaBackground: url })}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-[#1a1706]/50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/25 to-[#1a1706]/35" />
         <motion.div
           className="relative z-10 text-center px-8 max-w-2xl"
           initial={{ opacity: 0, scale: 0.96, y: 40 }}
@@ -98,7 +103,7 @@ export default function CtaContact({ onBookCall }) {
             {ctaData.sub}
           </p>
           <button
-            onClick={onBookCall}
+            onClick={!editMode ? onBookCall : undefined}
             className="font-['Outfit'] font-semibold uppercase tracking-widest text-sm px-12 py-4 bg-[#f5f0e6] text-[#1a1706] hover:bg-white transition-all duration-300 hover:-translate-y-0.5"
           >
             {ctaData.btn}
@@ -128,7 +133,7 @@ export default function CtaContact({ onBookCall }) {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="font-mono text-[10px] sm:text-[11px] md:text-[12px] tracking-[0.24em] sm:tracking-[0.3em] uppercase text-[#f5f0e6]/70 flex items-center gap-2.5 mb-3 md:mb-4"
+              className="font-mono text-[10px] sm:text-[11px] md:text-[12px] tracking-[0.24em] sm:tracking-[0.3em] uppercase text-[#f5f0e6]/90 flex items-center gap-2.5 mb-3 md:mb-4"
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
               viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15 }}
             >
@@ -143,7 +148,7 @@ export default function CtaContact({ onBookCall }) {
               {ctaData.contactHeading}
             </motion.h2>
             <motion.p
-              className="font-['Outfit'] text-[#f5f0e6]/82 text-base sm:text-lg leading-relaxed mb-7 md:mb-10 font-light max-w-xl"
+              className="font-['Outfit'] text-[#f5f0e6]/95 text-base sm:text-lg leading-relaxed mb-7 md:mb-10 font-light max-w-xl"
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
             >
@@ -167,11 +172,11 @@ export default function CtaContact({ onBookCall }) {
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="font-mono text-[9px] md:text-[10px] tracking-[0.22em] uppercase text-[#f5f0e6]/62 mb-1">{label}</div>
+                    <div className="font-mono text-[9px] md:text-[10px] tracking-[0.22em] uppercase text-[#f5f0e6]/85 mb-1">{label}</div>
                     <div className="font-['Outfit'] text-[#f5f0e6] text-base md:text-lg leading-snug break-words">{val}</div>
                   </div>
                   {href && (
-                    <span className="text-[#f5f0e6]/25 text-sm flex-shrink-0 mt-1">→</span>
+                    <span className="text-[#f5f0e6]/45 text-sm flex-shrink-0 mt-1">→</span>
                   )}
                 </motion.a>
               ))}

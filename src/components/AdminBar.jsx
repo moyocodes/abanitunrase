@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/providers";
 import { useData } from "@/providers";
@@ -15,57 +15,12 @@ export const useEditMode = () => useContext(Ctx);
    Renders children normally; in edit mode becomes a click-
    to-edit inline input / textarea.
 ───────────────────────────────────────────────────────── */
-export function EditableText({
-  value,
-  onSave,
-  className = "",
-  multiline = false,
-  placeholder = "…",
-}) {
+export function EditableText({ value, onSave, className = "", multiline = false, placeholder = "…" }) {
   const { editMode } = useEditMode();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value ?? "");
-
-  useEffect(() => {
-    if (!editing) setDraft(value ?? "");
-  }, [value, editing]);
-
   if (!editMode) return <>{value}</>;
-
-  const commit = () => {
-    setEditing(false);
-    const trimmed = draft.trim();
-    if (trimmed !== (value ?? "").trim()) onSave(trimmed);
-  };
-
-  if (editing) {
-    const shared = {
-      value: draft,
-      onChange: (e) => setDraft(e.target.value),
-      onBlur: commit,
-      onKeyDown: (e) => {
-        if (e.key === "Escape") { setDraft(value ?? ""); setEditing(false); }
-        if (!multiline && e.key === "Enter") { e.preventDefault(); commit(); }
-      },
-      autoFocus: true,
-    };
-    const base =
-      "outline-none ring-1 ring-amber-400/70 bg-white/10 backdrop-blur-sm " +
-      "font-[inherit] text-[inherit] leading-[inherit] tracking-[inherit] px-1 w-full";
-    return multiline
-      ? <textarea rows={4} {...shared} className={`${base} resize-none block ${className}`} />
-      : <input type="text" {...shared} className={`${base} inline-block min-w-[60px] ${className}`} />;
-  }
-
   return (
-    <span
-      className={`cursor-text relative group/et ${className}`}
-      onClick={() => { setDraft(value ?? ""); setEditing(true); }}
-      title="Click to edit"
-    >
+    <span className={`border-b border-amber-400/40 ${className}`}>
       {value || <span className="opacity-30 italic">{placeholder}</span>}
-      {/* amber dot signals editable */}
-      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400 opacity-0 group-hover/et:opacity-100 transition-opacity pointer-events-none" />
     </span>
   );
 }
@@ -158,10 +113,10 @@ export function EditSection({ children, className }) {
 /* ── Provider ───────────────────────────────────────────── */
 export function AdminEditProvider({ children }) {
   const { user } = useAuth();
-  const [editMode, setEditMode] = useState(false);
-  const [looksPanel, setLooksPanel] = useState(null); // null | "list" | "new" | lookId
+  const [looksPanel, setLooksPanel] = useState(null);
   const [activePanel, setActivePanel] = useState(null);
 
+  const editMode = activePanel !== null;
   const openLook = (id) => setLooksPanel(id ?? "list");
   const closeLooks = () => setLooksPanel(null);
   const openPanel = (id) => setActivePanel(id);
@@ -177,8 +132,6 @@ export function AdminEditProvider({ children }) {
 
   return (
     <Ctx.Provider value={{ editMode, openLook, activePanel, openPanel, closePanel, showToast }}>
-      {/* spacer grows when sections subbar is visible */}
-      {user && <div style={{ height: editMode ? 68 : 36 }} />}
       {children}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9998] bg-[#1a1706] text-[#f5f0e6] font-mono text-[8px] tracking-[0.3em] uppercase px-5 py-2.5 shadow-xl pointer-events-none whitespace-nowrap">
@@ -186,13 +139,10 @@ export function AdminEditProvider({ children }) {
         </div>
       )}
       {user && (
-        <InlineAdminBar
-          editMode={editMode}
-          setEditMode={setEditMode}
+        <FloatingAdmin
           looksPanel={looksPanel}
           setLooksPanel={setLooksPanel}
           closeLooks={closeLooks}
-          openPanel={openPanel}
         />
       )}
     </Ctx.Provider>
@@ -445,6 +395,123 @@ const SECTIONS = [
   { id: "footer",     label: "Footer" },
 ];
 
+/* ── FloatingAdmin — bottom-left badge + looks drawer ───── */
+function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
+  const { signOut } = useAuth();
+  const { looks, refetch } = useData();
+  const [expanded, setExpanded] = useState(false);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this look?")) return;
+    try { await deleteLook(id); await refetch(); }
+    catch { alert("Delete failed."); }
+  };
+
+  const panelOpen = Boolean(looksPanel);
+
+  return (
+    <>
+      <div className="fixed bottom-6 left-6 z-[9999] flex flex-col items-start gap-1.5">
+        {expanded && (
+          <div className="flex flex-col bg-[#1a1706] border border-white/10 shadow-2xl overflow-hidden mb-0.5">
+            <Link
+              to="/admin"
+              className="font-mono text-[6.5px] tracking-[0.2em] uppercase px-4 py-2.5 text-[#f5f0e6]/55 hover:text-[#f5f0e6] hover:bg-white/[0.05] transition-colors no-underline block border-b border-white/[0.06]"
+            >
+              Bookings →
+            </Link>
+            <button
+              onClick={signOut}
+              className="font-mono text-[6.5px] tracking-[0.2em] uppercase px-4 py-2.5 text-[#f5f0e6]/35 hover:text-[#f5f0e6]/65 transition-colors text-left border-none bg-transparent cursor-pointer w-full"
+            >
+              Sign Out
+            </button>
+          </div>
+        )}
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className={`font-mono text-[6.5px] tracking-[0.28em] uppercase px-3.5 py-2 border shadow-lg transition-all duration-200 ${
+            expanded
+              ? "bg-[#1a1706] text-[#f5f0e6] border-white/20"
+              : "bg-[#1a1706]/85 text-[#f5f0e6]/55 border-white/10 hover:text-[#f5f0e6] hover:bg-[#1a1706] hover:border-white/20"
+          }`}
+        >
+          {expanded ? "✕ Close" : "⚙ Admin"}
+        </button>
+      </div>
+
+      {/* Looks side drawer */}
+      {panelOpen && (
+        <div className="fixed inset-0 z-[9990] bg-black/40" onClick={closeLooks}>
+          <div
+            className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#f8f7f3] overflow-y-auto shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-7">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-heading italic text-[#1a1706] text-2xl">
+                  {looksPanel === "list" ? "Manage Looks" : looksPanel === "new" ? "Add Look" : "Edit Look"}
+                </h2>
+                <button
+                  onClick={closeLooks}
+                  className="font-mono text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/30 hover:text-[#1a1706]/60 transition-colors"
+                >
+                  Close ✕
+                </button>
+              </div>
+
+              {looksPanel === "list" && (
+                <div>
+                  <button
+                    onClick={() => setLooksPanel("new")}
+                    className="w-full mb-5 py-3 border border-[#1a1706]/20 text-[#1a1706]/60 font-mono text-[7.5px] tracking-[0.25em] uppercase hover:border-[#1a1706]/40 hover:text-[#1a1706] transition-colors"
+                  >
+                    + Add New Look
+                  </button>
+                  <div className="divide-y divide-[#1a1706]/[0.06]">
+                    {looks.map(look => (
+                      <div key={look.id} className="flex items-center gap-3 py-3">
+                        {look.img && (
+                          <img src={look.img} alt={look.title} className="w-10 h-10 object-cover flex-shrink-0 saturate-0 opacity-50" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-body text-[#1a1706] text-sm truncate">{look.title || look.id}</div>
+                          <div className="font-mono text-[7px] tracking-[0.15em] uppercase text-[#1a1706]/30 mt-0.5">{look.cat}</div>
+                        </div>
+                        <button
+                          onClick={() => setLooksPanel(look.id)}
+                          className="font-mono text-[7px] tracking-[0.15em] uppercase text-[#1a1706]/40 hover:text-[#1a1706] transition-colors shrink-0"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(look.id)}
+                          className="font-mono text-[7px] tracking-[0.15em] uppercase text-red-500/40 hover:text-red-500/80 transition-colors shrink-0"
+                        >
+                          Del
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(looksPanel === "new" || (looksPanel !== "list" && looksPanel !== null)) && (
+                <LookForm
+                  lookId={looksPanel === "new" ? "new" : looksPanel}
+                  looks={looks}
+                  onBack={() => setLooksPanel("list")}
+                  onSaved={async () => { await refetch(); setLooksPanel("list"); }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ── InlineAdminBar ─────────────────────────────────────── */
 function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, closeLooks, openPanel }) {
   const { signOut } = useAuth();
@@ -594,8 +661,25 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
    edit-icon button + slide-in panel + field helpers.
 ═══════════════════════════════════════════════════════════ */
 
-/* ── SectionEditButton — replaced by sections subbar; renders nothing ── */
-export function SectionEditButton() { return null; }
+/* ── SectionEditButton — per-section edit toggle ── */
+export function SectionEditButton({ panelId }) {
+  const { user } = useAuth();
+  const { openPanel, closePanel, activePanel } = useEditMode();
+  if (!user) return null;
+  const isActive = activePanel === panelId;
+  return (
+    <button
+      onClick={() => isActive ? closePanel() : openPanel(panelId)}
+      className={`font-mono tracking-[0.22em] uppercase border transition-all duration-300 shadow-xl cursor-pointer ${
+        isActive
+          ? "fixed top-20 right-6 z-[9985] text-[9px] px-6 py-3 bg-amber-400 border-amber-500 text-[#1a1706] font-semibold"
+          : "absolute top-4 right-4 z-[200] text-[8px] px-4 py-2 bg-[#1a1706] border-white/20 text-[#f5f0e6]/90 hover:text-[#f5f0e6] hover:border-white/40 hover:bg-black"
+      }`}
+    >
+      {isActive ? "✕ Done Editing" : "✎ Edit Section"}
+    </button>
+  );
+}
 
 /* ── SectionPanel — slide-in drawer, only one open at a time ── */
 export function SectionPanel({ panelId, title, children }) {
@@ -604,7 +688,7 @@ export function SectionPanel({ panelId, title, children }) {
   return (
     <>
       <div className="fixed inset-0 z-[9982] bg-black/20 cursor-pointer" onClick={closePanel} />
-      <div className="fixed top-9 right-0 bottom-0 w-[min(100vw,360px)] z-[9983] bg-[#f8f7f3] overflow-y-auto shadow-2xl">
+      <div className="fixed top-0 right-0 bottom-0 w-[min(100vw,360px)] z-[9983] bg-[#f8f7f3] overflow-y-auto shadow-2xl">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <span className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-xl">{title}</span>
@@ -710,6 +794,56 @@ export function PanelImageField({ label, value, onChange }) {
         </label>
       </div>
       {value && <img src={value} alt="" className="w-full h-16 object-cover saturate-0 opacity-40 mt-2" />}
+    </div>
+  );
+}
+
+/* ── PanelVideoField — URL input + Cloudinary video upload ── */
+export function PanelVideoField({ label, value, onChange }) {
+  const { showToast } = useEditMode();
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setProgress(0);
+    try {
+      const url = await uploadToCloudinary(file, (pct) => setProgress(pct));
+      onChange(url);
+      showToast("Video uploaded ✓");
+    } catch (ex) {
+      alert(ex.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      setProgress(0);
+      e.target.value = "";
+    }
+  };
+  return (
+    <div>
+      <label className="block font-mono text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/35 mb-1.5">{label}</label>
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Paste URL or upload →"
+          className="flex-1 bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 text-sm outline-none focus:border-[#1a1706]/40"
+        />
+        <label className={`shrink-0 cursor-pointer font-mono text-[6.5px] tracking-[0.2em] uppercase px-2.5 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/40 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          {uploading ? `${progress}%` : "Upload"}
+          <input type="file" accept="video/*" className="hidden" onChange={handleFile} disabled={uploading} />
+        </label>
+      </div>
+      {uploading && (
+        <div className="mt-1.5 h-0.5 bg-[#1a1706]/10 rounded-full overflow-hidden">
+          <div className="h-full bg-amber-400 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+      {value && !uploading && (
+        <video src={value} className="w-full h-16 object-cover opacity-40 mt-2" muted playsInline />
+      )}
     </div>
   );
 }

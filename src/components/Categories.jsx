@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { fmt } from "../data.js";
 import { useData } from "@/providers";
-import { EditableText, EditableImage, SectionEditButton, SectionPanel, PanelField, PanelImageField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
+import { EditableImage, SectionEditButton, SectionPanel, PanelField, PanelImageField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
 
 const panelReveal = {
@@ -27,13 +27,16 @@ export default function Categories({ onBook }) {
     }
   }, [activePanel, categories]);
 
-  const isDirty = draft.length > 0 && JSON.stringify(draft) !== JSON.stringify(categories);
+  const patchDraft = (idx, field, val) =>
+    setDraft((prev) => prev.map((c, i) => i === idx ? { ...c, [field]: val } : c));
 
-  const patchDraft = (type, field, val) =>
-    setDraft((prev) => prev.map((c) => c.type === type ? { ...c, [field]: val } : c));
+  const addCategory = () => setDraft(prev => [...prev, {
+    title: "New Category", yoruba: "", looks: 0, desc: "", catIdx: prev.length, img: "", type: `cat-${Date.now()}`,
+  }]);
+
+  const removeCategory = (idx) => setDraft(prev => prev.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
-    if (!isDirty) return;
     setSaving(true);
     try {
       await saveSettings("categories", { items: draft });
@@ -57,39 +60,26 @@ export default function Categories({ onBook }) {
     <section id="categories" className="bg-white border-t border-[#1a1706]/6 relative">
       <SectionEditButton panelId="categories" />
       <SectionPanel panelId="categories" title="What We Do">
-        <div className="flex flex-col gap-6">
-          {(draft.length ? draft : (categories ?? [])).map((cat) => (
-            <div key={cat.type} className="flex flex-col gap-3 pb-5 border-b border-[#1a1706]/7 last:border-b-0 last:pb-0">
-              <div className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 mb-1">{cat.type}</div>
-              <PanelImageField
-                label="Image"
-                value={draft.find((c) => c.type === cat.type)?.img ?? cat.img}
-                onChange={(v) => patchDraft(cat.type, "img", v)}
-              />
-              <PanelField
-                label="Title"
-                value={draft.find((c) => c.type === cat.type)?.title ?? cat.title}
-                onChange={(v) => patchDraft(cat.type, "title", v)}
-              />
-              <PanelField
-                label="Yoruba Label"
-                value={draft.find((c) => c.type === cat.type)?.yoruba ?? cat.yoruba}
-                onChange={(v) => patchDraft(cat.type, "yoruba", v)}
-              />
-              <PanelField
-                label="Description"
-                value={draft.find((c) => c.type === cat.type)?.desc ?? cat.desc}
-                onChange={(v) => patchDraft(cat.type, "desc", v)}
-                multiline
-              />
-              <PanelField
-                label="Looks count"
-                value={String(draft.find((c) => c.type === cat.type)?.looks ?? cat.looks ?? "")}
-                onChange={(v) => patchDraft(cat.type, "looks", Number(v) || 0)}
-              />
+        <div className="flex flex-col gap-4">
+          {draft.map((cat, idx) => (
+            <div key={idx} className="flex flex-col gap-2 pb-4 border-b border-[#1a1706]/7 last:border-b-0 last:pb-0">
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40">{cat.type}</div>
+                <button onClick={() => removeCategory(idx)} className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer">✕ Remove</button>
+              </div>
+              <PanelField label="Type/Slug" value={cat.type ?? ""} onChange={v => patchDraft(idx, "type", v)} />
+              <PanelImageField label="Image" value={cat.img ?? ""} onChange={v => patchDraft(idx, "img", v)} />
+              <PanelField label="Title" value={cat.title ?? ""} onChange={v => patchDraft(idx, "title", v)} />
+              <PanelField label="Yoruba Label" value={cat.yoruba ?? ""} onChange={v => patchDraft(idx, "yoruba", v)} />
+              <PanelField label="Description" value={cat.desc ?? ""} onChange={v => patchDraft(idx, "desc", v)} multiline />
+              <PanelField label="Looks count" value={String(cat.looks ?? "")} onChange={v => patchDraft(idx, "looks", Number(v) || 0)} />
             </div>
           ))}
-          <PanelSaveBtn onClick={handleSave} saving={saving} disabled={!isDirty} />
+          <button
+            onClick={addCategory}
+            className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-2 bg-transparent cursor-pointer transition-colors w-full"
+          >+ Add Category</button>
+          <PanelSaveBtn onClick={handleSave} saving={saving} />
         </div>
       </SectionPanel>
       {/* Section header */}
@@ -159,10 +149,7 @@ export default function Categories({ onBook }) {
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
                   >
-                    <EditableText
-                      value={cat.yoruba}
-                      onSave={(v) => saveCategory({ ...cat, yoruba: v })}
-                    />
+                    {cat.yoruba}
                   </motion.div>
                   <motion.h3
                     className="font-['Cormorant_Garamond'] italic font-normal text-[#1a1706] text-[clamp(32px,3.5vw,54px)] leading-[1.03] mb-4"
@@ -170,10 +157,7 @@ export default function Categories({ onBook }) {
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
                   >
-                    <EditableText
-                      value={cat.title}
-                      onSave={(v) => saveCategory({ ...cat, title: v })}
-                    />
+                    {cat.title}
                   </motion.h3>
                   <motion.div
                     className="w-8 h-px bg-[#1a1706]/15 mb-6"
@@ -187,11 +171,7 @@ export default function Categories({ onBook }) {
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
                   >
-                    <EditableText
-                      value={cat.desc}
-                      onSave={(v) => saveCategory({ ...cat, desc: v })}
-                      multiline
-                    />
+                    {cat.desc}
                   </motion.p>
                   <motion.div
                     className="flex items-center gap-2.5 font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[#1a1706]/35 mb-8"

@@ -25,13 +25,49 @@ const DEFAULT_ATELIER = {
   sigName: "Fiponmileoluwa",
   sigRole: "Creative Director",
   estYear: "2024",
+  bgVideo: "/savessss.mp4",
+  specializations: ["Bridal Styling", "Occasion Styling", "Travel — Kájáyelo"],
+  sectionLabel: "A Note from the Styling House",
 };
 
 const DEFAULT_RATES = {
+  heading: "The Rates.",
+  sectionLabel: "Investment",
   note: "All prices NGN\nNon-deductible consultation",
   consultations: [
     { label: "General Consultation", note: "One-on-one styling session", price: "₦100,000" },
     { label: "Couple's Consultation", note: "Joint styling & alignment session", price: "₦150,000" },
+  ],
+};
+
+const DEFAULT_HERO_META = {
+  tagline: "Lagos Styling House",
+  subTagline: "Bridal · Occasion · Travel",
+};
+
+const DEFAULT_CATEGORIES_HDR = {
+  sectionLabel: "What We Do",
+  heading: "Three ways\nto dress well.",
+  sub: "Browse stories by category\nor click See Rates to explore pricing",
+};
+
+const DEFAULT_BEFORE = {
+  sectionLabel: "Before You Book",
+  heading: "Good to know.",
+  sub: "Questions we get asked\nbefore every booking",
+  faqs: [
+    {
+      q: "How far in advance should I book?",
+      a: "For bridal packages, we recommend booking at least 3–4 months before your first ceremony. For occasion styling, 3–6 weeks is ideal. For travel styling (Kájáyelo), we require a minimum of 2 weeks notice. Slots fill quickly — especially for Lagos owambe season.",
+    },
+    {
+      q: "Are the prices negotiable?",
+      a: "Our prices reflect the work, time, research, and relationships that go into every look. They are not negotiable. What we do offer is transparency — you know exactly what you are paying for, and we do not charge for extras that were always going to be part of the job.",
+    },
+    {
+      q: "Do you work outside Lagos?",
+      a: "Yes. We work in Lagos, Ibadan, Abuja, and abroad. Travel styling packages (Kájáyelo) are specifically designed for international trips. For local travel beyond Lagos, logistics are discussed during consultation.",
+    },
   ],
 };
 
@@ -43,10 +79,17 @@ const DEFAULT_LOOKBOOK = {
 
 const DEFAULT_CTA = {
   heading: "Ready to make an entrance?",
-  sub: "Let’s create something unforgettable together.\nBook a consultation or reach out.",
+  sub: "Let's create something unforgettable together.\nBook a consultation or reach out.",
   btn: "Get Started →",
-  contactHeading: "Let’s dress\nyou with\nintention.",
+  contactHeading: "Let's dress\nyou with\nintention.",
   contactBody: "Reach out to start a conversation about your day, your event, your trip — and what it should feel like to walk in.",
+  introVideo: "/savessss.mp4",
+};
+
+const DEFAULT_GALLERY = {
+  heading: "Work & Process.",
+  sub: "Moments from the styling house — fittings, arrivals, and the quiet work between.",
+  tagline: "The Archive",
 };
 
 const DEFAULT_FOOTER = {
@@ -157,6 +200,8 @@ export function DataProvider({ children }) {
 
   const atelier = { ...DEFAULT_ATELIER, ...(settings.atelier ?? {}) };
   const ctaData = { ...DEFAULT_CTA, ...(settings.site ?? {}) };
+  const introVideo = settings.site?.introVideo ?? DEFAULT_CTA.introVideo;
+  const archiveData = { ...DEFAULT_GALLERY, ...(settings.gallery ?? {}) };
   const footerData = { ...DEFAULT_FOOTER, ...(settings.footer ?? {}) };
   const ratesData = {
     ...DEFAULT_RATES,
@@ -183,6 +228,8 @@ export function DataProvider({ children }) {
         showcased,
         atelier,
         ctaData,
+        introVideo,
+        archiveData,
         footerData,
         ratesData,
         lookbookData,

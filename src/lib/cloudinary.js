@@ -12,7 +12,7 @@ async function sha1(str) {
     .join("");
 }
 
-export async function uploadToCloudinary(file) {
+export async function uploadToCloudinary(file, onProgress) {
   if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
     throw new Error(
       "Missing Cloudinary config — set VITE_CLOUDINARY_CLOUD_NAME, VITE_CLOUDINARY_API_KEY, VITE_CLOUDINARY_API_SECRET in .env"
@@ -20,9 +20,7 @@ export async function uploadToCloudinary(file) {
   }
 
   const timestamp = Math.round(Date.now() / 1000);
-  // Signature = SHA1("timestamp=<ts><api_secret>")
   const signature = await sha1(`timestamp=${timestamp}${API_SECRET}`);
-
   const resourceType = file.type.startsWith("video/") ? "video" : "image";
 
   const form = new FormData();
@@ -31,15 +29,24 @@ export async function uploadToCloudinary(file) {
   form.append("timestamp", timestamp);
   form.append("signature", signature);
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`,
-    { method: "POST", body: form }
-  );
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message ?? "Cloudinary upload failed");
-  }
-
-  return (await res.json()).secure_url;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`);
+    if (onProgress) {
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      });
+    }
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText);
+        resolve(data.secure_url);
+      } else {
+        const err = JSON.parse(xhr.responseText || "{}");
+        reject(new Error(err.error?.message ?? "Cloudinary upload failed"));
+      }
+    });
+    xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+    xhr.send(form);
+  });
 }

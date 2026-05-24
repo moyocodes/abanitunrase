@@ -2,10 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
 import { useData } from "@/providers";
 import { saveSettings } from "@/lib/firestore";
-import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelVideoField, PanelSaveBtn } from "@/components/AdminBar";
 
 /* Char-by-char reveal tied to scroll progress */
-function ScrollChars({ text, scrollProgress, start, end, className }) {
+function ScrollCharsAnimated({ text, scrollProgress, start, end, className }) {
   const chars = [...(text ?? "")];
   const [count, setCount] = useState(() => {
     const v = scrollProgress.get();
@@ -29,7 +29,7 @@ function ScrollChars({ text, scrollProgress, start, end, className }) {
 }
 
 /* Word-by-word reveal tied to scroll progress */
-function ScrollWords({ text, scrollProgress, start, end, className }) {
+function ScrollWordsAnimated({ text, scrollProgress, start, end, className }) {
   const words = (text ?? "").split(" ");
   const [count, setCount] = useState(() => {
     const v = scrollProgress.get();
@@ -61,13 +61,13 @@ function ScrollFade({ scrollProgress, start, end, y: yFrom = 16, className, chil
 export default function Atelier() {
   const sectionRef = useRef(null);
   const { atelier, refetch } = useData();
-  const { activePanel } = useEditMode();
+  const { activePanel, showToast } = useEditMode();
   const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (activePanel === "atelier") setDraft({ ...atelier });
-  }, [activePanel]);
+  }, [activePanel, atelier]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -75,10 +75,9 @@ export default function Atelier() {
     setSaving(true);
     try {
       await saveSettings("atelier", draft);
-      await refetch();
-    } finally {
-      setSaving(false);
-    }
+      refetch();
+      showToast("Atelier saved ✓");
+    } finally { setSaving(false); }
   };
 
   const { scrollYProgress } = useScroll({
@@ -89,24 +88,39 @@ export default function Atelier() {
   return (
     <section ref={sectionRef} id="styling-house" className="bg-[#f7f6f2] relative overflow-hidden">
       <SectionEditButton panelId="atelier" />
-      <SectionPanel panelId="atelier" title="Styling House">
-        {draft && (
-          <>
-            <PanelField label="Quote Line 1" value={draft.quote1} onChange={v => set("quote1", v)} />
-            <PanelField label="Quote Line 2" value={draft.quote2} onChange={v => set("quote2", v)} />
-            <PanelField label="Body Paragraph 1" value={draft.body1} onChange={v => set("body1", v)} multiline />
-            <PanelField label="Body Paragraph 2" value={draft.body2} onChange={v => set("body2", v)} multiline />
-            <PanelField label="Signature Name" value={draft.sigName} onChange={v => set("sigName", v)} />
-            <PanelField label="Signature Role" value={draft.sigRole} onChange={v => set("sigRole", v)} />
-            <PanelField label="Est. Year" value={draft.estYear} onChange={v => set("estYear", v)} />
-            <PanelSaveBtn onClick={handleSave} saving={saving} />
-          </>
-        )}
+      <SectionPanel panelId="atelier" title="The Styling House">
+        <PanelField label="Quote Line 1" value={draft.quote1 ?? ""} onChange={v => set("quote1", v)} />
+        <PanelField label="Quote Line 2" value={draft.quote2 ?? ""} onChange={v => set("quote2", v)} />
+        <PanelField label="Body Paragraph 1" value={draft.body1 ?? ""} onChange={v => set("body1", v)} multiline />
+        <PanelField label="Body Paragraph 2" value={draft.body2 ?? ""} onChange={v => set("body2", v)} multiline />
+        <PanelField label="Signatory Name" value={draft.sigName ?? ""} onChange={v => set("sigName", v)} />
+        <PanelField label="Signatory Role" value={draft.sigRole ?? ""} onChange={v => set("sigRole", v)} />
+        <PanelField label="Est. Year" value={draft.estYear ?? ""} onChange={v => set("estYear", v)} />
+        <PanelVideoField label="Background Video" value={draft.bgVideo ?? ""} onChange={v => set("bgVideo", v)} />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Specialisations</p>
+        {(draft.specializations ?? []).map((s, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={s}
+              onChange={e => set("specializations", (draft.specializations ?? []).map((x, j) => j === i ? e.target.value : x))}
+              className="flex-1 font-body text-[#1a1706] text-[10px] px-1.5 py-1 border border-[#1a1706]/15 bg-transparent outline-none focus:border-amber-500/60"
+            />
+            <button
+              onClick={() => set("specializations", (draft.specializations ?? []).filter((_, j) => j !== i))}
+              className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer shrink-0"
+            >✕</button>
+          </div>
+        ))}
+        <button
+          onClick={() => set("specializations", [...(draft.specializations ?? []), ""])}
+          className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full mt-1"
+        >+ Add Specialisation</button>
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
-
       {/* Faint bg video */}
       <video
-        src="/savessss.mp4"
+        src={atelier.bgVideo ?? "/savessss.mp4"}
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover opacity-[0.14] pointer-events-none select-none saturate-[0.15]"
       />
@@ -119,7 +133,7 @@ export default function Atelier() {
         <ScrollFade
           scrollProgress={scrollYProgress}
           start={0} end={0.1} y={10}
-          className="flex items-center gap-3 mb-12 md:mb-16 font-['DM_Mono'] text-[7.5px] tracking-[0.48em] uppercase text-[#1a1706]/35"
+          className="flex items-center gap-3 mb-12 md:mb-16 font-['DM_Mono'] text-[7.5px] tracking-[0.48em] uppercase text-[#1a1706]/50"
         >
           <span className="block w-8 h-px bg-[#1a1706]/18" />
           A Note from the Styling House
@@ -130,21 +144,21 @@ export default function Atelier() {
           <div>
             <div className="mb-10 md:mb-12">
               <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
-                <ScrollChars text={atelier.quote1} scrollProgress={scrollYProgress} start={0.04} end={0.22} />
+                <ScrollCharsAnimated text={atelier.quote1} scrollProgress={scrollYProgress} start={0.04} end={0.22} />
               </div>
               <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
-                <ScrollChars text={atelier.quote2} scrollProgress={scrollYProgress} start={0.19} end={0.34} />
+                <ScrollCharsAnimated text={atelier.quote2} scrollProgress={scrollYProgress} start={0.19} end={0.34} />
               </div>
             </div>
 
             <ScrollFade scrollProgress={scrollYProgress} start={0.31} end={0.38} y={0} className="w-10 h-px bg-[#1a1706]/18 mb-8" />
 
-            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/68 leading-[1.95] font-light max-w-lg mb-5">
-              <ScrollWords text={atelier.body1} scrollProgress={scrollYProgress} start={0.33} end={0.60} />
+            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/80 leading-[1.95] font-light max-w-lg mb-5">
+              <ScrollWordsAnimated text={atelier.body1} scrollProgress={scrollYProgress} start={0.33} end={0.60} />
             </div>
 
-            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/68 leading-[1.95] font-light max-w-lg mb-10">
-              <ScrollWords text={atelier.body2} scrollProgress={scrollYProgress} start={0.57} end={0.90} />
+            <div className="font-['Outfit'] text-[clamp(15px,1.5vw,18px)] text-[#1a1706]/80 leading-[1.95] font-light max-w-lg mb-10">
+              <ScrollWordsAnimated text={atelier.body2} scrollProgress={scrollYProgress} start={0.57} end={0.90} />
             </div>
 
             <ScrollFade
@@ -154,7 +168,7 @@ export default function Atelier() {
             >
               <span className="font-['Cormorant_Garamond'] italic text-[24px] text-[#1a1706]">{atelier.sigName}</span>
               <span className="w-px h-[13px] bg-[#1a1706]/18" />
-              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/38">{atelier.sigRole}</span>
+              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/50">{atelier.sigRole}</span>
             </ScrollFade>
           </div>
 
@@ -165,12 +179,14 @@ export default function Atelier() {
           >
             <div className="mb-6 md:mb-10">
               <div className="font-['Cormorant_Garamond'] italic text-[36px] md:text-[60px] text-[#1a1706]/8 leading-none">Est.</div>
-              <div className="font-['Cormorant_Garamond'] text-[36px] md:text-[60px] text-[#1a1706] leading-none -mt-1 md:-mt-2">{atelier.estYear}</div>
-              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mt-2 md:mt-3">Lagos, Nigeria</div>
+              <div className="font-['Cormorant_Garamond'] text-[36px] md:text-[60px] text-[#1a1706] leading-none -mt-1 md:-mt-2">
+                {atelier.estYear}
+              </div>
+              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/45 mt-2 md:mt-3">Lagos, Nigeria</div>
             </div>
             <div className="border-t border-[#1a1706]/8 pt-5 md:pt-7">
-              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.4em] uppercase text-[#1a1706]/30 mb-3 md:mb-4">Specialising in</div>
-              {["Bridal Styling", "Occasion Styling", "Travel — Kájáyelo"].map((s) => (
+              <div className="font-['DM_Mono'] text-[6px] md:text-[7px] tracking-[0.4em] uppercase text-[#1a1706]/45 mb-3 md:mb-4">Specialising in</div>
+              {(atelier.specializations ?? []).map((s) => (
                 <div key={s} className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[13px] md:text-[20px] py-2 md:py-2.5 border-b border-[#1a1706]/7 last:border-b-0 leading-tight">
                   {s}
                 </div>

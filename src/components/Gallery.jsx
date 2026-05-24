@@ -1,8 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, useAnimationFrame } from "framer-motion";
-import { SectionEditButton, SectionPanel } from "@/components/AdminBar";
+import { SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, useEditMode } from "@/components/AdminBar";
+import { useAuth } from "@/providers";
+import { useData } from "@/providers";
+import { saveSettings } from "@/lib/firestore";
 
-const AUTO_SPEED = 1.4; // px per frame at 60fps
+const AUTO_SPEED = 1.4;
 const GAP = 16;
 
 function getCardW() {
@@ -10,7 +13,7 @@ function getCardW() {
   return window.innerWidth < 768 ? window.innerWidth * 0.76 : window.innerWidth * 0.36;
 }
 
-function Strip({ items, onOpen, onRemove }) {
+function Strip({ items, onOpen, onRemove, isAdmin }) {
   const xRef = useRef(0);
   const draggingRef = useRef(false);
   const dragStartClientX = useRef(0);
@@ -23,7 +26,6 @@ function Strip({ items, onOpen, onRemove }) {
   const stride = cardW + GAP;
   const totalW = stride * items.length;
 
-  // Wrap x so it always loops seamlessly
   const wrap = (x) => {
     if (!totalW) return 0;
     let v = x % totalW;
@@ -34,12 +36,9 @@ function Strip({ items, onOpen, onRemove }) {
   useAnimationFrame((_, delta) => {
     if (!items.length) return;
     const dt = Math.min(delta, 50) / 16.7;
-
     if (draggingRef.current) {
-      // During drag, just ensure wrap and re-render
       xRef.current = wrap(xRef.current);
     } else {
-      // Apply momentum decay then auto-scroll
       if (Math.abs(velRef.current) > 0.1) {
         xRef.current += velRef.current * dt;
         velRef.current *= 0.88;
@@ -49,7 +48,6 @@ function Strip({ items, onOpen, onRemove }) {
       }
       xRef.current = wrap(xRef.current);
     }
-
     tick(v => v + 1);
   });
 
@@ -75,19 +73,16 @@ function Strip({ items, onOpen, onRemove }) {
     if (!draggingRef.current) return;
     draggingRef.current = false;
     e.currentTarget.style.cursor = "grab";
-    // Convert drag velocity into momentum (negative = moving left = auto direction)
     velRef.current = velRef.current * 0.6;
   }, []);
 
   const onClickCapture = useCallback((e) => {
-    // Suppress click if it was a drag
     const travelled = Math.abs(e.clientX - dragStartClientX.current);
     if (travelled > 6) e.stopPropagation();
   }, []);
 
   if (!items.length) return null;
 
-  // Render 3 repetitions so there's always off-screen content on both sides
   const repeated = [...items, ...items, ...items];
 
   return (
@@ -101,11 +96,7 @@ function Strip({ items, onOpen, onRemove }) {
     >
       <div
         className="flex"
-        style={{
-          gap: GAP,
-          transform: `translateX(${xRef.current}px)`,
-          willChange: "transform",
-        }}
+        style={{ gap: GAP, transform: `translateX(${xRef.current}px)`, willChange: "transform" }}
       >
         {repeated.map((item, i) => {
           const origIdx = i % items.length;
@@ -113,43 +104,29 @@ function Strip({ items, onOpen, onRemove }) {
             <div
               key={`${item.url}-${i}`}
               className="flex-shrink-0 relative overflow-hidden group bg-[#181510]"
-              style={{
-                width: cardW,
-                height: Math.round(cardW * 1.15),
-              }}
+              style={{ width: cardW, height: Math.round(cardW * 1.15) }}
               onClick={() => item.type === "image" && onOpen(origIdx)}
             >
               {item.type === "video" ? (
-                <video
-                  src={item.url}
-                  muted loop autoPlay playsInline preload="metadata"
-                  className="w-full h-full object-contain pointer-events-none"
-                />
+                <video src={item.url} muted loop autoPlay playsInline preload="metadata"
+                  className="w-full h-full object-contain pointer-events-none" />
               ) : (
-                <img
-                  src={item.url}
-                  alt={item.name}
-                  draggable={false}
-                  className="w-full h-full object-contain pointer-events-none"
-                />
+                <img src={item.url} alt={item.name} draggable={false}
+                  className="w-full h-full object-contain pointer-events-none" />
               )}
-
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
-
               {item.type === "video" && (
                 <div className="absolute top-3 left-3 font-mono text-[7px] tracking-[0.22em] uppercase text-white/60 border border-white/20 px-2 py-1 bg-black/35 backdrop-blur-sm pointer-events-none">
                   ▶ Video
                 </div>
               )}
-
-              <button
-                onClick={e => { e.stopPropagation(); onRemove(origIdx, e); }}
-                className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/50 border border-white/15 text-white/60 hover:bg-black/80 hover:text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
-                title="Remove"
-              >
-                ✕
-              </button>
-
+              {isAdmin && (
+                <button
+                  onClick={e => { e.stopPropagation(); onRemove(origIdx, e); }}
+                  className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/50 border border-white/15 text-white/60 hover:bg-black/80 hover:text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
+                  title="Remove"
+                >✕</button>
+              )}
               <div className="absolute bottom-3 left-3 font-mono text-[7px] tracking-[0.28em] uppercase text-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 {String(origIdx + 1).padStart(2, "0")}
               </div>
@@ -162,6 +139,27 @@ function Strip({ items, onOpen, onRemove }) {
 }
 
 export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragOver, setDragOver }) {
+  const { user } = useAuth();
+  const { archiveData, refetch } = useData();
+  const { activePanel, showToast } = useEditMode();
+  const [draft, setDraft] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activePanel === "gallery") setDraft({ ...archiveData });
+  }, [activePanel, archiveData]);
+
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("gallery", draft);
+      refetch();
+      showToast("Gallery saved ✓");
+    } finally { setSaving(false); }
+  };
+
   const handleFiles = (files) => {
     if (files?.length) onAdd(files);
   };
@@ -170,23 +168,24 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
     <section
       id="collage"
       className="bg-[#0e0d08] relative overflow-hidden"
-      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+      onDragOver={e => { if (!user) return; e.preventDefault(); setDragOver(true); }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(false); }}
-      onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+      onDrop={e => { e.preventDefault(); setDragOver(false); if (user) handleFiles(e.dataTransfer.files); }}
     >
       <SectionEditButton panelId="gallery" />
       <SectionPanel panelId="gallery" title="The Archive">
-        <p className="font-['Outfit'] text-[13px] text-[#1a1706]/55 leading-relaxed">
-          Drag &amp; drop files onto the section, or use the "+ Add to archive" button. Hover a card to remove it.
-        </p>
+        <PanelField label="Tagline" value={draft.tagline ?? ""} onChange={v => set("tagline", v)} />
+        <PanelField label="Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} />
+        <PanelField label="Sub-text" value={draft.sub ?? ""} onChange={v => set("sub", v)} multiline />
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
+
       {dragOver && (
         <div className="absolute inset-0 z-50 bg-[#0e0d08]/90 flex items-center justify-center pointer-events-none">
           <div className="font-mono text-[9px] tracking-[0.44em] uppercase text-white/30">Drop to archive</div>
         </div>
       )}
 
-      {/* Header */}
       <motion.div
         className="px-6 md:px-16 pt-20 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.06]"
         initial={{ opacity: 0, y: 20 }}
@@ -197,41 +196,45 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
         <div>
           <div className="font-mono text-[8px] tracking-[0.44em] uppercase text-white/25 flex items-center gap-3 mb-5">
             <span className="block w-7 h-px bg-white/15" />
-            The Archive
+            {archiveData.tagline}
           </div>
           <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(36px,5vw,68px)] leading-none tracking-tight font-normal">
-            Work &amp; Process.
+            {archiveData.heading}
           </h2>
         </div>
         <div className="flex flex-col items-start md:items-end gap-4 md:pb-1">
           <p className="font-['Outfit'] text-white/35 text-[clamp(13px,1.2vw,15px)] leading-relaxed font-light md:text-right max-w-xs">
-            Moments from the styling house — fittings, arrivals, and the quiet work between.
+            {archiveData.sub}
           </p>
-          <div className="flex items-center gap-4">
-            <label
-              htmlFor="collage-file-input"
-              className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/35 border border-white/12 px-5 py-2.5 hover:border-white/35 hover:text-white/65 transition-colors cursor-pointer"
-            >
-              + Add to archive
-            </label>
-            {items.length > 0 && (
-              <button
-                onClick={onClear}
-                className="font-mono text-[8px] tracking-[0.26em] uppercase text-white/18 border-b border-white/10 pb-px hover:text-white/40 transition-colors bg-transparent cursor-pointer"
+          {user && (
+            <div className="flex items-center gap-4">
+              <label
+                htmlFor="collage-file-input"
+                className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/35 border border-white/12 px-5 py-2.5 hover:border-white/35 hover:text-white/65 transition-colors cursor-pointer"
               >
-                Clear all
-              </button>
-            )}
-          </div>
+                + Add to archive
+              </label>
+              {items.length > 0 && (
+                <button
+                  onClick={onClear}
+                  className="font-mono text-[8px] tracking-[0.26em] uppercase text-white/18 border-b border-white/10 pb-px hover:text-white/40 transition-colors bg-transparent cursor-pointer"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
 
-      <input
-        type="file" id="collage-file-input" multiple
-        accept="image/*,video/mp4,video/quicktime,.mov"
-        className="hidden"
-        onChange={e => { handleFiles(e.target.files); e.target.value = ""; }}
-      />
+      {user && (
+        <input
+          type="file" id="collage-file-input" multiple
+          accept="image/*,video/mp4,video/quicktime,.mov"
+          className="hidden"
+          onChange={e => { handleFiles(e.target.files); e.target.value = ""; }}
+        />
+      )}
 
       {items.length === 0 ? (
         <motion.div
@@ -244,14 +247,16 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
           <div className="w-px h-12 bg-white/10 mb-6" />
           <div className="font-['Cormorant_Garamond'] italic text-white/18 text-3xl mb-3">The archive is empty.</div>
           <div className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/12 mb-8">
-            Add images &amp; videos above · drag &amp; drop anywhere
+            {user ? "Add images & videos above · drag & drop anywhere" : "Coming soon."}
           </div>
-          <label
-            htmlFor="collage-file-input"
-            className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/30 border border-white/12 px-6 py-3 hover:border-white/30 hover:text-white/55 transition-colors cursor-pointer"
-          >
-            + Add first item →
-          </label>
+          {user && (
+            <label
+              htmlFor="collage-file-input"
+              className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/30 border border-white/12 px-6 py-3 hover:border-white/30 hover:text-white/55 transition-colors cursor-pointer"
+            >
+              + Add first item →
+            </label>
+          )}
         </motion.div>
       ) : (
         <motion.div
@@ -260,7 +265,7 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
           transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
           viewport={{ once: true, margin: "-60px" }}
         >
-          <Strip items={items} onOpen={onOpen} onRemove={onRemove} />
+          <Strip items={items} onOpen={onOpen} onRemove={onRemove} isAdmin={!!user} />
           <div className="px-6 md:px-16 py-4 flex items-center justify-between border-t border-white/[0.06]">
             <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-white/18">
               {items.length} item{items.length !== 1 ? "s" : ""} · drag to browse

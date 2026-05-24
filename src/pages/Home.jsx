@@ -30,7 +30,7 @@ import RatesStickyBar from "@/components/RatesStickyBar";
 
 export default function Home() {
   const location = useLocation();
-  const { looks: LOOKS, galleryItems, galleryUploading, addGallery, removeGallery, clearGallery } = useData();
+  const { looks: LOOKS, introVideo, galleryItems, galleryUploading, addGallery, removeGallery, clearGallery } = useData();
 
   /* ── Modals ── */
   const [bookCallOpen, setBookCallOpen] = useState(false);
@@ -178,7 +178,7 @@ export default function Home() {
       {/* INTRO */}
       <div id="intro" className={introDismissed ? "fade-to-lookbook" : ""}>
         <video
-          src="/savessss.mp4"
+          src={introVideo}
           autoPlay
           muted
           loop
