@@ -90,7 +90,7 @@ export default function StyleQuiz({ open, onClose, onBook, onBookCall }) {
   const [typing, setTyping] = useState(false);
 
   const reset = () => {
-    setMode("browse");
+    setMode("quiz");
     setStep(0);
     setAnswers({});
     setResultKey(null);
