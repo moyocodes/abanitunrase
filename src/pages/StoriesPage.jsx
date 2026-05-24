@@ -14,7 +14,7 @@ export default function StoriesPage() {
       replace: true,
       state: { openStoryIdx: firstIdx >= 0 ? firstIdx : 0 },
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }

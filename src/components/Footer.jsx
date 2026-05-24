@@ -29,7 +29,7 @@ export default function Footer() {
 
   useEffect(() => {
     if (activePanel === "footer") setDraft({ ...footerData });
-  }, [activePanel]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activePanel]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 

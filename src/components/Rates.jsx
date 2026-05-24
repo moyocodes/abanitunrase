@@ -144,7 +144,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
       });
     }, 8000);
     return () => clearInterval(tabIntervalRef.current);
-  }, [hoveredCard, editMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hoveredCard, editMode]);
 
   const updateCard = async (idx, patch) => {
     const current = activeTab === "bridal" ? bridal : activeTab === "occasion" ? occasion : travel;

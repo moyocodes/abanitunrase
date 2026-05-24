@@ -70,20 +70,20 @@ export default function RatesPage() {
         </button>
       </nav>
 
-      <header className="px-6 md:px-16 pt-20 md:pt-28 pb-12 md:pb-16">
-        <div className="max-w-[1120px] mx-auto grid md:grid-cols-[1fr_360px] gap-10 md:gap-16 items-end">
+      <header className="px-6 md:px-16 pt-14 md:pt-20 pb-10 md:pb-12">
+        <div className="max-w-[1120px] mx-auto grid md:grid-cols-[1fr_420px] gap-8 md:gap-16 items-end">
           <div>
             <div className="font-mono text-[7.5px] tracking-[0.42em] uppercase text-[#1a1706]/35 mb-5">
-              Investment
+              Styling Packages
             </div>
-            <h1 className="font-['Cormorant_Garamond'] italic text-[clamp(52px,9vw,120px)] leading-[0.9] tracking-tight text-[#1a1706]">
-              The Rates.
+            <h1 className="font-['Cormorant_Garamond'] italic text-[clamp(44px,7vw,88px)] leading-[0.96] tracking-tight text-[#1a1706]">
+              Choose your service.
             </h1>
           </div>
           <p className="font-['Outfit'] text-[15px] md:text-[17px] leading-relaxed text-[#1a1706]/60 font-light">
             Bridal styling, occasion looks, and travel wardrobe curation in one
-            focused place. Choose a category below, then book the package or
-            consultation that fits the moment.
+            focused place. Pick a category, then book the package or
+            consultation that matches the moment.
           </p>
         </div>
       </header>

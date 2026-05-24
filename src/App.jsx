@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import GlobalStyleQuiz from "@/components/GlobalStyleQuiz";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AdminEditProvider } from "@/components/AdminBar";
 import Home from "@/pages/Home";
@@ -46,6 +47,7 @@ export default function App() {
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <GlobalStyleQuiz />
       </AdminEditProvider>
     </ErrorBoundary>
   );

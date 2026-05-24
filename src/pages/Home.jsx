@@ -25,8 +25,8 @@ import {
   OccasionForm,
   TravelForm,
 } from "@/components/forms";
-import StyleQuiz from "@/components/StyleQuiz";
 import RatesStickyBar from "@/components/RatesStickyBar";
+import { openStyleQuiz } from "@/components/GlobalStyleQuiz";
 
 export default function Home() {
   const location = useLocation();
@@ -58,10 +58,6 @@ export default function Home() {
   const [ratesTab, setRatesTab] = useState("bridal");
   const [ratesVisible, setRatesVisible] = useState(false);
 
-  /* ── Style Quiz ── */
-  const [quizOpen, setQuizOpen] = useState(false);
-
-
   /* ── Open story from StoriesPage redirect via location state ── */
   useEffect(() => {
     const idx = location.state?.openStoryIdx;
@@ -70,7 +66,7 @@ export default function Home() {
       setStoryOpen(true);
       window.history.replaceState({}, document.title);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ── Handlers ── */
   const openStory = (idx) => {
@@ -282,7 +278,7 @@ export default function Home() {
         <Hero
           onOpenStory={openStory}
           onBookCall={() => setBookCallOpen(true)}
-          onQuiz={() => setQuizOpen(true)}
+          onQuiz={openStyleQuiz}
         />
 
         <div className="sticky top-0 z-[10]">
@@ -380,22 +376,6 @@ export default function Home() {
         setActiveTab={setRatesTab}
       />
 
-      <StyleQuiz
-        open={quizOpen}
-        onClose={() => setQuizOpen(false)}
-        onBook={(type) => setFormType(type)}
-        onBookCall={() => setBookCallOpen(true)}
-      />
-
-      {introDismissed && !quizOpen && !ratesVisible && !storyOpen && !lbOpen && (
-        <button
-          onClick={() => setQuizOpen(true)}
-          className="fixed bottom-6 right-6 z-[190] flex items-center gap-2 bg-[#1a1706] text-[#f5f0e6] px-5 py-3 shadow-xl hover:bg-black transition-all duration-300 cursor-pointer border-none font-['Outfit'] text-[12px] font-semibold tracking-[0.1em] uppercase"
-        >
-          <span className="text-[#f5f0e6]/50 text-base">✦</span>
-          Find My Style
-        </button>
-      )}
     </>
   );
 }
