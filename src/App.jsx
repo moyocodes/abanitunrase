@@ -3,6 +3,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AdminEditProvider } from "@/components/AdminBar";
 import Home from "@/pages/Home";
+import RatesPage from "@/pages/RatesPage";
 import StoriesPage from "@/pages/StoriesPage";
 import StylingPage from "@/pages/StylingPage";
 import NotFound from "@/pages/NotFound";
@@ -18,6 +19,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<Home />} />
+          <Route path="/rates" element={<RatesPage />} />
           <Route path="/stories/:category" element={<StoriesPage />} />
           <Route path="/styling/:type" element={<StylingPage />} />
 
