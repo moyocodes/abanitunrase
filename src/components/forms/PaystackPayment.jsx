@@ -4,11 +4,16 @@ import { sendBookingEmails } from "@/lib/email";
 
 function formatAmount(kobo) {
   const naira = kobo / 100;
-  return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(naira);
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+  }).format(naira);
 }
 
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY?.trim();
-const PAYSTACK_CURRENCY = import.meta.env.VITE_PAYSTACK_CURRENCY?.trim() || "NGN";
+const PAYSTACK_CURRENCY =
+  import.meta.env.VITE_PAYSTACK_CURRENCY?.trim() || "NGN";
 
 const formNames = {
   wedding: "Wedding Styling",
@@ -39,7 +44,8 @@ export default function PaystackPayment({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
-  const serviceName = serviceNameProp || formNames[formType] || "Styling Consultation";
+  const serviceName =
+    serviceNameProp || formNames[formType] || "Styling Consultation";
   const paystackReady = scriptReady && !!PAYSTACK_PUBLIC_KEY;
 
   useEffect(() => {
@@ -70,7 +76,9 @@ export default function PaystackPayment({
     }
 
     if (!PAYSTACK_PUBLIC_KEY) {
-      alert("Paystack is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
+      alert(
+        "Paystack is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.",
+      );
       return;
     }
 
@@ -92,9 +100,11 @@ export default function PaystackPayment({
           },
         ],
       },
-      callback: async (response) => {
+      callback: (response) => {
         setLoading(false);
         const resolvedReference = response.reference || reference;
+
+        // Fire-and-forget the async work — don't make callback itself async
         sendBookingEmails({
           name,
           email: email.trim(),
@@ -108,8 +118,12 @@ export default function PaystackPayment({
         }).catch((err) => {
           console.error("Failed to send booking emails:", err);
         });
+
         setSuccess(true);
-        setTimeout(() => onSuccess({ ...response, reference: resolvedReference }), 1500);
+        setTimeout(
+          () => onSuccess({ ...response, reference: resolvedReference }),
+          1500,
+        );
       },
       onClose: () => {
         setLoading(false);
@@ -122,25 +136,37 @@ export default function PaystackPayment({
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className={cn(
-          "w-16 h-16 rounded-full border border-[#1a1706]/20 flex items-center justify-center mb-6",
-          "text-2xl text-[#1a1706]"
-        )}>
+        <div
+          className={cn(
+            "w-16 h-16 rounded-full border border-[#1a1706]/20 flex items-center justify-center mb-6",
+            "text-2xl text-[#1a1706]",
+          )}
+        >
           &#10003;
         </div>
-        <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-2xl mb-3">Booking Confirmed</h3>
-        <p className="text-[#1a1706]/45 text-sm">Check your email for details.</p>
+        <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-2xl mb-3">
+          Booking Confirmed
+        </h3>
+        <p className="text-[#1a1706]/45 text-sm">
+          Check your email for details.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="py-8">
-      <div className={cn(
-        "border border-[#1a1706]/10 rounded-none p-8 mb-6",
-        "bg-[#1a1706]/2"
-      )}>
-        <p className={cn("font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4")}>
+      <div
+        className={cn(
+          "border border-[#1a1706]/10 rounded-none p-8 mb-6",
+          "bg-[#1a1706]/2",
+        )}
+      >
+        <p
+          className={cn(
+            "font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4",
+          )}
+        >
           Consultation Deposit
         </p>
         <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-2">
@@ -156,7 +182,7 @@ export default function PaystackPayment({
           className={cn(
             "w-full py-4 px-6 font-['DM_Mono'] text-xs tracking-[0.2em] uppercase transition-all",
             "bg-[#1a1706] text-[#f5f0e6] hover:bg-black",
-            "disabled:opacity-50 disabled:cursor-not-allowed"
+            "disabled:opacity-50 disabled:cursor-not-allowed",
           )}
         >
           {loading
