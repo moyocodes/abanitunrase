@@ -62,6 +62,26 @@ export async function updateBookingStatus(id, status) {
   await updateDoc(doc(db, "bookings", id), { status });
 }
 
+export async function updateBooking(id, patch) {
+  guard();
+  await updateDoc(doc(db, "bookings", id), patch);
+}
+
+export async function deleteBooking(id) {
+  guard();
+  await deleteDoc(doc(db, "bookings", id));
+}
+
+export async function updateContact(id, patch) {
+  guard();
+  await updateDoc(doc(db, "contacts", id), patch);
+}
+
+export async function deleteContact(id) {
+  guard();
+  await deleteDoc(doc(db, "contacts", id));
+}
+
 export async function getLooks() {
   if (!db) return [];
   const snap = await getDocs(collection(db, "looks"));

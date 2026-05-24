@@ -1,32 +1,58 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PaystackPayment from "@/components/forms/PaystackPayment";
+import { saveBooking } from "@/lib/firestore";
+
+const consultationOptions = [
+  { value: "consultation", label: "General Consultation", amount: 10000000 },
+  { value: "coupleConsultation", label: "Couple's Consultation", amount: 15000000 },
+];
 
 export default function BookCallModal({ open, onClose }) {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [service, setService] = useState("");
+  const [service, setService] = useState("consultation");
   const [time, setTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [done, setDone] = useState(false);
+
+  const selectedService = consultationOptions.find((option) => option.value === service) ?? consultationOptions[0];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
+    if (!name.trim() || !email.trim() || !phone.trim()) {
       alert("Please fill in all required fields");
       return;
     }
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
-      setDone(true);
-    }, 1400);
+      setShowPayment(true);
+    }, 300);
+  };
+
+  const handlePaymentSuccess = (payment) => {
+    saveBooking("consultation", {
+      fullName: name,
+      email,
+      phone,
+      service: selectedService.label,
+      preferredTime: time,
+      amount: selectedService.amount,
+      paymentReference: payment?.reference,
+      paid: true,
+    });
+    setShowPayment(false);
+    setDone(true);
   };
 
   const handleClose = () => {
     onClose();
     setTimeout(() => {
-      setName(""); setPhone(""); setService(""); setTime("");
-      setSubmitting(false); setDone(false);
+      setName(""); setEmail(""); setPhone(""); setService("consultation"); setTime("");
+      setSubmitting(false); setShowPayment(false); setDone(false);
     }, 400);
   };
 
@@ -81,10 +107,10 @@ export default function BookCallModal({ open, onClose }) {
                 <div className="text-center py-10">
                   <div className="text-[32px] text-[#1a1706]/35 mb-4">&#10003;</div>
                   <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,2.8vw,36px)] text-[#1a1706] mb-[10px]">
-                    Call Scheduled
+                    Consultation Paid
                   </div>
                   <div className="font-['Outfit'] text-[clamp(16px,1.4vw,19px)] text-[#1a1706]/68 leading-[1.7] mb-7">
-                    We&apos;ll be in touch within 24 hours to confirm your time.
+                    We&apos;ll be in touch within 24 hours to confirm your fitting time.
                   </div>
                   <button
                     className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase px-6 py-[10px] bg-[#1a1706]/5 text-[#1a1706]/45 border border-[#1a1706]/15 cursor-pointer transition-all duration-200 hover:bg-[#1a1706]/10 hover:text-[#1a1706]"
@@ -93,6 +119,18 @@ export default function BookCallModal({ open, onClose }) {
                     Close
                   </button>
                 </div>
+              ) : showPayment ? (
+                <PaystackPayment
+                  name={name}
+                  email={email}
+                  phone={phone}
+                  preferredTime={time}
+                  amount={selectedService.amount}
+                  onSuccess={handlePaymentSuccess}
+                  onClose={() => setShowPayment(false)}
+                  formType={selectedService.value}
+                  serviceName={selectedService.label}
+                />
               ) : (
                 <form className="flex flex-col gap-[18px]" onSubmit={handleSubmit}>
                   {/* Name */}
@@ -110,6 +148,24 @@ export default function BookCallModal({ open, onClose }) {
                       placeholder="Your name"
                       value={name}
                       onChange={e => setName(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/55"
+                      htmlFor="bcm-email"
+                    >
+                      Email
+                    </label>
+                    <input
+                      className={fieldBase}
+                      id="bcm-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
                     />
                   </div>
 
@@ -145,13 +201,15 @@ export default function BookCallModal({ open, onClose }) {
                       value={service}
                       onChange={e => setService(e.target.value)}
                     >
-                      <option value="">Select a category</option>
-                      <option>Bridal Styling</option>
-                      <option>Occasion Styling</option>
-                      <option>Travel Styling — Kájáyelo</option>
-                      <option>General Consultation</option>
-                      <option>Couple&apos;s Consultation</option>
+                      {consultationOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
+                    <p className="font-['DM_Mono'] text-[10px] tracking-[0.12em] uppercase text-[#1a1706]/32">
+                      Consultation fee: {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(selectedService.amount / 100)}
+                    </p>
                   </div>
 
                   {/* Time */}
@@ -178,7 +236,7 @@ export default function BookCallModal({ open, onClose }) {
                     type="submit"
                     disabled={submitting || done}
                   >
-                    {submitting ? "Scheduling…" : "Schedule Call →"}
+                    {submitting ? "Preparing Payment…" : "Pay Consultation Fee →"}
                   </button>
                 </form>
               )}

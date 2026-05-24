@@ -19,11 +19,11 @@ export default function AdminLayout({ children, title }) {
   return (
     <div className="min-h-screen bg-[#f8f7f3] text-[#1a1706] font-body">
       {/* Header */}
-      <header className="border-b border-[#1a1706]/[0.07] px-6 md:px-8 h-14 flex items-center justify-between sticky top-0 z-50 bg-[#f8f7f3]/95 backdrop-blur-sm">
+      <header className="border-b border-[#1a1706]/[0.07] px-6 md:px-10 h-20 flex items-center justify-between sticky top-0 z-50 bg-[#f8f7f3]/95 backdrop-blur-sm">
         <div className="flex items-center gap-8">
           <Link
             to="/"
-            className="font-mono text-[7.5px] tracking-[0.45em] uppercase text-[#1a1706]/35 hover:text-[#1a1706]/70 transition-colors"
+            className="font-mono text-[13px] tracking-[0.35em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/80 transition-colors"
           >
             ABÁNITÚNRASE
           </Link>
@@ -32,7 +32,7 @@ export default function AdminLayout({ children, title }) {
               <Link
                 key={to}
                 to={to}
-                className={`font-mono text-[8.5px] tracking-[0.25em] uppercase transition-colors ${
+                className={`font-mono text-[14px] tracking-[0.18em] uppercase transition-colors ${
                   location.pathname === to
                     ? "text-[#1a1706]"
                     : "text-[#1a1706]/35 hover:text-[#1a1706]/65"
@@ -45,7 +45,7 @@ export default function AdminLayout({ children, title }) {
         </div>
         <button
           onClick={handleSignOut}
-          className="font-mono text-[8px] tracking-[0.2em] uppercase text-[#1a1706]/30 hover:text-[#1a1706]/65 transition-colors"
+          className="font-mono text-[13px] tracking-[0.18em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/75 transition-colors"
         >
           Sign Out
         </button>
@@ -53,14 +53,14 @@ export default function AdminLayout({ children, title }) {
 
       {/* Page title */}
       {title && (
-        <div className="px-6 md:px-8 pt-8 pb-6">
-          <h1 className="font-heading italic text-[#1a1706] text-[clamp(24px,3vw,40px)]">
+        <div className="px-6 md:px-10 pt-10 pb-7">
+          <h1 className="font-heading italic text-[#1a1706] text-[clamp(44px,5vw,76px)]">
             {title}
           </h1>
         </div>
       )}
 
-      <main className="px-6 md:px-8 pb-16">{children}</main>
+      <main className="px-6 md:px-10 pb-16">{children}</main>
     </div>
   );
 }

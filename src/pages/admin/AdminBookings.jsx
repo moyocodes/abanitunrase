@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
-import { getBookings, getContacts, updateBookingStatus } from "@/lib/firestore";
+import {
+  deleteBooking,
+  deleteContact,
+  getBookings,
+  getContacts,
+  updateBookingStatus,
+  updateContact,
+} from "@/lib/firestore";
 
 const STATUS_OPTIONS = [
   "new",
@@ -14,9 +21,18 @@ const TYPE_COLORS = {
   wedding: "text-purple-700/70 border-purple-400/40",
   occasion: "text-blue-700/70 border-blue-400/40",
   travel: "text-teal-700/70 border-teal-400/40",
+  consultation: "text-amber-700/80 border-amber-400/50",
 };
 
-function BookingRow({ booking, onStatusChange }) {
+const FILTERS = ["all", "wedding", "occasion", "travel", "consultation"];
+
+function readableType(type) {
+  if (type === "wedding") return "bridal";
+  if (type === "coupleConsultation") return "couple consult";
+  return type || "booking";
+}
+
+function BookingRow({ booking, onStatusChange, onDelete }) {
   const [expanded, setExpanded] = useState(false);
 
   const entries = Object.entries(booking.data || {}).filter(([, v]) => {
@@ -33,15 +49,15 @@ function BookingRow({ booking, onStatusChange }) {
       >
         <div className="flex items-center gap-4 min-w-0">
           <span
-            className={`font-mono text-[7px] tracking-[0.18em] uppercase border px-2 py-0.5 flex-shrink-0 ${TYPE_COLORS[booking.type] ?? "border-[#1a1706]/15 text-[#1a1706]/40"}`}
+            className={`font-mono text-[12px] tracking-[0.12em] uppercase border px-3 py-1 flex-shrink-0 ${TYPE_COLORS[booking.type] ?? "border-[#1a1706]/15 text-[#1a1706]/55"}`}
           >
-            {booking.type}
+            {readableType(booking.type)}
           </span>
           <div className="min-w-0">
-            <div className="font-body text-[#1a1706] text-sm truncate">
+            <div className="font-body text-[#1a1706] text-2xl truncate">
               {booking.data?.fullName || "—"}
             </div>
-            <div className="font-mono text-[7px] tracking-[0.12em] text-[#1a1706]/35 mt-0.5 truncate">
+            <div className="font-mono text-[12px] tracking-[0.08em] text-[#1a1706]/50 mt-1 truncate">
               {booking.data?.email}{" "}
               {booking.data?.phone ? `· ${booking.data.phone}` : ""}
             </div>
@@ -56,7 +72,7 @@ function BookingRow({ booking, onStatusChange }) {
               onStatusChange(booking.id, e.target.value);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white border border-[#1a1706]/15 text-[#1a1706]/55 font-mono text-[7.5px] tracking-[0.15em] uppercase py-1 px-2.5 outline-none cursor-pointer hover:border-[#1a1706]/30 transition-colors"
+            className="bg-white border border-[#1a1706]/15 text-[#1a1706]/70 font-mono text-[12px] tracking-[0.1em] uppercase py-2 px-3 outline-none cursor-pointer hover:border-[#1a1706]/30 transition-colors"
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s} className="normal-case">
@@ -64,7 +80,16 @@ function BookingRow({ booking, onStatusChange }) {
               </option>
             ))}
           </select>
-          <span className="text-[#1a1706]/25 text-[10px]">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(booking.id);
+            }}
+            className="border border-red-300/60 text-red-700/70 hover:text-red-800 hover:border-red-500 bg-transparent font-mono text-[12px] tracking-[0.12em] uppercase px-3 py-2"
+          >
+            Delete
+          </button>
+          <span className="text-[#1a1706]/35 text-lg">
             {expanded ? "▲" : "▼"}
           </span>
         </div>
@@ -75,10 +100,10 @@ function BookingRow({ booking, onStatusChange }) {
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-5">
             {entries.map(([key, value]) => (
               <div key={key}>
-                <div className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/30 mb-1">
+                <div className="font-mono text-[12px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-1">
                   {key.replace(/([A-Z])/g, " $1").trim()}
                 </div>
-                <div className="font-body text-[#1a1706]/70 text-xs leading-relaxed break-words">
+                <div className="font-body text-[#1a1706]/75 text-lg leading-relaxed break-words">
                   {Array.isArray(value)
                     ? value.join(", ")
                     : String(value) === "true"
@@ -94,7 +119,7 @@ function BookingRow({ booking, onStatusChange }) {
   );
 }
 
-function ContactRow({ contact }) {
+function ContactRow({ contact, onStatusChange, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <>
@@ -103,18 +128,42 @@ function ContactRow({ contact }) {
         onClick={() => setExpanded((e) => !e)}
       >
         <div className="min-w-0">
-          <div className="font-body text-[#1a1706] text-sm truncate">
+          <div className="font-body text-[#1a1706] text-2xl truncate">
             {contact.name || "—"}
           </div>
-          <div className="font-mono text-[7px] tracking-[0.12em] text-[#1a1706]/35 mt-0.5 truncate">
+          <div className="font-mono text-[12px] tracking-[0.08em] text-[#1a1706]/50 mt-1 truncate">
             {contact.email} {contact.phone ? `· ${contact.phone}` : ""}
           </div>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-          <span className="font-mono text-[7px] tracking-[0.15em] uppercase border border-[#1a1706]/15 text-[#1a1706]/40 px-2 py-0.5">
+          <span className="font-mono text-[12px] tracking-[0.12em] uppercase border border-[#1a1706]/15 text-[#1a1706]/55 px-3 py-1">
             {contact.service || "enquiry"}
           </span>
-          <span className="text-[#1a1706]/25 text-[10px]">
+          <select
+            value={contact.status || "new"}
+            onChange={(e) => {
+              e.stopPropagation();
+              onStatusChange(contact.id, e.target.value);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-[#1a1706]/15 text-[#1a1706]/70 font-mono text-[12px] tracking-[0.1em] uppercase py-2 px-3 outline-none cursor-pointer hover:border-[#1a1706]/30 transition-colors"
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s} className="normal-case">
+                {s}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(contact.id);
+            }}
+            className="border border-red-300/60 text-red-700/70 hover:text-red-800 hover:border-red-500 bg-transparent font-mono text-[12px] tracking-[0.12em] uppercase px-3 py-2"
+          >
+            Delete
+          </button>
+          <span className="text-[#1a1706]/35 text-lg">
             {expanded ? "▲" : "▼"}
           </span>
         </div>
@@ -126,10 +175,10 @@ function ContactRow({ contact }) {
               if (!v || k === "status" || k === "createdAt") return null;
               return (
                 <div key={k}>
-                  <div className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/30 mb-1">
+                  <div className="font-mono text-[12px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-1">
                     {k}
                   </div>
-                  <div className="font-body text-[#1a1706]/70 text-xs leading-relaxed break-words">
+                  <div className="font-body text-[#1a1706]/75 text-lg leading-relaxed break-words">
                     {String(v)}
                   </div>
                 </div>
@@ -141,8 +190,6 @@ function ContactRow({ contact }) {
     </>
   );
 }
-
-const FILTERS = ["all", "wedding", "occasion", "travel"];
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);
@@ -168,6 +215,25 @@ export default function AdminBookings() {
     );
   };
 
+  const handleContactStatusChange = async (id, status) => {
+    await updateContact(id, { status });
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status } : c)),
+    );
+  };
+
+  const handleDeleteBooking = async (id) => {
+    if (!confirm("Delete this booking?")) return;
+    await deleteBooking(id);
+    setBookings((prev) => prev.filter((b) => b.id !== id));
+  };
+
+  const handleDeleteContact = async (id) => {
+    if (!confirm("Delete this enquiry?")) return;
+    await deleteContact(id);
+    setContacts((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const filtered =
     filter === "all" ? bookings : bookings.filter((b) => b.type === filter);
 
@@ -179,7 +245,7 @@ export default function AdminBookings() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`font-mono text-[8px] tracking-[0.25em] uppercase pb-3 px-1 mr-4 border-b transition-colors ${
+            className={`font-mono text-[16px] tracking-[0.16em] uppercase pb-3 px-1 mr-6 border-b transition-colors ${
               tab === t
                 ? "border-[#1a1706] text-[#1a1706]"
                 : "border-transparent text-[#1a1706]/30 hover:text-[#1a1706]/60"
@@ -194,7 +260,7 @@ export default function AdminBookings() {
       </div>
 
       {loading ? (
-        <p className="font-mono text-[8px] tracking-[0.35em] uppercase text-[#1a1706]/30 py-10">
+        <p className="font-mono text-[16px] tracking-[0.24em] uppercase text-[#1a1706]/40 py-10">
           Loading…
         </p>
       ) : tab === "bookings" ? (
@@ -205,7 +271,7 @@ export default function AdminBookings() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`font-mono text-[7.5px] tracking-[0.25em] uppercase py-1.5 px-3 border transition-colors ${
+                className={`font-mono text-[13px] tracking-[0.16em] uppercase py-2 px-4 border transition-colors ${
                   filter === f
                     ? "border-[#1a1706]/50 text-[#1a1706] bg-[#1a1706]/[0.04]"
                     : "border-[#1a1706]/[0.12] text-[#1a1706]/35 hover:border-[#1a1706]/30 hover:text-[#1a1706]/60"
@@ -218,7 +284,7 @@ export default function AdminBookings() {
 
           {filtered.length === 0 ? (
             <div className="border border-[#1a1706]/[0.06] bg-white py-16 text-center">
-              <p className="font-mono text-[8px] tracking-[0.3em] uppercase text-[#1a1706]/20">
+              <p className="font-mono text-[16px] tracking-[0.2em] uppercase text-[#1a1706]/30">
                 No bookings found
               </p>
             </div>
@@ -229,6 +295,7 @@ export default function AdminBookings() {
                   key={b.id}
                   booking={b}
                   onStatusChange={handleStatusChange}
+                  onDelete={handleDeleteBooking}
                 />
               ))}
             </div>
@@ -238,14 +305,19 @@ export default function AdminBookings() {
         <>
           {contacts.length === 0 ? (
             <div className="border border-[#1a1706]/[0.06] bg-white py-16 text-center">
-              <p className="font-mono text-[8px] tracking-[0.3em] uppercase text-[#1a1706]/20">
+              <p className="font-mono text-[16px] tracking-[0.2em] uppercase text-[#1a1706]/30">
                 No enquiries yet
               </p>
             </div>
           ) : (
             <div className="border border-[#1a1706]/[0.08] bg-white divide-y divide-[#1a1706]/[0.05]">
               {contacts.map((c) => (
-                <ContactRow key={c.id} contact={c} />
+                <ContactRow
+                  key={c.id}
+                  contact={c}
+                  onStatusChange={handleContactStatusChange}
+                  onDelete={handleDeleteContact}
+                />
               ))}
             </div>
           )}

@@ -135,7 +135,10 @@ export default function WeddingForm({ onComplete }) {
   if (showPayment) {
     return (
       <PaystackPayment
+        name={data.fullName}
         email={data.email}
+        phone={data.phone}
+        preferredTime={data.attireTimeline}
         amount={5000000}
         onSuccess={onComplete}
         onClose={() => setShowPayment(false)}

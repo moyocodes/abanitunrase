@@ -1,92 +1,46 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { sendBookingEmails } from "@/lib/email";
 
 function formatAmount(kobo) {
   const naira = kobo / 100;
   return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(naira);
 }
 
-async function sendConfirmationEmail(email, formType) {
-  const apiKey = import.meta.env.VITE_RESEND_API_KEY;
-  if (!apiKey) return;
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY?.trim();
+const PAYSTACK_CURRENCY = import.meta.env.VITE_PAYSTACK_CURRENCY?.trim() || "NGN";
 
-  const formNames = {
-    wedding: "Wedding Styling",
-    occasion: "Occasion Styling",
-    travel: "Kájáyelo Travel Styling",
-  };
+const formNames = {
+  wedding: "Wedding Styling",
+  bridal: "Bridal Styling",
+  occasion: "Occasion Styling",
+  travel: "Kájáyelo Travel Styling",
+  consultation: "General Consultation",
+  coupleConsultation: "Couple's Consultation",
+};
 
-  const serviceName = formNames[formType] || "Styling Consultation";
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: "ABÁNITÚNRASE <booking@abanitunrase.com>",
-        to: [email],
-        subject: "Your ABÁNITÚNRASE Booking is Confirmed",
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="UTF-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            </head>
-            <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Inter',sans-serif;color:#f5f0e6;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
-                <tr>
-                  <td align="center">
-                    <table width="560" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">
-                      <tr>
-                        <td style="padding:32px 40px;border-bottom:1px solid rgba(255,255,255,0.08);">
-                          <p style="margin:0;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(245,240,230,0.4);font-family:monospace;">ABÁNITÚNRASE</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:40px 40px 32px;">
-                          <h1 style="margin:0 0 16px;font-size:28px;font-family:Georgia,serif;color:#f5f0e6;font-weight:400;">Booking Confirmed.</h1>
-                          <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:rgba(245,240,230,0.6);">
-                            Your deposit for <strong style="color:#f5f0e6;">${serviceName}</strong> has been received. Thank you for choosing ABÁNITÚNRASE.
-                          </p>
-                          <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:rgba(245,240,230,0.6);">
-                            We will be in touch shortly to begin your styling journey. In the meantime, please feel free to gather any inspiration boards, mood references, or questions you would like to discuss.
-                          </p>
-                          <div style="background:rgba(245,240,230,0.04);border:1px solid rgba(245,240,230,0.08);border-radius:4px;padding:20px;margin-bottom:24px;">
-                            <p style="margin:0 0 8px;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(245,240,230,0.35);font-family:monospace;">Service</p>
-                            <p style="margin:0;font-size:15px;color:#f5f0e6;">${serviceName}</p>
-                          </div>
-                          <p style="margin:0;font-size:13px;color:rgba(245,240,230,0.4);">
-                            Questions? Reach us at <a href="mailto:Officialabanitunrase@gmail.com" style="color:#f5f0e6;">Officialabanitunrase@gmail.com</a> or WhatsApp <a href="tel:+2348126286593" style="color:#f5f0e6;">+234 812 628 6593</a>.
-                          </p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:24px 40px;border-top:1px solid rgba(255,255,255,0.06);">
-                          <p style="margin:0;font-size:11px;color:rgba(245,240,230,0.25);text-align:center;letter-spacing:0.15em;text-transform:uppercase;font-family:monospace;">Lagos, Nigeria · ABÁNITÚNRASE</p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </body>
-          </html>
-        `,
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to send confirmation email:", err);
-  }
+function paymentReference(formType) {
+  const service = formType || "consultation";
+  const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `ABN-${service}-${Date.now()}-${random}`;
 }
 
-export default function PaystackPayment({ email, amount, onSuccess, onClose, formType }) {
+export default function PaystackPayment({
+  email,
+  amount,
+  onSuccess,
+  onClose,
+  formType,
+  name,
+  phone,
+  preferredTime,
+  serviceName: serviceNameProp,
+}) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
+  const serviceName = serviceNameProp || formNames[formType] || "Styling Consultation";
+  const paystackReady = scriptReady && !!PAYSTACK_PUBLIC_KEY;
 
   useEffect(() => {
     if (window.PaystackPop) {
@@ -100,31 +54,62 @@ export default function PaystackPayment({ email, amount, onSuccess, onClose, for
   }, []);
 
   const handlePay = () => {
+    if (!email?.trim()) {
+      alert("Please enter your email before payment.");
+      return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      alert("Payment amount is invalid. Please contact us directly.");
+      return;
+    }
+
     if (!scriptReady || !window.PaystackPop) {
       alert("Payment system is loading. Please try again in a moment.");
       return;
     }
 
-    const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-    if (!publicKey) {
-      alert("Payment is not configured. Please contact us directly.");
+    if (!PAYSTACK_PUBLIC_KEY) {
+      alert("Paystack is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
       return;
     }
 
     setLoading(true);
 
+    const reference = paymentReference(formType);
     const handler = window.PaystackPop.setup({
-      key: publicKey,
-      email,
+      key: PAYSTACK_PUBLIC_KEY,
+      email: email.trim(),
       amount,
-      currency: "NGN",
+      currency: PAYSTACK_CURRENCY,
+      ref: reference,
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Service",
+            variable_name: "service",
+            value: serviceName,
+          },
+        ],
+      },
       callback: async (response) => {
         setLoading(false);
-        if (response.status === "success") {
-          await sendConfirmationEmail(email, formType);
-          setSuccess(true);
-          setTimeout(() => onSuccess(response), 1500);
-        }
+        const resolvedReference = response.reference || reference;
+        sendBookingEmails({
+          name,
+          email: email.trim(),
+          phone,
+          preferredTime,
+          formType,
+          serviceName,
+          amount,
+          amountLabel: formatAmount(amount),
+          reference: resolvedReference,
+        }).catch((err) => {
+          console.error("Failed to send booking emails:", err);
+        });
+        setSuccess(true);
+        setTimeout(() => onSuccess({ ...response, reference: resolvedReference }), 1500);
       },
       onClose: () => {
         setLoading(false);
@@ -167,14 +152,20 @@ export default function PaystackPayment({ email, amount, onSuccess, onClose, for
 
         <button
           onClick={handlePay}
-          disabled={loading || !scriptReady}
+          disabled={loading || !paystackReady}
           className={cn(
             "w-full py-4 px-6 font-['DM_Mono'] text-xs tracking-[0.2em] uppercase transition-all",
             "bg-[#1a1706] text-[#f5f0e6] hover:bg-black",
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
         >
-          {loading ? "Processing…" : "Proceed to Payment →"}
+          {loading
+            ? "Processing…"
+            : !PAYSTACK_PUBLIC_KEY
+              ? "Paystack Key Missing"
+              : !scriptReady
+                ? "Loading Paystack…"
+                : "Proceed to Payment →"}
         </button>
 
         <p className="text-[#1a1706]/25 text-xs text-center mt-4">

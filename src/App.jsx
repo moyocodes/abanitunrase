@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import GlobalStyleQuiz from "@/components/GlobalStyleQuiz";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SeoMeta from "@/components/SeoMeta";
 import { AdminEditProvider } from "@/components/AdminBar";
 import Home from "@/pages/Home";
 import RatesPage from "@/pages/RatesPage";
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AdminEditProvider>
+        <SeoMeta />
         <Routes>
           {/* Public */}
           <Route path="/" element={<Home />} />
