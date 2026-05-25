@@ -1,25 +1,38 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-
-const FAQ = [
-  {
-    q: "How far in advance should I book?",
-    a: "For bridal packages, we recommend booking at least 3–4 months before your first ceremony. For occasion styling, 3–6 weeks is ideal. For travel styling (Kájáyelo), we require a minimum of 2 weeks notice. Slots fill quickly — especially for Lagos owambe season.",
-  },
-  {
-    q: "Are the prices negotiable?",
-    a: "Our prices reflect the work, time, research, and relationships that go into every look. They are not negotiable. What we do offer is transparency — you know exactly what you are paying for, and we do not charge for extras that were always going to be part of the job.",
-  },
-  {
-    q: "Do you work outside Lagos?",
-    a: "Yes. We work in Lagos, Ibadan, Abuja, and abroad. Travel styling packages (Kájáyelo) are specifically designed for international trips. For local travel beyond Lagos, logistics are discussed during consultation.",
-  },
-];
+import { useData } from "@/providers";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { saveSettings } from "@/lib/firestore";
 
 export default function BeforeYouBook() {
+  const { beforeData, refetch } = useData();
+  const { activePanel, showToast } = useEditMode();
+  const [draft, setDraft] = useState({});
+  const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(null);
   const sectionRef = useRef(null);
   const triggered = useRef(false);
+
+  useEffect(() => {
+    if (activePanel === "before") {
+      setDraft({ ...beforeData, faqs: (beforeData.faqs ?? []).map(f => ({ ...f })) });
+    }
+  }, [activePanel, beforeData]);
+
+  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+  const setFaq = (idx, field, val) =>
+    setDraft(d => ({ ...d, faqs: d.faqs.map((f, i) => i === idx ? { ...f, [field]: val } : f) }));
+  const addFaq = () => setDraft(d => ({ ...d, faqs: [...(d.faqs ?? []), { q: "", a: "" }] }));
+  const removeFaq = (idx) => setDraft(d => ({ ...d, faqs: (d.faqs ?? []).filter((_, i) => i !== idx) }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveSettings("before", draft);
+      refetch();
+      showToast("Before You Book saved ✓");
+    } finally { setSaving(false); }
+  };
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -37,11 +50,39 @@ export default function BeforeYouBook() {
     return () => obs.disconnect();
   }, []);
 
-  return (
-    <section ref={sectionRef} className="bg-[#f4f3f0] border-t border-[#1a1706]/6">
-      <div className="px-6 md:px-16 py-10 md:py-12 max-w-[1100px] mx-auto">
+  const faqs = beforeData.faqs ?? [];
 
-        {/* Header */}
+  return (
+    <section ref={sectionRef} className="bg-[#f4f3f0] border-t border-[#1a1706]/6 relative">
+      <SectionEditButton panelId="before" />
+      <SectionPanel panelId="before" title="Before You Book">
+        <PanelField label="Section Label" value={draft.sectionLabel ?? ""} onChange={v => set("sectionLabel", v)} />
+        <PanelField label="Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} />
+        <PanelField label="Sub-text" value={draft.sub ?? ""} onChange={v => set("sub", v)} multiline />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-3">FAQs</p>
+        <div className="flex flex-col gap-2">
+          {(draft.faqs ?? []).map((faq, idx) => (
+            <div key={idx} className="border border-[#1a1706]/10 p-2 flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/30">FAQ {idx + 1}</div>
+                <button
+                  onClick={() => removeFaq(idx)}
+                  className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer"
+                >✕ Remove</button>
+              </div>
+              <PanelField label="Question" value={faq.q ?? ""} onChange={v => setFaq(idx, "q", v)} />
+              <PanelField label="Answer" value={faq.a ?? ""} onChange={v => setFaq(idx, "a", v)} multiline />
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={addFaq}
+          className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-2 bg-transparent cursor-pointer transition-colors w-full mt-1"
+        >+ Add FAQ</button>
+        <PanelSaveBtn onClick={handleSave} saving={saving} />
+      </SectionPanel>
+
+      <div className="px-6 md:px-16 py-10 md:py-12 max-w-[1100px] mx-auto">
         <motion.div
           className="flex items-end justify-between mb-7 gap-6 flex-wrap"
           initial={{ opacity: 0, y: 28 }}
@@ -58,7 +99,7 @@ export default function BeforeYouBook() {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             >
               <span className="block w-6 h-px bg-[#1a1706]/20" />
-              Before You Book
+              {beforeData.sectionLabel}
             </motion.div>
             <motion.h2
               className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(26px,3vw,44px)] leading-none tracking-tight font-normal"
@@ -67,23 +108,22 @@ export default function BeforeYouBook() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
             >
-              Good to know.
+              {beforeData.heading}
             </motion.h2>
           </div>
           <motion.p
-            className="font-mono text-[8px] tracking-[0.24em] uppercase text-[#1a1706]/30 leading-[2.2] text-right hidden sm:block"
+            className="font-mono text-[8px] tracking-[0.24em] uppercase text-[#1a1706]/30 leading-[2.2] text-right hidden sm:block whitespace-pre-line"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
           >
-            Questions we get asked<br />before every booking
+            {beforeData.sub}
           </motion.p>
         </motion.div>
 
-        {/* FAQ list — each item slides up with stagger */}
         <div className="border-t border-[#1a1706]/8">
-          {FAQ.map((item, i) => (
+          {faqs.map((item, i) => (
             <motion.div
               key={i}
               className="border-b border-[#1a1706]/8"

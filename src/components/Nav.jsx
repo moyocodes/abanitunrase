@@ -17,7 +17,7 @@ const NAV_VARIANTS = {
   },
 };
 
-export default function Nav({ onBookCall, hidden }) {
+export default function Nav({ onBookCall, hidden, onTrackBooking }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -71,13 +71,23 @@ export default function Nav({ onBookCall, hidden }) {
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <button
-          onClick={onBookCall}
-          className="hidden sm:block font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
-        >
-          Book a Fitting
-        </button>
+        {/* Desktop CTAs */}
+        <div className="hidden sm:flex items-center gap-4">
+          {onTrackBooking && (
+            <button
+              onClick={onTrackBooking}
+              className="font-mono text-[8px] tracking-[0.15em] uppercase text-black/40 hover:text-black/70 transition-colors duration-300 bg-transparent border-none cursor-pointer"
+            >
+              Track Booking
+            </button>
+          )}
+          <button
+            onClick={onBookCall}
+            className="font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
+          >
+            Book a Fitting
+          </button>
+        </div>
 
         {/* Hamburger */}
         <button
@@ -107,6 +117,14 @@ export default function Nav({ onBookCall, hidden }) {
             {label}
           </a>
         ))}
+        {onTrackBooking && (
+          <button
+            onClick={() => { onTrackBooking(); setMenuOpen(false); }}
+            className="font-mono text-[11px] tracking-[0.18em] uppercase text-black/45 hover:text-black transition-colors duration-300 bg-transparent border-none cursor-pointer text-left"
+          >
+            Track My Booking →
+          </button>
+        )}
         <button
           onClick={() => { onBookCall(); setMenuOpen(false); }}
           className="mt-2 font-mono text-[11px] tracking-[0.18em] uppercase px-5 py-3 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer self-start"

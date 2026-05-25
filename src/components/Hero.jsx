@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useData } from "@/providers";
-import { useEditMode, SectionEditButton, SectionPanel, PanelSaveBtn, PanelImageField } from "@/components/AdminBar";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, PanelImageField } from "@/components/AdminBar";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { saveSettings } from "@/lib/firestore";
 import { useState, useEffect } from "react";
@@ -42,17 +42,21 @@ function HeroCardEdit({ item, allItems, onSaved }) {
 }
 
 export default function Hero({ onBookCall, onQuiz }) {
-  const { heroItems, refetch } = useData();
+  const { heroItems, heroMeta, refetch } = useData();
   const { editMode, activePanel, showToast } = useEditMode();
   const navigate = useNavigate();
   const [heroDraft, setHeroDraft] = useState([]);
+  const [metaDraft, setMetaDraft] = useState({});
   const [saving, setSaving] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addErr, setAddErr] = useState("");
 
   useEffect(() => {
-    if (activePanel === "hero") setHeroDraft((heroItems ?? []).map(i => ({ ...i })));
-  }, [activePanel, heroItems]);
+    if (activePanel === "hero") {
+      setHeroDraft((heroItems ?? []).map(i => ({ ...i })));
+      setMetaDraft({ ...heroMeta });
+    }
+  }, [activePanel, heroItems, heroMeta]);
 
   const setItem = (idx, field, val) =>
     setHeroDraft(d => d.map((item, i) => i === idx ? { ...item, [field]: val } : item));
@@ -63,6 +67,7 @@ export default function Hero({ onBookCall, onQuiz }) {
     setSaving(true);
     try {
       await saveSettings("hero", { images: heroDraft });
+      await saveSettings("heroMeta", metaDraft);
       await refetch();
       showToast("Hero saved ✓");
     } finally { setSaving(false); }
@@ -98,8 +103,11 @@ export default function Hero({ onBookCall, onQuiz }) {
       className="h-screen flex flex-col justify-center overflow-hidden relative bg-[#0a0a0a]"
     >
       <SectionEditButton panelId="hero" />
-      <SectionPanel panelId="hero" title="Hero Images">
-        <p className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/35 mb-1">
+      <SectionPanel panelId="hero" title="Hero">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Center Text</p>
+        <PanelField label="Tagline" value={metaDraft.tagline ?? ""} onChange={v => setMetaDraft(d => ({ ...d, tagline: v }))} />
+        <PanelField label="Sub-tagline" value={metaDraft.subTagline ?? ""} onChange={v => setMetaDraft(d => ({ ...d, subTagline: v }))} />
+        <p className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/35 mt-2 mb-1">
           Assign each image to Row 1 (top) or Row 2 (bottom).
         </p>
         <div className="flex flex-col gap-2">
@@ -141,7 +149,6 @@ export default function Hero({ onBookCall, onQuiz }) {
                   className="font-mono text-[7px] uppercase text-red-500/50 hover:text-red-500/90 transition-colors shrink-0 border-none bg-transparent cursor-pointer"
                 >✕</button>
               </div>
-              {/* Image URL / replace */}
               <PanelImageField
                 label="Image"
                 value={item.url ?? ""}
@@ -178,6 +185,7 @@ export default function Hero({ onBookCall, onQuiz }) {
                     alt={item.label ?? ""}
                     loading="lazy"
                     className="w-full h-full object-cover block transition-transform duration-500 opacity-100 saturate-90 contrast-[1.02] hover:scale-[1.04]"
+                    style={{ objectPosition: `${item.posX ?? 50}% ${item.posY ?? 50}%` }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
                   {item.label && (
@@ -200,14 +208,14 @@ export default function Hero({ onBookCall, onQuiz }) {
 
       <div className="absolute inset-0 z-[6] flex flex-col items-center justify-center pointer-events-none select-none">
         <div className="font-['DM_Mono'] text-[7px] md:text-[8px] tracking-[0.5em] uppercase text-[#f5f0e6]/60 mb-5">
-          Lagos Styling House
+          {heroMeta.tagline}
         </div>
-        <div className="text-[clamp(42px,9vw,116px)] text-[#f5f0e6] leading-[1.02] tracking-[0.1em] sm:tracking-[0.18em] text-center">
+        <div className="text-[clamp(42px,9vw,116px)] font-light text-[#f5f0e6] leading-[1.02] tracking-[0.1em] sm:tracking-[0.18em] text-center">
           ABÁNITÚNRASE
         </div>
         <div className="w-16 h-px bg-[#f5f0e6]/28 my-5" />
         <div className="font-['Outfit'] text-[clamp(13px,1.3vw,17px)] text-[#f5f0e6]/65 leading-relaxed font-light text-center tracking-[0.12em]">
-          Bridal &nbsp;·&nbsp; Occasion &nbsp;·&nbsp; Travel
+          {heroMeta.subTagline}
         </div>
         <div className="flex items-center gap-4 mt-10 pointer-events-auto flex-wrap justify-center">
           <button

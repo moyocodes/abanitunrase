@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useData } from "@/providers";
 import {
   INTRO_STEPS,
   INTRO_TRIGGER,
-  SHOWCASED,
 } from "@/data";
 import Nav from "@/components/Nav";
 import BookCallModal from "@/components/BookCallModal";
+import BookingLookup from "@/components/BookingLookup";
 import Hero from "@/components/Hero";
 import Atelier from "@/components/Atelier";
 import Categories from "@/components/Categories";
@@ -34,6 +34,8 @@ export default function Home() {
 
   /* ── Modals ── */
   const [bookCallOpen, setBookCallOpen] = useState(false);
+  const [lookupOpen, setLookupOpen] = useState(false);
+  const [continuePay, setContinuePay] = useState(null); // { prefill, autoPayment }
   const [formType, setFormType] = useState(null);
   const [storyOpen, setStoryOpen] = useState(false);
   const [storyLookIdx, setStoryLookIdx] = useState(0);
@@ -45,11 +47,6 @@ export default function Home() {
   const [introStep, setIntroStep] = useState(0);
   const [introDismissed, setIntroDismissed] = useState(false);
 
-  /* ── Lookbook ── */
-  const [lkActive, setLkActive] = useState(0);
-  const [lkProgress, setLkProgress] = useState(0);
-  const [lkVisible, setLkVisible] = useState(false);
-  const lkStackRef = useRef(null);
 
   /* ── Gallery ── */
   const [dragOver, setDragOver] = useState(false);
@@ -95,16 +92,6 @@ export default function Home() {
         setIntroStep(Math.min(Math.floor(s / INTRO_TRIGGER), INTRO_STEPS - 1));
         if (s > INTRO_TRIGGER * INTRO_STEPS) setIntroDismissed(true);
       }
-      if (lkStackRef.current) {
-        const sr = lkStackRef.current.getBoundingClientRect();
-        const inLk = sr.top <= 0 && sr.bottom > 0;
-        setLkVisible(inLk);
-        if (inLk) {
-          setLkActive(Math.min(Math.floor(-sr.top / window.innerHeight), SHOWCASED.length - 1));
-          const rawP = -sr.top / window.innerHeight;
-          setLkProgress(Math.max(0, Math.min(rawP, SHOWCASED.length - 1)));
-        }
-      }
       const ratesEl = document.getElementById("rates");
       const galleryEl = document.getElementById("gallery-section");
       if (ratesEl && galleryEl) {
@@ -121,11 +108,11 @@ export default function Home() {
   /* ── Body overflow for modals ── */
   useEffect(() => {
     document.body.style.overflow =
-      lbOpen || storyOpen || bookCallOpen || formType !== null ? "hidden" : "";
+      lbOpen || storyOpen || bookCallOpen || lookupOpen || formType !== null ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [lbOpen, storyOpen, bookCallOpen, formType]);
+  }, [lbOpen, storyOpen, bookCallOpen, lookupOpen, formType]);
 
   /* ── Keyboard ── */
   useEffect(() => {
@@ -244,7 +231,7 @@ export default function Home() {
                   : "opacity-0 translate-y-[18px]"
               }`}
             >
-              <div className={`${ch.plain ? "tracking-[0.12em]" : "font-heading italic tracking-[-0.025em]"} font-normal text-[clamp(28px,8vw,100px)] text-[#f5f0e6] leading-[1.05]`}>
+              <div className={` ${ch.plain ? "tracking-[0.12em] " : "font-heading italic tracking-[-0.025em]"} font-light text-[clamp(28px,8vw,100px)] text-[#f5f0e6] leading-[1.05]`}>
                 {ch.big}
               </div>
               {ch.med && (
@@ -264,11 +251,14 @@ export default function Home() {
         </div>
       </div>
 
-      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} />
+      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} onTrackBooking={() => setLookupOpen(true)} />
 
       <BookCallModal
-        open={bookCallOpen}
-        onClose={() => setBookCallOpen(false)}
+        open={bookCallOpen || continuePay !== null}
+        onClose={() => { setBookCallOpen(false); setContinuePay(null); }}
+        onTrackBooking={() => { setBookCallOpen(false); setLookupOpen(true); }}
+        prefill={continuePay?.prefill}
+        autoPayment={continuePay?.autoPayment}
       />
 
       <div
@@ -287,14 +277,7 @@ export default function Home() {
         <div className="relative z-[20]">
           <Categories onBook={(type) => setFormType(type)} />
 
-          <Lookbook
-            lkStackRef={lkStackRef}
-            lkProgress={lkProgress}
-            lkActive={lkActive}
-            lkVisible={lkVisible}
-            onOpenStory={openStory}
-            onOpenLightbox={(idx) => { setLbIdx(idx); setLbOpen(true); }}
-          />
+          <Lookbook />
           <BeforeYouBook />
         </div>
 
@@ -374,6 +357,23 @@ export default function Home() {
         visible={ratesVisible}
         activeTab={ratesTab}
         setActiveTab={setRatesTab}
+      />
+
+      <BookingLookup
+        open={lookupOpen}
+        onClose={() => setLookupOpen(false)}
+        onContinuePayment={(booking) => {
+          setLookupOpen(false);
+          setContinuePay({
+            prefill: {
+              name: booking.data?.fullName ?? "",
+              email: booking.data?.email ?? "",
+              phone: booking.data?.phone ?? "",
+              service: booking.type === "coupleConsultation" ? "coupleConsultation" : "consultation",
+            },
+            autoPayment: true,
+          });
+        }}
       />
 
     </>

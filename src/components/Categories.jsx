@@ -14,18 +14,20 @@ const panelReveal = {
 export default function Categories({ onBook }) {
   const [expandedCat, setExpandedCat] = useState(null);
   const navigate = useNavigate();
-  const { categories, bridal, occasion, travel, refetch } = useData();
+  const { categories, categoriesHdr, bridal, occasion, travel, refetch } = useData();
   const { activePanel, showToast } = useEditMode();
   const RATES = { bridal, occasion, travel };
 
   const [draft, setDraft] = useState([]);
+  const [hdrDraft, setHdrDraft] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (activePanel === "categories" && categories?.length) {
-      setDraft(categories.map((c) => ({ ...c })));
+    if (activePanel === "categories") {
+      if (categories?.length) setDraft(categories.map((c) => ({ ...c })));
+      setHdrDraft({ ...categoriesHdr });
     }
-  }, [activePanel, categories]);
+  }, [activePanel, categories, categoriesHdr]);
 
   const patchDraft = (idx, field, val) =>
     setDraft((prev) => prev.map((c, i) => i === idx ? { ...c, [field]: val } : c));
@@ -40,6 +42,7 @@ export default function Categories({ onBook }) {
     setSaving(true);
     try {
       await saveSettings("categories", { items: draft });
+      await saveSettings("categoriesHdr", hdrDraft);
       refetch();
       showToast("Categories saved ✓");
     } finally {
@@ -60,6 +63,11 @@ export default function Categories({ onBook }) {
     <section id="categories" className="bg-white border-t border-[#1a1706]/6 relative">
       <SectionEditButton panelId="categories" />
       <SectionPanel panelId="categories" title="What We Do">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Section Header</p>
+        <PanelField label="Section Label" value={hdrDraft.sectionLabel ?? ""} onChange={v => setHdrDraft(d => ({ ...d, sectionLabel: v }))} />
+        <PanelField label="Heading" value={hdrDraft.heading ?? ""} onChange={v => setHdrDraft(d => ({ ...d, heading: v }))} multiline />
+        <PanelField label="Sub-text" value={hdrDraft.sub ?? ""} onChange={v => setHdrDraft(d => ({ ...d, sub: v }))} multiline />
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-3">Categories</p>
         <div className="flex flex-col gap-4">
           {draft.map((cat, idx) => (
             <div key={idx} className="flex flex-col gap-2 pb-4 border-b border-[#1a1706]/7 last:border-b-0 last:pb-0">
@@ -93,14 +101,14 @@ export default function Categories({ onBook }) {
         <div>
           <div className="flex items-center gap-3 mb-4 font-['DM_Mono'] text-[8px] tracking-[0.4em] uppercase text-[#1a1706]/40">
             <span className="block w-6 h-px bg-[#1a1706]/20" />
-            What We Do
+            {categoriesHdr.sectionLabel}
           </div>
-          <h2 className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(40px,5vw,70px)] text-[#1a1706] leading-none tracking-[-0.02em]">
-            Three ways<br />to dress well.
+          <h2 className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(40px,5vw,70px)] text-[#1a1706] leading-none tracking-[-0.02em] whitespace-pre-line">
+            {categoriesHdr.heading}
           </h2>
         </div>
-        <p className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[#1a1706]/28 leading-[2] max-w-[280px] text-right flex-shrink-0 hidden md:block">
-          Browse stories by category<br />or click See Rates to explore pricing
+        <p className="font-['DM_Mono'] text-[8px] tracking-[0.26em] uppercase text-[#1a1706]/28 leading-[2] max-w-[280px] text-right flex-shrink-0 hidden md:block whitespace-pre-line">
+          {categoriesHdr.sub}
         </p>
       </motion.div>
 

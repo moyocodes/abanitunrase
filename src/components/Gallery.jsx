@@ -174,10 +174,70 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
     >
       <SectionEditButton panelId="gallery" />
       <SectionPanel panelId="gallery" title="The Archive">
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10">Display Text</p>
         <PanelField label="Tagline" value={draft.tagline ?? ""} onChange={v => set("tagline", v)} />
         <PanelField label="Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} />
         <PanelField label="Sub-text" value={draft.sub ?? ""} onChange={v => set("sub", v)} multiline />
         <PanelSaveBtn onClick={handleSave} saving={saving} />
+
+        <div className="flex items-center justify-between mt-4 mb-1.5">
+          <span className="font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/55 uppercase tracking-[0.2em]">
+            Items ({items.length})
+          </span>
+          <label className="cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/55 border border-[#1a1706]/15 px-[10px] py-1">
+            + Upload
+            <input type="file" multiple accept="image/*,video/mp4,video/quicktime,.mov" className="hidden" onChange={e => { handleFiles(e.target.files); e.target.value = ""; }} />
+          </label>
+        </div>
+        <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
+          {items.map((item, idx) => (
+            <div key={`${item.url}-${idx}`} className="border border-[#1a1706]/10">
+              <div className="flex items-center gap-3 p-2">
+                {item.type === "image" ? (
+                  <img src={item.url} alt="" className="w-14 h-14 object-cover shrink-0" />
+                ) : (
+                  <div className="w-14 h-14 bg-[#1a1706]/10 flex items-center justify-center shrink-0 font-['Georgia,serif'] text-[18px] text-[#1a1706]/35">▶</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/65 overflow-hidden text-ellipsis whitespace-nowrap">
+                    {item.name || item.type}
+                  </p>
+                </div>
+                {/* Replace upload */}
+                <label className="cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/50 border border-[#1a1706]/15 px-2 py-1 shrink-0" title="Replace image">
+                  ↑
+                  <input
+                    type="file"
+                    accept="image/*,video/mp4,video/quicktime,.mov"
+                    className="hidden"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const { uploadToCloudinary } = await import("@/lib/cloudinary");
+                      const { addGalleryItem } = await import("@/lib/firestore");
+                      try {
+                        const url = await uploadToCloudinary(file);
+                        const type = file.type.startsWith("video") ? "video" : "image";
+                        await addGalleryItem({ url, type, name: file.name });
+                        onRemove(idx, { stopPropagation: () => {} });
+                        showToast("Item replaced ✓");
+                      } catch (ex) { showToast("Upload failed"); }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  onClick={e => onRemove(idx, e)}
+                  className="font-['Georgia,serif'] text-[13px] font-bold text-red-500/60 bg-transparent border-none cursor-pointer px-1.5 py-1 shrink-0"
+                  title="Delete"
+                >✕</button>
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/30 py-3 text-center">No items yet</p>
+          )}
+        </div>
       </SectionPanel>
 
       {dragOver && (

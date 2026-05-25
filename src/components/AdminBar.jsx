@@ -151,7 +151,7 @@ export function AdminEditProvider({ children }) {
 
 /* ── Shared tiny UI ─────────────────────────────────────── */
 const Lbl = ({ children }) => (
-  <label className="block font-mono text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/35 mb-1.5">
+  <label className="block font-['Georgia,Times_New_Roman,serif'] text-[11px] font-semibold text-[#1a1706]/55 mb-1.5 tracking-[0.01em]">
     {children}
   </label>
 );
@@ -216,7 +216,7 @@ function UploadImageField({ label, value, onChange }) {
           <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
         </label>
       </div>
-      {value && <img src={value} alt="" className="w-full h-20 object-cover saturate-0 opacity-40 mt-2" />}
+      {value && <img src={value} alt="" className="w-full h-20 object-cover mt-2" />}
     </div>
   );
 }
@@ -472,7 +472,7 @@ function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
                     {looks.map(look => (
                       <div key={look.id} className="flex items-center gap-3 py-3">
                         {look.img && (
-                          <img src={look.img} alt={look.title} className="w-10 h-10 object-cover flex-shrink-0 saturate-0 opacity-50" />
+                          <img src={look.img} alt={look.title} className="w-10 h-10 object-cover flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="font-body text-[#1a1706] text-sm truncate">{look.title || look.id}</div>
@@ -615,7 +615,7 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
                     {looks.map((look) => (
                       <div key={look.id} className="flex items-center gap-3 py-3">
                         {look.img && (
-                          <img src={look.img} alt={look.title} className="w-10 h-10 object-cover flex-shrink-0 saturate-0 opacity-50" />
+                          <img src={look.img} alt={look.title} className="w-10 h-10 object-cover flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="font-body text-[#1a1706] text-sm truncate">{look.title || look.id}</div>
@@ -687,14 +687,14 @@ export function SectionPanel({ panelId, title, children }) {
   if (activePanel !== panelId) return null;
   return (
     <>
-      <div className="fixed inset-0 z-[9982] bg-black/20 cursor-pointer" onClick={closePanel} />
-      <div className="fixed top-0 right-0 bottom-0 w-[min(100vw,360px)] z-[9983] bg-[#f8f7f3] overflow-y-auto shadow-2xl">
+      <div className="fixed inset-0 z-[99998] bg-black/30 cursor-pointer" onClick={closePanel} />
+      <div className="fixed top-0 right-0 bottom-0 w-[min(100vw,400px)] z-[99999] bg-[#f8f7f3] overflow-y-auto shadow-2xl" data-admin-panel>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <span className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-xl">{title}</span>
+            <span className="font-['Georgia,Times_New_Roman,serif'] text-[20px] italic text-[#1a1706]">{title}</span>
             <button
               onClick={closePanel}
-              className="font-mono text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/30 hover:text-[#1a1706]/60 transition-colors border-none bg-transparent cursor-pointer"
+              className="font-['Georgia,Times_New_Roman,serif'] text-[12px] font-semibold text-[#1a1706]/45 bg-transparent border-none cursor-pointer"
             >
               Close ✕
             </button>
@@ -710,7 +710,7 @@ export function SectionPanel({ panelId, title, children }) {
 export function PanelField({ label, value, onChange, multiline = false }) {
   return (
     <div>
-      <label className="block font-mono text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/35 mb-1.5">
+      <label className="block font-['Georgia,Times_New_Roman,serif'] text-[11px] font-semibold text-[#1a1706]/55 mb-1.5">
         {label}
       </label>
       {multiline ? (
@@ -718,14 +718,14 @@ export function PanelField({ label, value, onChange, multiline = false }) {
           rows={3}
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-white border border-[#1a1706]/12 p-2.5 text-[#1a1706]/80 text-xs outline-none focus:border-[#1a1706]/30 resize-none"
+          className="w-full bg-white border border-[#1a1706]/12 p-2.5 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 resize-none font-['Georgia,Times_New_Roman,serif'] text-[13px]"
         />
       ) : (
         <input
           type="text"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 text-sm outline-none focus:border-[#1a1706]/40"
+          className="w-full bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/40 font-['Georgia,Times_New_Roman,serif'] text-[13px]"
         />
       )}
     </div>
@@ -751,7 +751,7 @@ export function PanelSaveBtn({ onClick, saving, label = "Save →", disabled = f
     <button
       onClick={handleClick}
       disabled={saving || disabled}
-      className="w-full py-3 bg-[#1a1706] text-[#f5f0e6] font-mono text-[8px] tracking-[0.25em] uppercase hover:bg-black transition-colors disabled:opacity-40 border-none cursor-pointer mt-1"
+      className="w-full py-3 bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors disabled:opacity-40 border-none cursor-pointer mt-1 font-['Georgia,Times_New_Roman,serif'] text-[12px] font-bold tracking-[0.08em] uppercase"
     >
       {saving ? "Saving…" : saved ? "Saved ✓" : label}
     </button>
@@ -793,7 +793,7 @@ export function PanelImageField({ label, value, onChange }) {
           <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
         </label>
       </div>
-      {value && <img src={value} alt="" className="w-full h-16 object-cover saturate-0 opacity-40 mt-2" />}
+      {value && <img src={value} alt="" className="w-full h-16 object-cover mt-2" />}
     </div>
   );
 }
@@ -842,7 +842,7 @@ export function PanelVideoField({ label, value, onChange }) {
         </div>
       )}
       {value && !uploading && (
-        <video src={value} className="w-full h-16 object-cover opacity-40 mt-2" muted playsInline />
+        <video src={value} className="w-full h-16 object-cover mt-2" muted playsInline />
       )}
     </div>
   );

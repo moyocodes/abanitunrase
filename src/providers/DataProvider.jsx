@@ -75,6 +75,11 @@ const DEFAULT_LOOKBOOK = {
   heading: "Selected Works",
   season: "SS 2026",
   sub: "Bridal · Occasion · Travel\nLagos · Ibadan · Abroad",
+  items: [
+    { title: "Look 01", img: "", cat: "Bridal", catIdx: 0, sub: "" },
+    { title: "Look 02", img: "", cat: "Occasion", catIdx: 1, sub: "" },
+    { title: "Look 03", img: "", cat: "Travel", catIdx: 2, sub: "" },
+  ],
 };
 
 const DEFAULT_CTA = {
@@ -166,6 +171,13 @@ export function DataProvider({ children }) {
     setGalleryUploading(false);
   };
 
+  const addGalleryByUrl = async (url, type = "image") => {
+    if (!url) return;
+    const item = { url, type, name: url.split("/").pop() };
+    const savedId = await addGalleryItem(item).catch(() => `url-${Date.now()}`);
+    setGalleryItems(prev => [...prev, { ...item, id: savedId }]);
+  };
+
   const removeGallery = async (idx) => {
     const item = galleryItems[idx];
     if (item?.id && !item.id.startsWith("temp-")) {
@@ -208,7 +220,14 @@ export function DataProvider({ children }) {
     ...(settings.rates ?? {}),
     consultations: settings.rates?.consultations ?? DEFAULT_RATES.consultations,
   };
-  const lookbookData = { ...DEFAULT_LOOKBOOK, ...(settings.lookbook ?? {}) };
+  const lookbookData = {
+    ...DEFAULT_LOOKBOOK,
+    ...(settings.lookbook ?? {}),
+    items: settings.lookbook?.items ?? DEFAULT_LOOKBOOK.items,
+  };
+  const heroMeta = { ...DEFAULT_HERO_META, ...(settings.heroMeta ?? {}) };
+  const categoriesHdr = { ...DEFAULT_CATEGORIES_HDR, ...(settings.categoriesHdr ?? {}) };
+  const beforeData = { ...DEFAULT_BEFORE, ...(settings.before ?? {}), faqs: settings.before?.faqs ?? DEFAULT_BEFORE.faqs };
 
   return (
     <DataContext.Provider
@@ -233,9 +252,13 @@ export function DataProvider({ children }) {
         footerData,
         ratesData,
         lookbookData,
+        heroMeta,
+        categoriesHdr,
+        beforeData,
         galleryItems,
         galleryUploading,
         addGallery,
+        addGalleryByUrl,
         removeGallery,
         clearGallery,
       }}

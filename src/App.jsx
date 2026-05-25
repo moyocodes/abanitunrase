@@ -8,11 +8,15 @@ import Home from "@/pages/Home";
 import RatesPage from "@/pages/RatesPage";
 import StoriesPage from "@/pages/StoriesPage";
 import StylingPage from "@/pages/StylingPage";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfUse from "@/pages/TermsOfUse";
+import SizeGuide from "@/pages/SizeGuide";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminRegister from "@/pages/admin/AdminRegister";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminBookings from "@/pages/admin/AdminBookings";
+import AdminEmails from "@/pages/admin/AdminEmails";
 
 export default function App() {
   return (
@@ -25,6 +29,9 @@ export default function App() {
           <Route path="/rates" element={<RatesPage />} />
           <Route path="/stories/:category" element={<StoriesPage />} />
           <Route path="/styling/:type" element={<StylingPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/size-guide" element={<SizeGuide />} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -42,6 +49,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/emails"
+            element={
+              <ProtectedRoute>
+                <AdminEmails />
               </ProtectedRoute>
             }
           />

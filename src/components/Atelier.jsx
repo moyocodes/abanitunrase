@@ -89,6 +89,7 @@ export default function Atelier() {
     <section ref={sectionRef} id="styling-house" className="bg-[#f7f6f2] relative overflow-hidden">
       <SectionEditButton panelId="atelier" />
       <SectionPanel panelId="atelier" title="The Styling House">
+        <PanelField label="Section Label" value={draft.sectionLabel ?? ""} onChange={v => set("sectionLabel", v)} />
         <PanelField label="Quote Line 1" value={draft.quote1 ?? ""} onChange={v => set("quote1", v)} />
         <PanelField label="Quote Line 2" value={draft.quote2 ?? ""} onChange={v => set("quote2", v)} />
         <PanelField label="Body Paragraph 1" value={draft.body1 ?? ""} onChange={v => set("body1", v)} multiline />
@@ -136,7 +137,7 @@ export default function Atelier() {
           className="flex items-center gap-3 mb-12 md:mb-16 font-['DM_Mono'] text-[7.5px] tracking-[0.48em] uppercase text-[#1a1706]/50"
         >
           <span className="block w-8 h-px bg-[#1a1706]/18" />
-          A Note from the Styling House
+          {atelier.sectionLabel}
           <span className="block w-8 h-px bg-[#1a1706]/18" />
         </ScrollFade>
 

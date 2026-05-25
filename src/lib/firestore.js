@@ -10,23 +10,26 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 
 const guard = () => {
   if (!db) throw new Error("Firebase not configured");
 };
 
-export async function saveBooking(type, data) {
-  if (!db) return;
+export async function saveBooking(type, data, status = "new") {
+  if (!db) return null;
   try {
-    await addDoc(collection(db, "bookings"), {
+    const ref = await addDoc(collection(db, "bookings"), {
       type,
       data,
-      status: "new",
+      status,
       createdAt: serverTimestamp(),
     });
+    return ref.id;
   } catch (err) {
     console.error("Failed to save booking:", err);
+    return null;
   }
 }
 
@@ -48,6 +51,15 @@ export async function getBookings() {
   const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getBookingsByEmail(email) {
+  if (!db || !email) return [];
+  const q = query(collection(db, "bookings"), where("data.email", "==", email.trim()));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
 }
 
 export async function getContacts() {
@@ -133,6 +145,11 @@ export async function getSettings() {
 export async function saveSettings(section, data) {
   guard();
   await setDoc(doc(db, "settings", section), data, { merge: true });
+}
+
+export async function saveEmailTemplate(key, template) {
+  guard();
+  await setDoc(doc(db, "settings", "emailTemplates"), { [key]: template }, { merge: true });
 }
 
 export async function getGallery() {

@@ -65,12 +65,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const tabIntervalRef = useRef(null);
   const { bridal, occasion, travel, ratesData, refetch } = useData();
   const { editMode, activePanel, showToast } = useEditMode();
-  const [draft, setDraft] = useState({ note: "", consultations: [], packages: { bridal: [], occasion: [], travel: [] } });
+  const [draft, setDraft] = useState({ heading: "", sectionLabel: "", note: "", consultations: [], packages: { bridal: [], occasion: [], travel: [] } });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (activePanel === "rates") {
       setDraft({
+        heading: ratesData.heading,
+        sectionLabel: ratesData.sectionLabel,
         note: ratesData.note,
         consultations: ratesData.consultations.map(c => ({ ...c })),
         packages: {
@@ -113,7 +115,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveSettings("rates", { ...ratesData, note: draft.note, consultations: draft.consultations });
+      await saveSettings("rates", { ...ratesData, heading: draft.heading, sectionLabel: draft.sectionLabel, note: draft.note, consultations: draft.consultations });
       await savePricing("bridal", draft.packages.bridal);
       await savePricing("occasion", draft.packages.occasion);
       await savePricing("travel", draft.packages.travel);
@@ -157,6 +159,8 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     <section id="rates" className="bg-[#0a0a0a] relative">
       <SectionEditButton panelId="rates" />
       <SectionPanel panelId="rates" title="Rates & Pricing">
+        <PanelField label="Section Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} />
+        <PanelField label="Section Label" value={draft.sectionLabel ?? ""} onChange={v => set("sectionLabel", v)} />
         <PanelField label="Header Note" value={draft.note ?? ""} onChange={v => set("note", v)} multiline />
 
         {/* Consultations */}
@@ -215,9 +219,9 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
       >
         <div className="px-6 md:px-16 pt-6 pb-5 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/50 hidden md:block">Investment</span>
+            <span className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#f5f0e6]/50 hidden md:block">{ratesData.sectionLabel}</span>
             <span className="w-4 h-px bg-[#f5f0e6]/20 hidden md:block" />
-            <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">The Rates.</h2>
+            <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(30px,4vw,52px)] leading-none tracking-tight">{ratesData.heading}</h2>
           </div>
           <p className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#f5f0e6]/45 text-right leading-relaxed hidden md:block whitespace-pre-line">
             {ratesData.note}
