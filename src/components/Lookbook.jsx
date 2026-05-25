@@ -226,7 +226,7 @@ export default function Lookbook() {
                       {activeLook.title}
                     </h3>
                     {activeLook.sub && (
-                      <div className="font-['DM_Mono'] text-[7px] tracking-[0.24em] uppercase text-[#1a1706]/60 mb-6">
+                      <div className=" text-[15px] tracking-[0.02em]  text-[#1a1706]/60 mb-6">
                         {activeLook.sub}
                       </div>
                     )}

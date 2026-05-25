@@ -188,7 +188,7 @@ export default function Categories({ onBook }) {
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.36 }}
                   >
                     <span className="block w-4 h-px bg-[#1a1706]/14" />
-                    {cat.looks} looks
+      
                   </motion.div>
                   <motion.div
                     className="flex gap-2.5 flex-wrap"
