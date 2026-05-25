@@ -60,7 +60,7 @@ export default function AdminDashboard() {
                 key={label}
                 className="border border-[#1a1706]/[0.08] bg-white p-6 hover:border-[#1a1706]/[0.18] transition-colors"
               >
-                <div className="font-heading italic text-[#1a1706] text-5xl mb-2">
+                <div className="font-mono text-[#1a1706] text-5md mb-2">
                   {value}
                 </div>
                 <div className="font-mono text-[12px] tracking-[0.16em] uppercase text-[#1a1706]/45">
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
                         {b.type}
                       </span>
                       <div className="min-w-0">
-                        <div className="font-body text-[#1a1706] text-2xl truncate">
+                        <div className="font-mono text-[#1a1706] text-md truncate">
                           {b.data?.fullName || "—"}
                         </div>
                         <div className="font-mono text-[12px] tracking-[0.08em] text-[#1a1706]/50 mt-1 truncate">
@@ -132,18 +132,18 @@ export default function AdminDashboard() {
               <div className="font-mono text-[13px] tracking-[0.16em] uppercase text-[#1a1706]/45 mb-3 group-hover:text-[#1a1706]/65 transition-colors">
                 Bookings
               </div>
-              <div className="font-heading italic text-[#1a1706] text-3xl">
+              <div className="font-mono text-[#1a1706] text-md">
                 Manage bookings →
               </div>
             </Link>
             <Link
-              to="/admin/content"
+              to="/"
               className="border border-[#1a1706]/[0.08] bg-white p-6 hover:border-[#1a1706]/[0.2] transition-all duration-200 group"
             >
               <div className="font-mono text-[13px] tracking-[0.16em] uppercase text-[#1a1706]/45 mb-3 group-hover:text-[#1a1706]/65 transition-colors">
                 Content
               </div>
-              <div className="font-heading italic text-[#1a1706] text-3xl">
+              <div className="font-mono text-[#1a1706] text-md">
                 Edit site content →
               </div>
             </Link>

@@ -120,9 +120,9 @@ function Strip({ items, onOpen, onRemove, isAdmin }) {
                   ▶ Video
                 </div>
               )}
-              {isAdmin && (
+              {isAdmin && !item.uploading && (
                 <button
-                  onClick={e => { e.stopPropagation(); onRemove(origIdx, e); }}
+                  onClick={e => { e.stopPropagation(); onRemove(origIdx, e).then(() => {}).catch(() => {}); }}
                   className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/50 border border-white/15 text-white/60 hover:bg-black/80 hover:text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer z-10"
                   title="Remove"
                 >✕</button>
@@ -140,7 +140,7 @@ function Strip({ items, onOpen, onRemove, isAdmin }) {
 
 export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragOver, setDragOver }) {
   const { user } = useAuth();
-  const { archiveData, refetch } = useData();
+  const { archiveData, refetch, uploadProgress, replaceGalleryItem, galleryUploading } = useData();
   const { activePanel, showToast } = useEditMode();
   const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
@@ -157,11 +157,33 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
       await saveSettings("gallery", draft);
       refetch();
       showToast("Gallery saved ✓");
+    } catch {
+      showToast("Save failed — check connection");
     } finally { setSaving(false); }
   };
 
-  const handleFiles = (files) => {
-    if (files?.length) onAdd(files);
+  const handleFiles = async (files) => {
+    if (!files?.length) return;
+    const result = await onAdd(files);
+    if (result?.failed > 0 && result?.success === 0) showToast("Upload failed");
+    else if (result?.failed > 0) showToast(`${result.success} uploaded, ${result.failed} failed`);
+    else if (result?.success > 0) showToast(`${result.success} item${result.success !== 1 ? "s" : ""} added ✓`);
+  };
+
+  const handleDelete = async (idx, e) => {
+    e.stopPropagation();
+    try {
+      await onRemove(idx, e);
+      showToast("Item deleted ✓");
+    } catch {
+      showToast("Delete failed — check connection");
+    }
+  };
+
+  const handleReplace = async (idx, file) => {
+    const result = await replaceGalleryItem(idx, file);
+    if (result.success) showToast("Item replaced ✓");
+    else showToast("Replace failed — " + (result.error ?? "unknown error"));
   };
 
   return (
@@ -190,50 +212,63 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
           </label>
         </div>
         <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
-          {items.map((item, idx) => (
-            <div key={`${item.url}-${idx}`} className="border border-[#1a1706]/10">
-              <div className="flex items-center gap-3 p-2">
-                {item.type === "image" ? (
-                  <img src={item.url} alt="" className="w-14 h-14 object-cover shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 bg-[#1a1706]/10 flex items-center justify-center shrink-0 font-['Georgia,serif'] text-[18px] text-[#1a1706]/35">▶</div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/65 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {item.name || item.type}
-                  </p>
+          {items.map((item, idx) => {
+            const pct = uploadProgress[item.id];
+            const isUploading = item.uploading;
+            return (
+              <div key={`${item.id ?? item.url}-${idx}`} className="border border-[#1a1706]/10">
+                <div className="flex items-center gap-3 p-2">
+                  {item.type === "image" ? (
+                    <img src={item.url} alt="" className="w-14 h-14 object-cover shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 bg-[#1a1706]/10 flex items-center justify-center shrink-0 font-['Georgia,serif'] text-[18px] text-[#1a1706]/35">▶</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/65 overflow-hidden text-ellipsis whitespace-nowrap">
+                      {item.name || item.type}
+                    </p>
+                    {isUploading && (
+                      <div className="mt-1.5 h-[3px] w-full bg-[#1a1706]/10 overflow-hidden">
+                        <div
+                          className="h-full bg-[#1a1706]/60 transition-[width] duration-200"
+                          style={{ width: `${pct ?? 0}%` }}
+                        />
+                      </div>
+                    )}
+                    {isUploading && (
+                      <p className="font-mono text-[8px] tracking-[0.1em] text-[#1a1706]/40 mt-0.5">
+                        {pct != null ? `${pct}%` : "uploading…"}
+                      </p>
+                    )}
+                  </div>
+                  <label
+                    className={`cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/50 border border-[#1a1706]/15 px-2 py-1 shrink-0 ${isUploading ? "opacity-40 pointer-events-none" : ""}`}
+                    title="Replace"
+                  >
+                    ↑
+                    <input
+                      type="file"
+                      accept="image/*,video/mp4,video/quicktime,.mov"
+                      className="hidden"
+                      disabled={isUploading}
+                      onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        await handleReplace(idx, file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  <button
+                    onClick={e => handleDelete(idx, e)}
+                    disabled={isUploading}
+                    className={`font-['Georgia,serif'] text-[13px] font-bold text-red-500/60 bg-transparent border-none cursor-pointer px-1.5 py-1 shrink-0 ${isUploading ? "opacity-40 cursor-not-allowed" : ""}`}
+                    title="Delete"
+                  >✕</button>
                 </div>
-                {/* Replace upload */}
-                <label className="cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/50 border border-[#1a1706]/15 px-2 py-1 shrink-0" title="Replace image">
-                  ↑
-                  <input
-                    type="file"
-                    accept="image/*,video/mp4,video/quicktime,.mov"
-                    className="hidden"
-                    onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const { uploadToCloudinary } = await import("@/lib/cloudinary");
-                      const { addGalleryItem } = await import("@/lib/firestore");
-                      try {
-                        const url = await uploadToCloudinary(file);
-                        const type = file.type.startsWith("video") ? "video" : "image";
-                        await addGalleryItem({ url, type, name: file.name });
-                        onRemove(idx, { stopPropagation: () => {} });
-                        showToast("Item replaced ✓");
-                      } catch (ex) { showToast("Upload failed"); }
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-                <button
-                  onClick={e => onRemove(idx, e)}
-                  className="font-['Georgia,serif'] text-[13px] font-bold text-red-500/60 bg-transparent border-none cursor-pointer px-1.5 py-1 shrink-0"
-                  title="Delete"
-                >✕</button>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {items.length === 0 && (
             <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/30 py-3 text-center">No items yet</p>
           )}
@@ -294,6 +329,16 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
           className="hidden"
           onChange={e => { handleFiles(e.target.files); e.target.value = ""; }}
         />
+      )}
+
+      {/* Upload progress overlay — shown when uploading via Add to archive */}
+      {galleryUploading && (
+        <div className="px-6 md:px-16 py-3 flex items-center gap-3 border-t border-white/[0.06]">
+          <div className="flex-1 h-[2px] bg-white/10 overflow-hidden">
+            <div className="h-full bg-white/40 animate-pulse w-full" />
+          </div>
+          <span className="font-mono text-[7px] tracking-[0.3em] uppercase text-white/35 shrink-0">uploading…</span>
+        </div>
       )}
 
       {items.length === 0 ? (

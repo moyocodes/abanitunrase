@@ -62,10 +62,22 @@ export default function CtaContact({ onBookCall }) {
   const saveBg = async (patch) => { await saveSettings("site", { ...ctaData, ctaBackground, contactBackground, ...patch }); refetch(); };
 
   const contactItems = [
-    { label: "Phone", val: footerData.whatsappNumber || "+234 812 628 6593", href: footerData.whatsappUrl || "https://wa.me/2348126286593", target: "_blank" },
-    { label: "Email", val: footerData.email || "Officialabanitunrase@gmail.com", href: `mailto:${footerData.email || "Officialabanitunrase@gmail.com"}` },
-    { label: "Instagram", val: footerData.instagramHandle || "@Abanitunrase", href: footerData.instagramUrl || "https://instagram.com/Abanitunrase", target: "_blank" },
-    { label: "Location", val: footerData.location || "Lagos, Nigeria", href: null },
+    {
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>,
+      val: footerData.whatsappNumber || "+234 812 628 6593", href: footerData.whatsappUrl || "https://wa.me/2348126286593", target: "_blank",
+    },
+    {
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>,
+      val: footerData.email || "Officialabanitunrase@gmail.com", href: `mailto:${footerData.email || "Officialabanitunrase@gmail.com"}`,
+    },
+    {
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>,
+      val: footerData.instagramHandle || "@Abanitunrase", href: footerData.instagramUrl || "https://instagram.com/Abanitunrase", target: "_blank",
+    },
+    {
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2"/></svg>,
+      val: footerData.location || "Lagos, Nigeria", href: null,
+    },
   ];
 
   return (
@@ -90,7 +102,7 @@ export default function CtaContact({ onBookCall }) {
         <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
       {/* CTA Section — sticky */}
-      <div className="sticky top-0 z-[1] min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
+      <div className="sticky top-0 z-[1] min-h-screen flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#0e0d08] to-transparent z-[2] pointer-events-none" />
         <EditableImage
           src={ctaBackground}
@@ -125,139 +137,122 @@ export default function CtaContact({ onBookCall }) {
       {/* Contact Section */}
       <section
         id="contact"
-        className="relative z-[2] bg-[#0e0d08] px-5 sm:px-8 md:px-16 py-14 sm:py-16 md:py-24 border-b border-white/[0.08]"
+        className="relative z-[2] bg-[#0e0d08] h-screen overflow-hidden flex items-center border-b border-white/[0.08] px-5 sm:px-8 md:px-16"
       >
         <EditableImage
           src={contactBackground}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover saturate-[0.6] opacity-[0.22] select-none"
+          className="absolute inset-0 w-full h-full object-cover saturate-[0.75] opacity-[0.55] select-none"
           overlay
           onUpload={(url) => saveBg({ contactBackground: url })}
         />
-        <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-2 gap-6 md:gap-16">
+        <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-[1fr_2fr] gap-10 md:gap-20 h-[82vh]">
 
           {/* Left: info */}
           <motion.div
+            className="flex flex-col justify-between py-2"
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.div
-              className="font-mono text-[10px] sm:text-[11px] md:text-[12px] tracking-[0.24em] sm:tracking-[0.3em] uppercase text-[#f5f0e6]/90 flex items-center gap-2.5 mb-3 md:mb-4"
-              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
-              viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.15 }}
-            >
-              <span className="block w-5 h-px bg-[#f5f0e6]/30" />
-              Get in Touch
-            </motion.div>
-            <motion.h2
-              className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-[clamp(24px,6vw,80px)] leading-[0.98] mb-4 md:mb-6 whitespace-pre-line"
-              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            >
-              {ctaData.contactHeading}
-            </motion.h2>
-            <motion.p
-              className="font-['Outfit'] text-[#f5f0e6]/95 text-base sm:text-lg leading-relaxed mb-7 md:mb-10 font-light max-w-xl"
-              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-            >
-              {ctaData.contactBody}
-            </motion.p>
+            {/* Top */}
+            <div>
+              <div className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/35 flex items-center gap-2.5 mb-4">
+                <span className="block w-4 h-px bg-[#f5f0e6]/20" />
+                Get in Touch
+              </div>
+              <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-4xl sm:text-5xl lg:text-6xl leading-tight whitespace-pre-line">
+                {ctaData.contactHeading}
+              </h2>
+            </div>
 
-            {/* Contact links — each row slides up with stagger */}
-            <div className="border-t border-white/[0.06]">
-              {contactItems.map(({ label, val, href, target }, ci) => (
+            {/* Middle */}
+            <div className="flex flex-col gap-3 py-4">
+              <div className="w-px h-12 bg-white/10" />
+              <p className="font-['Outfit'] text-[#f5f0e6]/40 text-sm sm:text-base leading-relaxed font-light">
+                {ctaData.contactBody}
+              </p>
+            </div>
+
+            {/* Bottom: contact links */}
+            <div className="flex flex-col border-t border-white/[0.06]">
+              {contactItems.map(({ icon, val, href, target }, ci) => (
                 <motion.a
-                  key={label}
+                  key={ci}
                   href={href ?? undefined}
                   target={target}
                   rel={target ? "noreferrer" : undefined}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-20px" }}
-                  transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: ci * 0.09 }}
-                  className={`flex items-start justify-between py-3.5 md:py-4 border-b border-white/[0.06] transition-all duration-200 no-underline gap-3 ${
-                    href ? "hover:pl-1.5 cursor-pointer" : "cursor-default"
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: ci * 0.07 }}
+                  className={`flex items-center gap-3 py-3 border-b border-white/[0.06] text-[#f5f0e6]/60 no-underline transition-colors duration-200 ${
+                    href ? "hover:text-[#f5f0e6] cursor-pointer" : "cursor-default"
                   }`}
                 >
-                  <div className="min-w-0">
-                    <div className="font-mono text-[9px] md:text-[10px] tracking-[0.22em] uppercase text-[#f5f0e6]/85 mb-1">{label}</div>
-                    <div className="font-['Outfit'] text-[#f5f0e6] text-base md:text-lg leading-snug break-words">{val}</div>
-                  </div>
-                  {href && (
-                    <span className="text-[#f5f0e6]/45 text-sm flex-shrink-0 mt-1">→</span>
-                  )}
+                  {icon}
+                  <span className="font-['Outfit'] text-sm sm:text-base font-light leading-snug">{val}</span>
+                  {href && <span className="ml-auto text-[#f5f0e6]/25 text-sm shrink-0">↗</span>}
                 </motion.a>
               ))}
             </div>
           </motion.div>
 
-          {/* Right: form card — slides from right */}
+          {/* Right: form card */}
           <motion.div
+            className="h-full"
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <div className="bg-white/5 border border-white/10 p-5 sm:p-7 md:p-10">
-              <h3 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-3xl md:text-4xl mb-1 md:mb-2">
+            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 md:p-10 h-full flex flex-col justify-between">
+              <h3 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-3xl sm:text-4xl lg:text-5xl mb-4">
                 Start a Conversation
               </h3>
-              <div className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/55 mb-5 md:mb-8">
-                Fill in the form or book a call
-              </div>
 
-              <form onSubmit={submitForm} className="flex flex-col gap-4 md:gap-5">
+              <form onSubmit={submitForm} className="grid grid-cols-2 gap-x-6 gap-y-4 flex-1">
                 {/* Name */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Full Name
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Full Name</label>
                   <input
                     type="text"
                     placeholder="Your name"
                     value={formState.name}
                     onChange={e => setFormState(s => ({ ...s, name: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg placeholder:text-white/50 outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Phone */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Phone / WhatsApp
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Phone / WhatsApp</label>
                   <input
                     type="tel"
                     placeholder="+234 ..."
                     value={formState.phone}
                     onChange={e => setFormState(s => ({ ...s, phone: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg placeholder:text-white/50 outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Email */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Email
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Email</label>
                   <input
                     type="email"
                     placeholder="your@email.com"
                     value={formState.email}
                     onChange={e => setFormState(s => ({ ...s, email: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg placeholder:text-white/50 outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Service */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Service
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Service</label>
                   <select
                     value={formState.service}
                     onChange={e => setFormState(s => ({ ...s, service: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full cursor-pointer appearance-none"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full cursor-pointer appearance-none"
                   >
                     <option value="" className="bg-[#0e0d08]">Select a category</option>
                     <option className="bg-[#0e0d08]">Bridal Styling</option>
@@ -268,56 +263,47 @@ export default function CtaContact({ onBookCall }) {
                   </select>
                 </div>
                 {/* Date */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Event / Travel Date
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Event / Travel Date</label>
                   <input
                     type="text"
                     placeholder="DD / MM / YYYY"
                     value={formState.date}
                     onChange={e => setFormState(s => ({ ...s, date: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg placeholder:text-white/50 outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Message */}
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <label className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-[#f5f0e6]/85">
-                    Tell us about your event
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Tell us about your event</label>
                   <input
                     type="text"
                     placeholder="A brief note..."
                     value={formState.message}
                     onChange={e => setFormState(s => ({ ...s, message: e.target.value }))}
-                    className="bg-transparent border-b border-white/[0.24] py-3 text-[#f5f0e6] text-base md:text-lg placeholder:text-white/50 outline-none focus:border-white/60 transition-colors duration-200 font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={formSubmitting || formDone}
-                  className={`mt-1 py-4 md:py-4 font-['Outfit'] font-semibold text-sm md:text-base uppercase tracking-widest transition-all duration-200 cursor-pointer border-none ${
-                    formDone
-                      ? "bg-green-800 text-white"
-                      : "bg-[#f5f0e6] text-[#1a1706] hover:bg-white"
-                  }`}
-                >
-                  {formDone ? "Enquiry Sent ✓" : formSubmitting ? "Sending…" : "Send →"}
-                </button>
+                <div className="col-span-2 flex gap-4 items-center pt-2">
+                  <button
+                    type="submit"
+                    disabled={formSubmitting || formDone}
+                    className={`flex-1 py-4 font-['Outfit'] font-semibold text-sm uppercase tracking-widest transition-all duration-200 cursor-pointer border-none ${
+                      formDone ? "bg-green-800 text-white" : "bg-[#f5f0e6] text-[#1a1706] hover:bg-white"
+                    }`}
+                  >
+                    {formDone ? "Enquiry Sent ✓" : formSubmitting ? "Sending…" : "Send →"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onBookCall}
+                    className="flex-1 py-4 font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/65 border border-white/20 hover:text-[#f5f0e6] hover:border-white/40 transition-all duration-200 bg-transparent cursor-pointer"
+                  >
+                    Book a Call →
+                  </button>
+                </div>
               </form>
-
-              <div className="flex items-center gap-3 my-4 md:my-6">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-white/35">or</span>
-                <div className="flex-1 h-px bg-white/10" />
-              </div>
-              <button
-                onClick={onBookCall}
-                className="w-full py-3.5 md:py-3 font-mono text-[10px] md:text-[11px] tracking-[0.18em] uppercase text-[#f5f0e6]/65 border border-white/20 hover:text-[#f5f0e6] hover:border-white/35 transition-all duration-200 bg-transparent cursor-pointer"
-              >
-                Book a Call →
-              </button>
             </div>
           </motion.div>
         </div>

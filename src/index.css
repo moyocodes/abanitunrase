@@ -4,12 +4,11 @@
 @tailwind utilities;
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+html { scroll-behavior: smooth; }
 body { overflow-x: hidden; max-width: 100%; -webkit-font-smoothing: antialiased; }
 
-/* Scroll-snap — only the sections that are safe to snap to */
-#hero, #categories, #rates { scroll-snap-align: start; }
-
+/* 
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; } */
 #grain {
   pointer-events: none; position: fixed; inset: 0; z-index: 8000;
   opacity: 0.022;

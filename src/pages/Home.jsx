@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useData } from "@/providers";
-import {
-  INTRO_STEPS,
-  INTRO_TRIGGER,
-} from "@/data";
+import { INTRO_STEPS, INTRO_TRIGGER } from "@/data";
 import Nav from "@/components/Nav";
 import BookCallModal from "@/components/BookCallModal";
 import BookingLookup from "@/components/BookingLookup";
@@ -30,7 +27,15 @@ import { openStyleQuiz } from "@/components/GlobalStyleQuiz";
 
 export default function Home() {
   const location = useLocation();
-  const { looks: LOOKS, introVideo, galleryItems, galleryUploading, addGallery, removeGallery, clearGallery } = useData();
+  const {
+    looks: LOOKS,
+    introVideo,
+    galleryItems,
+    galleryUploading,
+    addGallery,
+    removeGallery,
+    clearGallery,
+  } = useData();
 
   /* ── Modals ── */
   const [bookCallOpen, setBookCallOpen] = useState(false);
@@ -46,7 +51,6 @@ export default function Home() {
   /* ── Intro ── */
   const [introStep, setIntroStep] = useState(0);
   const [introDismissed, setIntroDismissed] = useState(false);
-
 
   /* ── Gallery ── */
   const [dragOver, setDragOver] = useState(false);
@@ -74,7 +78,7 @@ export default function Home() {
   /* ── Gallery handlers ── */
   const removeCollageItem = (idx, e) => {
     e.stopPropagation();
-    removeGallery(idx);
+    return removeGallery(idx);
   };
   const openCollageItem = (idx) => {
     const item = galleryItems[idx];
@@ -108,7 +112,9 @@ export default function Home() {
   /* ── Body overflow for modals ── */
   useEffect(() => {
     document.body.style.overflow =
-      lbOpen || storyOpen || bookCallOpen || lookupOpen || formType !== null ? "hidden" : "";
+      lbOpen || storyOpen || bookCallOpen || lookupOpen || formType !== null
+        ? "hidden"
+        : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -134,18 +140,18 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handleKey);
   }, [lbOpen, storyOpen, bookCallOpen, lbCustom, LOOKS.length]);
 
-  /* ── Fade-up IntersectionObserver ── */
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) e.target.classList.add("visible");
-        }),
-      { threshold: 0.06 },
-    );
-    document.querySelectorAll(".fade-up").forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+  // /* ── Fade-up IntersectionObserver ── */
+  // useEffect(() => {
+  //   const obs = new IntersectionObserver(
+  //     (entries) =>
+  //       entries.forEach((e) => {
+  //         if (e.isIntersecting) e.target.classList.add("visible");
+  //       }),
+  //     { threshold: 0.06 },
+  //   );
+  //   document.querySelectorAll(".fade-up").forEach((el) => obs.observe(el));
+  //   return () => obs.disconnect();
+  // }, []);
 
   /* ── Intro progress fills ── */
   const iprFills = Array.from({ length: INTRO_STEPS }, (_, i) => {
@@ -231,7 +237,9 @@ export default function Home() {
                   : "opacity-0 translate-y-[18px]"
               }`}
             >
-              <div className={` ${ch.plain ? "tracking-[0.12em] " : "font-heading italic tracking-[-0.025em]"} font-light text-[clamp(28px,8vw,100px)] text-[#f5f0e6] leading-[1.05]`}>
+              <div
+                className={` ${ch.plain ? "tracking-[0.12em] " : "font-heading italic tracking-[-0.025em]"} font-light text-[clamp(28px,8vw,100px)] text-[#f5f0e6] leading-[1.05]`}
+              >
                 {ch.big}
               </div>
               {ch.med && (
@@ -251,19 +259,31 @@ export default function Home() {
         </div>
       </div>
 
-      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} onTrackBooking={() => setLookupOpen(true)} />
+      <Nav
+        hidden={false}
+        onBookCall={() => setBookCallOpen(true)}
+        onTrackBooking={() => setLookupOpen(true)}
+      />
 
       <BookCallModal
         open={bookCallOpen || continuePay !== null}
-        onClose={() => { setBookCallOpen(false); setContinuePay(null); }}
-        onTrackBooking={() => { setBookCallOpen(false); setLookupOpen(true); }}
+        onClose={() => {
+          setBookCallOpen(false);
+          setContinuePay(null);
+        }}
+        onTrackBooking={() => {
+          setBookCallOpen(false);
+          setLookupOpen(true);
+        }}
         prefill={continuePay?.prefill}
         autoPayment={continuePay?.autoPayment}
       />
 
       <div
         id="site"
-        className={introDismissed ? "pointer-events-auto" : "pointer-events-none"}
+        className={
+          introDismissed ? "pointer-events-auto" : "pointer-events-none"
+        }
       >
         <Hero
           onOpenStory={openStory}
@@ -369,13 +389,15 @@ export default function Home() {
               name: booking.data?.fullName ?? "",
               email: booking.data?.email ?? "",
               phone: booking.data?.phone ?? "",
-              service: booking.type === "coupleConsultation" ? "coupleConsultation" : "consultation",
+              service:
+                booking.type === "coupleConsultation"
+                  ? "coupleConsultation"
+                  : "consultation",
             },
             autoPayment: true,
           });
         }}
       />
-
     </>
   );
 }

@@ -117,6 +117,7 @@ export function DataProvider({ children }) {
   const [settings, setSettings] = useState({});
   const [galleryItems, setGalleryItems] = useState([...PLACEHOLDER_MEDIA]);
   const [galleryUploading, setGalleryUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
@@ -148,27 +149,70 @@ export function DataProvider({ children }) {
   useEffect(() => { fetchAll(); }, []);
 
   /* ── Gallery CMS ─────────────────────────────────────── */
+  const setProgress = (tempId, pct) =>
+    setUploadProgress(prev => ({ ...prev, [tempId]: pct }));
+  const clearProgress = (tempId) =>
+    setUploadProgress(prev => { const n = { ...prev }; delete n[tempId]; return n; });
+
   const addGallery = async (files) => {
     const valid = Array.from(files).filter(f => GALLERY_TYPES.includes(f.type));
-    if (!valid.length) return;
+    if (!valid.length) return { success: 0, failed: 0 };
     setGalleryUploading(true);
+    let success = 0, failed = 0;
     for (const file of valid) {
       const blobUrl = URL.createObjectURL(file);
       const tempId = `temp-${Date.now()}-${Math.random()}`;
-      const placeholder = { id: tempId, url: blobUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name, uploading: true };
-      setGalleryItems(prev => [...prev, placeholder]);
+      const type = file.type.startsWith("video") ? "video" : "image";
+      setGalleryItems(prev => [...prev, { id: tempId, url: blobUrl, type, name: file.name, uploading: true }]);
+      setProgress(tempId, 0);
       try {
-        const url = await uploadToCloudinary(file);
-        const item = { url, type: placeholder.type, name: file.name };
-        const savedId = await addGalleryItem(item).catch(() => tempId);
+        const url = await uploadToCloudinary(file, pct => setProgress(tempId, pct));
+        const item = { url, type, name: file.name };
+        const savedId = await addGalleryItem(item);
         URL.revokeObjectURL(blobUrl);
         setGalleryItems(prev => prev.map(i => i.id === tempId ? { ...item, id: savedId } : i));
+        success++;
       } catch {
         URL.revokeObjectURL(blobUrl);
         setGalleryItems(prev => prev.filter(i => i.id !== tempId));
+        failed++;
+      } finally {
+        clearProgress(tempId);
       }
     }
     setGalleryUploading(false);
+    return { success, failed };
+  };
+
+  const replaceGalleryItem = async (idx, file) => {
+    const old = galleryItems[idx];
+    if (!old) return { success: false };
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    const blobUrl = URL.createObjectURL(file);
+    const type = file.type.startsWith("video") ? "video" : "image";
+    setGalleryItems(prev => prev.map((item, i) =>
+      i === idx ? { id: tempId, url: blobUrl, type, name: file.name, uploading: true } : item
+    ));
+    setProgress(tempId, 0);
+    try {
+      const url = await uploadToCloudinary(file, pct => setProgress(tempId, pct));
+      const newItem = { url, type, name: file.name };
+      const savedId = await addGalleryItem(newItem);
+      URL.revokeObjectURL(blobUrl);
+      if (old?.id && !old.id.startsWith("temp-")) {
+        await removeGalleryItem(old.id).catch(() => {});
+      }
+      setGalleryItems(prev => prev.map(item =>
+        item.id === tempId ? { ...newItem, id: savedId } : item
+      ));
+      return { success: true };
+    } catch (err) {
+      URL.revokeObjectURL(blobUrl);
+      setGalleryItems(prev => prev.map(item => item.id === tempId ? old : item));
+      return { success: false, error: err.message };
+    } finally {
+      clearProgress(tempId);
+    }
   };
 
   const addGalleryByUrl = async (url, type = "image") => {
@@ -181,7 +225,7 @@ export function DataProvider({ children }) {
   const removeGallery = async (idx) => {
     const item = galleryItems[idx];
     if (item?.id && !item.id.startsWith("temp-")) {
-      await removeGalleryItem(item.id).catch(() => {});
+      await removeGalleryItem(item.id);
     }
     setGalleryItems(prev => prev.filter((_, i) => i !== idx));
   };
@@ -257,8 +301,10 @@ export function DataProvider({ children }) {
         beforeData,
         galleryItems,
         galleryUploading,
+        uploadProgress,
         addGallery,
         addGalleryByUrl,
+        replaceGalleryItem,
         removeGallery,
         clearGallery,
       }}

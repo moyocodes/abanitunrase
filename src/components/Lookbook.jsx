@@ -184,7 +184,7 @@ export default function Lookbook() {
           <div className="sticky top-0 h-screen overflow-hidden flex">
 
             {/* Left — text panel */}
-            <div className="w-full md:w-[42%] flex flex-col justify-center px-6 md:px-16 py-10 relative bg-[#f0efeb]">
+            <div className="w-[52%] flex flex-col justify-center px-4 md:px-16 py-10 relative bg-[#f0efeb]">
               {/* Dot navigation — in-flow below panel when panel open, absolute at top otherwise */}
               <div className={activePanel === "lookbook" ? "flex gap-2 mb-6" : "absolute top-8 left-6 md:left-16 flex gap-2"}>
                 {items.map((_, i) => (
@@ -204,7 +204,7 @@ export default function Lookbook() {
               </div>
 
               {/* Counter */}
-              <div className="font-['DM_Mono'] text-[8px] tracking-[0.35em] uppercase text-[#1a1706]/50 mb-8">
+              <div className="font-['DM_Mono'] text-[6px] md:text-[8px] tracking-[0.35em] uppercase text-[#1a1706]/50 mb-4 md:mb-8">
                 {String(activeIdx + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
               </div>
 
@@ -218,22 +218,22 @@ export default function Lookbook() {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="flex flex-col"
                   >
-                    <div className="font-['DM_Mono'] text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/60 mb-3 flex items-center gap-2">
-                      <span className="w-4 h-px bg-[#1a1706]/30 inline-block" />
+                    <div className="font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/60 mb-2 md:mb-3 flex items-center gap-2">
+                      <span className="w-3 md:w-4 h-px bg-[#1a1706]/30 inline-block" />
                       {activeLook.cat || CAT_LABELS[activeLook.catIdx ?? 0]}
                     </div>
-                    <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(32px,4vw,60px)] leading-[1.05] tracking-tight font-normal mb-3">
+                    <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(24px,4vw,60px)] leading-[1.05] tracking-tight font-normal mb-2 md:mb-3">
                       {activeLook.title}
                     </h3>
                     {activeLook.sub && (
-                      <div    className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(15px,1.3vw,17px)] leading-[1.88] font-light mb-8 max-w-sm">
+                      <div className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(12px,1.3vw,17px)] leading-[1.7] font-light mb-4 md:mb-8 max-w-sm">
                         {activeLook.sub}
                       </div>
                     )}
-                    <div className="w-8 h-px bg-[#1a1706]/20 mb-6" />
+                    <div className="w-6 md:w-8 h-px bg-[#1a1706]/20 mb-3 md:mb-6" />
                     <button
                       onClick={() => handleViewCategory(activeLook)}
-                      className="self-start font-['DM_Mono'] text-[7.5px] tracking-[0.28em] uppercase text-[#f5f0e6] bg-[#1a1706] hover:bg-black px-6 py-3 border-none cursor-pointer transition-colors duration-200"
+                      className="self-start font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.28em] uppercase text-[#f5f0e6] bg-[#1a1706] hover:bg-black px-4 md:px-6 py-2 md:py-3 border-none cursor-pointer transition-colors duration-200"
                     >
                       View {activeLook.cat || CAT_LABELS[activeLook.catIdx ?? 0]} Stories →
                     </button>
@@ -242,48 +242,27 @@ export default function Lookbook() {
               </AnimatePresence>
             </div>
 
-            {/* Right — image panel (desktop) */}
-            <div className="hidden md:block flex-1 relative overflow-hidden bg-[#1a1706]">
+            {/* Right — image panel */}
+            <div className="flex-1 relative overflow-hidden bg-[#f0efeb]">
               <AnimatePresence mode="wait">
                 {activeLook?.img && (
                   <motion.img
                     key={`img-${activeIdx}`}
                     src={activeLook.img}
                     alt={activeLook.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
                   
                   />
                 )}
               </AnimatePresence>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#f0efeb]/25 via-transparent to-transparent pointer-events-none z-10" />
-              <div className="absolute inset-0 bg-[#1a1706]/10 pointer-events-none z-10" />
               {/* Image caption */}
               {activeLook && (
                 <div className="absolute bottom-8 left-8 z-20">
-                  <div className="font-['Cormorant_Garamond'] italic text-white/65 text-xl mb-1">{activeLook.title}</div>
-                  {activeLook.sub && <div className="font-['DM_Mono'] text-[7px] tracking-[0.26em] uppercase text-white/40">{activeLook.sub}</div>}
+                  <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/50 text-xl mb-1">{activeLook.title}</div>
                 </div>
               )}
             </div>
 
-            {/* Mobile — image at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-[40vw] max-h-64 md:hidden overflow-hidden bg-[#1a1706]">
-              <AnimatePresence mode="wait">
-                {activeLook?.img && (
-                  <motion.img
-                    key={`mob-${activeIdx}`}
-                    src={activeLook.img}
-                    alt={activeLook.title}
-                    className="w-full h-full object-cover"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                )}
-              </AnimatePresence>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#f0efeb]/60 to-transparent pointer-events-none" />
-            </div>
 
           </div>
         </div>
