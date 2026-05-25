@@ -226,7 +226,7 @@ export default function Lookbook() {
                       {activeLook.title}
                     </h3>
                     {activeLook.sub && (
-                      <div className=" text-[15px] tracking-[0.02em]  text-[#1a1706]/60 mb-6">
+                      <div    className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(15px,1.3vw,17px)] leading-[1.88] font-light mb-8 max-w-sm">
                         {activeLook.sub}
                       </div>
                     )}
@@ -251,10 +251,7 @@ export default function Lookbook() {
                     src={activeLook.img}
                     alt={activeLook.title}
                     className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                  
                   />
                 )}
               </AnimatePresence>

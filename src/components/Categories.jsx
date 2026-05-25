@@ -136,8 +136,7 @@ export default function Categories({ onBook }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1706]/45 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-6 left-6 right-6 pointer-events-none select-none">
                   <div className="font-['Cormorant_Garamond'] italic text-[#f5f0e6]/70 text-[20px] leading-none">{cat.title}</div>
-                  <div className="font-['DM_Mono'] text-[7px] tracking-[0.32em] uppercase text-white/30 mt-1.5">{cat.looks} looks · {cat.type}</div>
-                </div>
+                      </div>
               </div>
 
               {/* Text panel */}
