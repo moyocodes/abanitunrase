@@ -135,7 +135,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
               <div className="w-10 h-1 rounded-full bg-[#1a1706]/15" />
             </div>
 
-            <div className="px-5 py-6 md:px-12 md:py-10">
+            <div className="px-4 py-4 md:px-12 md:py-10">
               {/* Close button */}
               <button
                 className="absolute top-4 right-4 w-8 h-8 rounded-full border border-[#1a1706]/15 bg-transparent text-[#1a1706]/40 cursor-pointer text-[14px] transition-all duration-200 flex items-center justify-center hover:bg-[#1a1706]/6 hover:text-[#1a1706]"
@@ -150,7 +150,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
               </div>
 
               {/* Title */}
-              <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,3.4vw,44px)] text-[#1a1706] mb-6 md:mb-9">
+              <div className="font-['Cormorant_Garamond'] italic text-[clamp(22px,3.4vw,44px)] text-[#1a1706] mb-4 md:mb-9">
                 Let&apos;s set up a call.
               </div>
 
@@ -226,7 +226,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                   )}
                 </div>
               ) : (
-                <form className="flex flex-col gap-4 md:gap-[18px]" onSubmit={handleSubmit}>
+                <form className="flex flex-col gap-3 md:gap-[18px]" onSubmit={handleSubmit}>
                   {/* Name + Phone row on tablet+ */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     <div className="flex flex-col gap-1.5">
@@ -285,7 +285,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
 
                   {/* Submit */}
                   <button
-                    className="w-full font-['Outfit'] text-[14px] md:text-[clamp(14px,1.3vw,16px)] tracking-[0.1em] uppercase py-4 bg-[#1a1706] text-[#f5f0e6] border-0 cursor-pointer mt-1 transition-[background] duration-200 font-semibold hover:bg-black disabled:opacity-60"
+                    className="w-full font-['Outfit'] text-[13px] md:text-[clamp(14px,1.3vw,16px)] tracking-[0.1em] uppercase py-3 md:py-4 bg-[#1a1706] text-[#f5f0e6] border-0 cursor-pointer mt-1 transition-[background] duration-200 font-semibold hover:bg-black disabled:opacity-60"
                     type="submit"
                     disabled={submitting || done}
                   >

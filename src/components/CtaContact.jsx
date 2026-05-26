@@ -139,7 +139,7 @@ export default function CtaContact({ onBookCall }) {
       {/* Contact Section */}
       <section
         id="contact"
-        className="relative z-[2] bg-[#0e0d08] min-h-screen md:h-screen overflow-hidden flex items-center border-b border-white/[0.08] px-5 sm:px-8 md:px-16 py-16 md:py-0"
+        className="relative z-[2] bg-[#0e0d08] min-h-screen md:h-screen overflow-hidden flex items-center border-b border-white/[0.08] px-4 sm:px-8 md:px-16 py-10 md:py-0"
       >
         <EditableImage
           src={contactBackground}
@@ -148,11 +148,11 @@ export default function CtaContact({ onBookCall }) {
           overlay
           onUpload={(url) => saveBg({ contactBackground: url })}
         />
-        <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 md:gap-20 md:h-[82vh]">
+        <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 md:gap-20 md:h-[82vh]">
 
           {/* Left: info */}
           <motion.div
-            className="flex flex-col gap-8 md:gap-0 md:justify-between py-2"
+            className="flex flex-col gap-4 md:gap-0 md:justify-between py-2"
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -164,13 +164,13 @@ export default function CtaContact({ onBookCall }) {
                 <span className="block w-4 h-px bg-[#f5f0e6]/20" />
                 Get in Touch
               </div>
-              <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-4xl sm:text-5xl lg:text-6xl leading-tight whitespace-pre-line">
+              <h2 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-2xl sm:text-5xl lg:text-6xl leading-tight whitespace-pre-line">
                 {ctaData.contactHeading}
               </h2>
             </div>
 
             {/* Middle */}
-            <div className="flex flex-col gap-3 py-4">
+            <div className="hidden md:flex flex-col gap-3 py-4">
               <div className="w-px h-12 bg-white/10" />
               <p className="font-['Outfit'] text-[#f5f0e6]/40 text-sm sm:text-base leading-relaxed font-light">
                 {ctaData.contactBody}
@@ -209,12 +209,12 @@ export default function CtaContact({ onBookCall }) {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 md:p-10 md:h-full flex flex-col justify-between">
-              <h3 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-3xl sm:text-4xl lg:text-5xl mb-4">
+            <div className="bg-white/5 border border-white/10 p-4 sm:p-8 md:p-10 md:h-full flex flex-col justify-between">
+              <h3 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-2xl sm:text-4xl lg:text-5xl mb-3">
                 Start a Conversation
               </h3>
 
-              <form onSubmit={submitForm} className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 flex-1">
+              <form onSubmit={submitForm} className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 flex-1">
                 {/* Name */}
                 <div className="flex flex-col gap-1">
                   <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Full Name</label>
@@ -286,10 +286,10 @@ export default function CtaContact({ onBookCall }) {
                   />
                 </div>
                 {formError && (
-                  <p className="col-span-2 font-mono text-[8px] tracking-[0.16em] uppercase text-red-300 border-l-2 border-red-400 pl-3">{formError}</p>
+                  <p className="sm:col-span-2 font-mono text-[8px] tracking-[0.16em] uppercase text-red-300 border-l-2 border-red-400 pl-3">{formError}</p>
                 )}
                 {/* Submit */}
-                <div className="col-span-2 flex gap-4 items-center pt-2">
+                <div className="sm:col-span-2 flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     type="submit"
                     disabled={formSubmitting || formDone}

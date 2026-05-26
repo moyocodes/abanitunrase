@@ -308,16 +308,16 @@ export default function Hero({ onBookCall, onQuiz }) {
         <div className="font-['DM_Mono'] text-[8px] md:text-[8px] tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#f5f0e6]/60 text-center">
           {heroMeta.tagline}
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mt-8 md:mt-10 pointer-events-auto w-full sm:w-auto">
+        <div className="flex flex-row items-center gap-2 sm:gap-4 mt-6 md:mt-10 pointer-events-auto">
           <button
             onClick={onBookCall}
-            className="font-['DM_Mono'] text-[8px] md:text-[9px] tracking-[0.32em] uppercase w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-4 bg-[#f5f0e6] text-[#1a1706] border-none cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-lg"
+            className="font-['DM_Mono'] text-[7px] md:text-[9px] tracking-[0.28em] uppercase px-4 py-2.5 sm:px-7 sm:py-4 bg-[#f5f0e6] text-[#1a1706] border-none cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-lg whitespace-nowrap"
           >
             Book a Consultation
           </button>
           <button
             onClick={onQuiz}
-            className="font-['DM_Mono'] text-[8px] md:text-[9px] tracking-[0.32em] uppercase w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-4 bg-transparent text-[#f5f0e6]/75 border border-[#f5f0e6]/30 cursor-pointer transition-all duration-300 hover:text-[#f5f0e6] hover:border-[#f5f0e6]/65"
+            className="font-['DM_Mono'] text-[7px] md:text-[9px] tracking-[0.28em] uppercase px-4 py-2.5 sm:px-7 sm:py-4 bg-transparent text-[#f5f0e6]/75 border border-[#f5f0e6]/30 cursor-pointer transition-all duration-300 hover:text-[#f5f0e6] hover:border-[#f5f0e6]/65 whitespace-nowrap"
           >
             Find My Style
           </button>
