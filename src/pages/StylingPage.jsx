@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useData } from "@/providers";
 import { fmt } from "@/data";
 import Footer from "@/components/Footer";
@@ -39,7 +40,7 @@ const CAT_IDX = { bridal: 0, occasion: 1, travel: 2 };
 export default function StylingPage() {
   const { type } = useParams();
   const navigate = useNavigate();
-  const { categories, bridal, occasion, travel, looks } = useData();
+  const { categories, bridal, occasion, travel, looks, ratesData } = useData();
   const [formOpen, setFormOpen] = useState(false);
 
   if (!VALID_TYPES.includes(type)) return <Navigate to="/" replace />;
@@ -176,6 +177,25 @@ export default function StylingPage() {
             ))}
           </div>
         </section>
+      )}
+
+      {/* Travel Notes Section — Only shows on travel page */}
+      {type === "travel" && ratesData?.travelNotes && (
+        <motion.div
+          className="bg-[#faf9f6] border-b border-black/[0.07]"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="px-6 md:px-16 py-8 md:py-12 max-w-4xl mx-auto">
+            <div className="whitespace-pre-wrap font-['Outfit'] text-[14px] md:text-[15px] text-[#1a1706]/80 leading-relaxed space-y-6">
+              {ratesData.travelNotes.split("\n\n").map((paragraph, idx) => (
+                <div key={idx}>{paragraph}</div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {/* Selected looks from this category */}
