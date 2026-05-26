@@ -66,12 +66,12 @@ export default function StylingPage() {
   return (
     <div className="min-h-screen bg-[#f8f7f3]">
       {/* Slim top nav */}
-      <nav className="sticky top-0 z-50 h-14 bg-[#f8f7f3]/95 backdrop-blur-sm border-b border-[#1a1706]/[0.07] flex items-center justify-between px-8">
+      <nav className="sticky top-0 z-50 h-14 bg-[#f8f7f3]/95 backdrop-blur-sm border-b border-[#1a1706]/[0.07] flex items-center justify-between px-4 md:px-20">
         <Link
           to="/"
-          className="font-mono text-[7.5px] tracking-[0.4em] uppercase text-[#1a1706]/40 hover:text-[#1a1706] transition-colors"
+          className="font-mono text-[7.5px] uppercase text-[#1a1706]/40 hover:text-[#1a1706] transition-colors"
         >
-          ← ABÁNITÚNRASE
+          <img src="/logobg.png" alt="logo" className="h-80 w-32 md:w-48 object-contain" />
         </Link>
         <div className="flex items-center gap-6">
           {VALID_TYPES.map((t) => (

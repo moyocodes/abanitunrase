@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "@/providers";
 import { useAuth } from "@/providers";
@@ -10,10 +10,12 @@ import Nav from "@/components/Nav";
 import BookCallModal from "@/components/BookCallModal";
 import Footer from "@/components/Footer";
 
+const VALID_TYPES = ["bridal", "occasion", "travel"];
+
 const CAT_TABS = [
-  { label: "Bridal",  idx: 0 },
-  { label: "Occasion",idx: 1 },
-  { label: "Travel",  idx: 2 },
+  { label: "Bridal", idx: 0 },
+  { label: "Occasion", idx: 1 },
+  { label: "Travel", idx: 2 },
 ];
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 
@@ -25,7 +27,13 @@ async function uploadFile(file) {
 /* ── Full look editor form ─────────────────────────────────────────────────── */
 function LookEditor({ initial, onSave, onDelete, onCancel }) {
   const [draft, setDraft] = useState({
-    title: "", sub: "", catIdx: 0, img: "/id.jpg", thumbs: [], video: "", story: "",
+    title: "",
+    sub: "",
+    catIdx: 0,
+    img: "/id.jpg",
+    thumbs: [],
+    video: "",
+    story: "",
     ...initial,
     thumbs: Array.isArray(initial?.thumbs) ? [...initial.thumbs] : [],
   });
@@ -36,14 +44,20 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
   const [videoProgress, setVideoProgress] = useState(0);
   const [uploadErr, setUploadErr] = useState("");
 
-  const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
+  const set = (k, v) => setDraft((d) => ({ ...d, [k]: v }));
 
   const handleImgUpload = async (e) => {
-    const file = e.target.files?.[0]; if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setImgUploading(true);
-    try { set("img", await uploadFile(file)); }
-    catch { fireToast("Image upload failed"); }
-    finally { setImgUploading(false); e.target.value = ""; }
+    try {
+      set("img", await uploadFile(file));
+    } catch {
+      fireToast("Image upload failed");
+    } finally {
+      setImgUploading(false);
+      e.target.value = "";
+    }
   };
 
   const handleThumbUpload = async (e) => {
@@ -53,39 +67,61 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
     try {
       const urls = await Promise.all(files.map(uploadFile));
       set("thumbs", [...draft.thumbs, ...urls]);
-    } catch { setUploadErr("Thumbnail upload failed"); }
-    finally { setThumbUploading(false); e.target.value = ""; }
+    } catch {
+      setUploadErr("Thumbnail upload failed");
+    } finally {
+      setThumbUploading(false);
+      e.target.value = "";
+    }
   };
 
   const removeThumb = (idx) =>
-    set("thumbs", draft.thumbs.filter((_, i) => i !== idx));
+    set(
+      "thumbs",
+      draft.thumbs.filter((_, i) => i !== idx),
+    );
 
   const handleVideoUpload = async (e) => {
-    const file = e.target.files?.[0]; if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setVideoUploading(true);
     setVideoProgress(0);
     try {
       const { uploadToCloudinary } = await import("@/lib/cloudinary");
-      const url = await uploadToCloudinary(file, (pct) => setVideoProgress(pct));
+      const url = await uploadToCloudinary(file, (pct) =>
+        setVideoProgress(pct),
+      );
       set("video", url);
-    } catch { setUploadErr("Video upload failed"); }
-    finally { setVideoUploading(false); setVideoProgress(0); e.target.value = ""; }
+    } catch {
+      setUploadErr("Video upload failed");
+    } finally {
+      setVideoUploading(false);
+      setVideoProgress(0);
+      e.target.value = "";
+    }
   };
 
   const handleSave = async () => {
     if (!draft.title.trim()) return;
     setSaving(true);
-    try { await onSave({ ...draft, cat: CAT_LABELS[draft.catIdx ?? 0] }); }
-    finally { setSaving(false); }
+    try {
+      await onSave({ ...draft, cat: CAT_LABELS[draft.catIdx ?? 0] });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const fieldCls = "w-full font-['Outfit'] text-[14px] text-[#1a1706] bg-transparent border-b border-[#1a1706]/12 py-2 outline-none focus:border-[#1a1706]/50 placeholder:text-[#1a1706]/25 transition-colors";
-  const lblCls = "block font-mono text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/35 mb-1.5";
+  const fieldCls =
+    "w-full font-['Outfit'] text-[14px] text-[#1a1706] bg-transparent border-b border-[#1a1706]/12 py-2 outline-none focus:border-[#1a1706]/50 placeholder:text-[#1a1706]/25 transition-colors";
+  const lblCls =
+    "block font-mono text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/35 mb-1.5";
 
   return (
     <div className="flex flex-col gap-5">
       {uploadErr && (
-        <p className="font-mono text-[9px] tracking-[0.16em] uppercase text-red-600/80 border-l-2 border-red-400 pl-3 -mb-2">{uploadErr}</p>
+        <p className="font-mono text-[9px] tracking-[0.16em] uppercase text-red-600/80 border-l-2 border-red-400 pl-3 -mb-2">
+          {uploadErr}
+        </p>
       )}
       {/* Header */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-[#1a1706]/8">
@@ -109,7 +145,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
             disabled={saving || !draft.title.trim()}
             className="font-['Outfit'] text-[13px] font-semibold tracking-[0.04em] uppercase px-5 py-2 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40 hover:bg-black transition-colors"
           >
-            {saving ? "Saving…" : (initial?.id ? "Save Changes" : "Add Look")}
+            {saving ? "Saving…" : initial?.id ? "Save Changes" : "Add Look"}
           </button>
         </div>
       </div>
@@ -119,9 +155,11 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         <label className={lblCls}>Title *</label>
         <input
           value={draft.title}
-          onChange={e => set("title", e.target.value)}
+          onChange={(e) => set("title", e.target.value)}
           placeholder="Look title…"
-          className={fieldCls + " text-[18px] font-['Cormorant_Garamond'] italic"}
+          className={
+            fieldCls + " text-[18px] font-['Cormorant_Garamond'] italic"
+          }
         />
       </div>
 
@@ -130,7 +168,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         <label className={lblCls}>Subtitle</label>
         <input
           value={draft.sub}
-          onChange={e => set("sub", e.target.value)}
+          onChange={(e) => set("sub", e.target.value)}
           placeholder="e.g. Aso-oke · Lagos Owambe"
           className={fieldCls}
         />
@@ -141,10 +179,14 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         <label className={lblCls}>Category</label>
         <select
           value={draft.catIdx}
-          onChange={e => set("catIdx", Number(e.target.value))}
+          onChange={(e) => set("catIdx", Number(e.target.value))}
           className={fieldCls + " cursor-pointer"}
         >
-          {CAT_LABELS.map((c, i) => <option key={i} value={i}>{c}</option>)}
+          {CAT_LABELS.map((c, i) => (
+            <option key={i} value={i}>
+              {c}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -153,11 +195,21 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         <label className={lblCls}>Cover Image</label>
         {draft.img ? (
           <div className="flex items-start gap-3">
-            <img src={draft.img} alt="" className="w-20 h-24 object-cover border border-[#1a1706]/10 shrink-0" />
+            <img
+              src={draft.img}
+              alt=""
+              className="w-20 h-24 object-cover border border-[#1a1706]/10 shrink-0"
+            />
             <div className="flex flex-col gap-2 pt-1">
               <label className="cursor-pointer font-['Outfit'] text-[12px] font-medium text-[#1a1706]/50 border border-[#1a1706]/15 px-3 py-1.5 hover:border-[#1a1706]/35 hover:text-[#1a1706]/75 transition-colors">
                 {imgUploading ? "Uploading…" : "Replace"}
-                <input type="file" accept="image/*" className="hidden" disabled={imgUploading} onChange={handleImgUpload} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={imgUploading}
+                  onChange={handleImgUpload}
+                />
               </label>
               <button
                 onClick={() => set("img", "")}
@@ -174,7 +226,13 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
                 {imgUploading ? "Uploading…" : "+ Upload Cover Image"}
               </div>
             </div>
-            <input type="file" accept="image/*" className="hidden" disabled={imgUploading} onChange={handleImgUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={imgUploading}
+              onChange={handleImgUpload}
+            />
           </label>
         )}
       </div>
@@ -185,24 +243,39 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
           <label className={lblCls}>Thumbnails ({draft.thumbs.length})</label>
           <label className="cursor-pointer font-['Outfit'] text-[11px] font-medium text-[#1a1706]/45 border border-[#1a1706]/12 px-2.5 py-1 hover:border-[#1a1706]/30 hover:text-[#1a1706]/70 transition-colors">
             {thumbUploading ? "Uploading…" : "+ Add"}
-            <input type="file" accept="image/*" multiple className="hidden" disabled={thumbUploading} onChange={handleThumbUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={thumbUploading}
+              onChange={handleThumbUpload}
+            />
           </label>
         </div>
         {draft.thumbs.length > 0 && (
           <div className="flex gap-2 flex-wrap">
             {draft.thumbs.map((src, i) => (
               <div key={i} className="relative group">
-                <img src={src} alt="" className="w-[52px] h-[66px] object-cover border border-[#1a1706]/10" />
+                <img
+                  src={src}
+                  alt=""
+                  className="w-[52px] h-[66px] object-cover border border-[#1a1706]/10"
+                />
                 <button
                   onClick={() => removeThumb(i)}
                   className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/65 text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
-                >✕</button>
+                >
+                  ✕
+                </button>
               </div>
             ))}
           </div>
         )}
         {draft.thumbs.length === 0 && (
-          <p className="font-mono text-[8px] tracking-[0.15em] text-[#1a1706]/25 italic">No thumbnails — add above</p>
+          <p className="font-mono text-[8px] tracking-[0.15em] text-[#1a1706]/25 italic">
+            No thumbnails — add above
+          </p>
         )}
       </div>
 
@@ -212,45 +285,74 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         {draft.video ? (
           <div className="flex items-center gap-3 border border-[#1a1706]/10 px-3 py-2.5">
             <div className="flex-1 min-w-0">
-              <div className="font-mono text-[7.5px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-0.5">Current video</div>
-              <div className="font-['Outfit'] text-[12px] text-[#1a1706]/65 truncate">{draft.video}</div>
+              <div className="font-mono text-[7.5px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-0.5">
+                Current video
+              </div>
+              <div className="font-['Outfit'] text-[12px] text-[#1a1706]/65 truncate">
+                {draft.video}
+              </div>
             </div>
             <div className="flex gap-2 shrink-0">
               <label className="cursor-pointer font-['Outfit'] text-[11px] font-medium text-[#1a1706]/45 border border-[#1a1706]/12 px-2.5 py-1 hover:border-[#1a1706]/30 hover:text-[#1a1706]/70 transition-colors whitespace-nowrap">
                 {videoUploading ? `${videoProgress}%` : "Replace"}
-                <input type="file" accept="video/*" className="hidden" disabled={videoUploading} onChange={handleVideoUpload} />
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  disabled={videoUploading}
+                  onChange={handleVideoUpload}
+                />
               </label>
               <button
                 onClick={() => set("video", "")}
                 className="font-['Outfit'] text-[11px] text-red-500/60 hover:text-red-600 bg-transparent border-none cursor-pointer transition-colors"
-              >Remove</button>
+              >
+                Remove
+              </button>
             </div>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
             <label className="cursor-pointer block">
-              <div className={`border border-dashed border-[#1a1706]/15 px-4 py-4 text-center hover:border-[#1a1706]/30 transition-colors ${videoUploading ? "pointer-events-none" : ""}`}>
+              <div
+                className={`border border-dashed border-[#1a1706]/15 px-4 py-4 text-center hover:border-[#1a1706]/30 transition-colors ${videoUploading ? "pointer-events-none" : ""}`}
+              >
                 {videoUploading ? (
                   <div className="flex flex-col items-center gap-2">
-                    <div className="font-['Outfit'] text-[12px] font-medium text-[#1a1706]/50">Uploading… {videoProgress}%</div>
+                    <div className="font-['Outfit'] text-[12px] font-medium text-[#1a1706]/50">
+                      Uploading… {videoProgress}%
+                    </div>
                     <div className="w-full max-w-[200px] h-[2px] bg-[#1a1706]/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#1a1706]/50 transition-all duration-150" style={{ width: `${videoProgress}%` }} />
+                      <div
+                        className="h-full bg-[#1a1706]/50 transition-all duration-150"
+                        style={{ width: `${videoProgress}%` }}
+                      />
                     </div>
                   </div>
                 ) : (
-                  <div className="font-['Outfit'] text-[12px] font-medium text-[#1a1706]/40">+ Upload Video</div>
+                  <div className="font-['Outfit'] text-[12px] font-medium text-[#1a1706]/40">
+                    + Upload Video
+                  </div>
                 )}
               </div>
-              <input type="file" accept="video/*" className="hidden" disabled={videoUploading} onChange={handleVideoUpload} />
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                disabled={videoUploading}
+                onChange={handleVideoUpload}
+              />
             </label>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-px bg-[#1a1706]/8" />
-              <span className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/30">or paste url</span>
+              <span className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/30">
+                or paste url
+              </span>
               <div className="flex-1 h-px bg-[#1a1706]/8" />
             </div>
             <input
               value={draft.video}
-              onChange={e => set("video", e.target.value)}
+              onChange={(e) => set("video", e.target.value)}
               placeholder="https://youtube.com/watch?v=…"
               className={fieldCls}
             />
@@ -263,7 +365,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
         <label className={lblCls}>Story</label>
         <textarea
           value={draft.story}
-          onChange={e => set("story", e.target.value)}
+          onChange={(e) => set("story", e.target.value)}
           rows={8}
           placeholder="Write the story for this look…"
           className="w-full font-['Outfit'] text-[14px] text-[#1a1706]/80 leading-[1.85] bg-[#fafaf8] border border-[#1a1706]/8 p-3 outline-none focus:border-[#1a1706]/25 resize-y placeholder:text-[#1a1706]/25 transition-colors"
@@ -277,7 +379,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
           disabled={saving || !draft.title.trim()}
           className="font-['Outfit'] text-[13px] font-semibold tracking-[0.04em] uppercase px-6 py-2.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40 hover:bg-black transition-colors"
         >
-          {saving ? "Saving…" : (initial?.id ? "Save Changes" : "Add Look")}
+          {saving ? "Saving…" : initial?.id ? "Save Changes" : "Add Look"}
         </button>
         <button
           onClick={onCancel}
@@ -296,15 +398,27 @@ function ConfirmModal({ message, onConfirm, onCancel }) {
     <div className="fixed inset-0 z-[999999] bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-xs border border-[#e8e5dc] shadow-2xl">
         <div className="px-5 py-4 border-b border-[#e8e5dc]">
-          <div className="font-['Outfit'] text-[14px] text-[#1a1706] font-medium">{message}</div>
+          <div className="font-['Outfit'] text-[14px] text-[#1a1706] font-medium">
+            {message}
+          </div>
         </div>
         <div className="px-5 py-3 flex gap-2 justify-end">
-          <button onClick={onCancel} className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 border border-[#1a1706]/20 text-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer">Cancel</button>
-          <button onClick={onConfirm} className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors border-none cursor-pointer">Delete</button>
+          <button
+            onClick={onCancel}
+            className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 border border-[#1a1706]/20 text-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors border-none cursor-pointer"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -318,9 +432,10 @@ export default function StoriesPage() {
   const [bookCallOpen, setBookCallOpen] = useState(false);
 
   /* ── Active category & current look ── */
-  const initCatIdx = category === "occasion" ? 1 : category === "travel" ? 2 : 0;
-  const [activeCatIdx, setActiveCatIdx] = useState(initCatIdx);
-  const [curLook, setCurLook] = useState(null);
+  const [activeCatIdx, setActiveCatIdx] = useState(
+    category === "occasion" ? 1 : category === "travel" ? 2 : 0,
+  );
+  const [curLook, setCurLook] = useState(null); // ← this line is missing
 
   /* ── Media ── */
   const [currentThumb, setCurrentThumb] = useState("");
@@ -338,18 +453,29 @@ export default function StoriesPage() {
 
   /* ── Toast ── */
   const [toast, setToast] = useState("");
-  const fireToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
+  const fireToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  };
 
   /* ── Confirm delete ── */
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   /* ── Share toast ── */
   const [shareToast, setShareToast] = useState(false);
-
+  /* Sync activeCatIdx when URL param changes (e.g. nav link click) */
+  useEffect(() => {
+    const idx = category === "occasion" ? 1 : category === "travel" ? 2 : 0;
+    if (idx !== activeCatIdx) {
+      setActiveCatIdx(idx);
+      stopVoice();
+      setEditingLook(null);
+    }
+  }, [category]);
   /* When looks load or category changes, pick first look in category */
   useEffect(() => {
     if (!looks?.length) return;
-    const catLooks = looks.filter(l => (l.catIdx ?? 0) === activeCatIdx);
+    const catLooks = looks.filter((l) => (l.catIdx ?? 0) === activeCatIdx);
     if (catLooks.length) {
       const first = looks.indexOf(catLooks[0]);
       setCurLook(first);
@@ -363,7 +489,12 @@ export default function StoriesPage() {
 
   /* Sync URL */
   useEffect(() => {
-    const slug = activeCatIdx === 1 ? "occasion" : activeCatIdx === 2 ? "travel" : "bridal";
+    const slug =
+      activeCatIdx === 1
+        ? "occasion"
+        : activeCatIdx === 2
+          ? "travel"
+          : "bridal";
     navigate(`/stories/${slug}`, { replace: true });
   }, [activeCatIdx]);
 
@@ -378,54 +509,90 @@ export default function StoriesPage() {
   /* ── Voice helpers ── */
   const stopVoice = () => {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-    if (voiceTimerRef.current) { clearInterval(voiceTimerRef.current); voiceTimerRef.current = null; }
+    if (voiceTimerRef.current) {
+      clearInterval(voiceTimerRef.current);
+      voiceTimerRef.current = null;
+    }
     if (voiceProgRef.current) voiceProgRef.current.style.width = "0%";
-    setVoicePlaying(false); setVoicePaused(false); setVoiceLabel("Read aloud");
+    setVoicePlaying(false);
+    setVoicePaused(false);
+    setVoiceLabel("Read aloud");
   };
 
   const toggleVoice = () => {
-    if (!("speechSynthesis" in window)) { setVoiceLabel("Not supported"); return; }
+    if (!("speechSynthesis" in window)) {
+      setVoiceLabel("Not supported");
+      return;
+    }
     if (voicePlaying) {
       window.speechSynthesis.pause();
-      setVoicePlaying(false); setVoicePaused(true); setVoiceLabel("Paused"); return;
+      setVoicePlaying(false);
+      setVoicePaused(true);
+      setVoiceLabel("Paused");
+      return;
     }
     if (voicePaused && window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
-      setVoicePlaying(true); setVoicePaused(false); setVoiceLabel("Reading…"); return;
+      setVoicePlaying(true);
+      setVoicePaused(false);
+      setVoiceLabel("Reading…");
+      return;
     }
     window.speechSynthesis.cancel();
-    if (voiceTimerRef.current) { clearInterval(voiceTimerRef.current); voiceTimerRef.current = null; }
+    if (voiceTimerRef.current) {
+      clearInterval(voiceTimerRef.current);
+      voiceTimerRef.current = null;
+    }
     if (voiceProgRef.current) voiceProgRef.current.style.width = "0%";
     const text = look?.story;
     if (!text) return;
     const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 0.88; utt.pitch = 1.0; utt.lang = "en-GB";
+    utt.rate = 0.88;
+    utt.pitch = 1.0;
+    utt.lang = "en-GB";
     const voices = window.speechSynthesis.getVoices();
     const pref =
-      voices.find(v => v.name.includes("Google UK English Female")) ||
-      voices.find(v => v.name.includes("Serena") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Samantha") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Karen") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Moira") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Victoria") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.toLowerCase().includes("female") && v.lang.startsWith("en")) ||
-      voices.find(v => v.lang === "en-GB") ||
-      voices.find(v => v.lang.startsWith("en")) || null;
+      voices.find((v) => v.name.includes("Google UK English Female")) ||
+      voices.find(
+        (v) => v.name.includes("Serena") && v.lang.startsWith("en"),
+      ) ||
+      voices.find(
+        (v) => v.name.includes("Samantha") && v.lang.startsWith("en"),
+      ) ||
+      voices.find((v) => v.name.includes("Karen") && v.lang.startsWith("en")) ||
+      voices.find((v) => v.name.includes("Moira") && v.lang.startsWith("en")) ||
+      voices.find(
+        (v) => v.name.includes("Victoria") && v.lang.startsWith("en"),
+      ) ||
+      voices.find(
+        (v) =>
+          v.name.toLowerCase().includes("female") && v.lang.startsWith("en"),
+      ) ||
+      voices.find((v) => v.lang === "en-GB") ||
+      voices.find((v) => v.lang.startsWith("en")) ||
+      null;
     if (pref) utt.voice = pref;
     const estDuration = (text.length / 14) * 1000;
     let startTime = Date.now();
     utt.onstart = () => {
-      startTime = Date.now(); setVoicePlaying(true); setVoicePaused(false); setVoiceLabel("Reading…");
+      startTime = Date.now();
+      setVoicePlaying(true);
+      setVoicePaused(false);
+      setVoiceLabel("Reading…");
       voiceTimerRef.current = setInterval(() => {
         if (voiceProgRef.current)
-          voiceProgRef.current.style.width = Math.min(100, ((Date.now() - startTime) / estDuration) * 100) + "%";
+          voiceProgRef.current.style.width =
+            Math.min(100, ((Date.now() - startTime) / estDuration) * 100) + "%";
       }, 80);
     };
     utt.onend = utt.onerror = () => {
       if (voiceProgRef.current) voiceProgRef.current.style.width = "100%";
-      clearInterval(voiceTimerRef.current); voiceTimerRef.current = null;
+      clearInterval(voiceTimerRef.current);
+      voiceTimerRef.current = null;
       setTimeout(() => {
-        setVoicePlaying(false); setVoicePaused(false); setVoiceLabel("Read aloud");
+        setVoicePlaying(false);
+        setVoicePaused(false);
+        setVoiceLabel("Read aloud");
         if (voiceProgRef.current) voiceProgRef.current.style.width = "0%";
       }, 600);
     };
@@ -433,7 +600,10 @@ export default function StoriesPage() {
   };
 
   /* ── Media helpers ── */
-  const spotlightThumb = (src) => { setCurrentThumb(src); setMediaType("photo"); };
+  const spotlightThumb = (src) => {
+    setCurrentThumb(src);
+    setMediaType("photo");
+  };
   const showMedia = (type) => {
     if (type === "video" && !look?.video) return;
     setMediaType(type);
@@ -441,20 +611,31 @@ export default function StoriesPage() {
   };
 
   /* ── Category / look switch ── */
-  const switchCat = (idx) => { setActiveCatIdx(idx); stopVoice(); setEditingLook(null); };
+  const switchCat = (idx) => {
+    setActiveCatIdx(idx);
+    stopVoice();
+    setEditingLook(null);
+  };
   const switchLook = (idx) => {
-    stopVoice(); setEditingLook(null); setCurLook(idx);
-    setCurrentThumb(looks[idx]?.img ?? ""); setMediaType("photo");
+    stopVoice();
+    setEditingLook(null);
+    setCurLook(idx);
+    setCurrentThumb(looks[idx]?.img ?? "");
+    setMediaType("photo");
   };
 
   /* ── Share ── */
   const shareStory = () => {
     if (!look) return;
     if (navigator.share) {
-      navigator.share({ title: look.title + " — Abánítúnrase", url: window.location.href });
+      navigator.share({
+        title: look.title + " — Abánítúnrase",
+        url: window.location.href,
+      });
     } else {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        setShareToast(true); setTimeout(() => setShareToast(false), 2500);
+        setShareToast(true);
+        setTimeout(() => setShareToast(false), 2500);
       });
     }
   };
@@ -486,16 +667,23 @@ export default function StoriesPage() {
   /* ── Keyboard ── */
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === " " && !e.target.matches("textarea, input, select")) { e.preventDefault(); toggleVoice(); }
+      if (e.key === " " && !e.target.matches("textarea, input, select")) {
+        e.preventDefault();
+        toggleVoice();
+      }
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [voicePlaying, voicePaused, curLook]);
 
   /* ── Derived ── */
-  const look = curLook !== null ? looks?.[curLook] ?? null : null;
-  const catLooks = (looks ?? []).filter(l => (l.catIdx ?? 0) === activeCatIdx);
+  const look = curLook !== null ? (looks?.[curLook] ?? null) : null;
+  const catLooks = (looks ?? []).filter(
+    (l) => (l.catIdx ?? 0) === activeCatIdx,
+  );
   const isEditing = editingLook !== null;
+
+  if (!VALID_TYPES.includes(category)) return <Navigate to="/" replace />;
 
   return (
     <div className="min-h-screen bg-[#f4f3f0] flex flex-col">
@@ -511,46 +699,91 @@ export default function StoriesPage() {
         {(shareToast || toast) && (
           <motion.div
             className="fixed top-4 left-4 font-['Outfit'] text-[13px] font-medium px-6 py-3 bg-[#1a1706] text-[#f5f0e6] z-[900] pointer-events-none whitespace-nowrap"
-            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.3 }}
           >
             {toast || "Link copied to clipboard"}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} />
-      <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
+      <nav className="sticky top-0 z-50 h-14 bg-[#f8f7f3]/95 backdrop-blur-sm border-b border-[#1a1706]/[0.07] flex items-center justify-between px-4 md:px-20">
+        <Link
+          to="/"
+          className="font-mono text-[7.5px] uppercase text-[#1a1706]/40 hover:text-[#1a1706] transition-colors"
+        >
+          <img
+            src="/logobg.png"
+            alt="logo"
+            className="h-80 w-32 md:w-48 object-contain"
+          />
+        </Link>
+        <div className="flex items-center gap-6">
+          {VALID_TYPES.map((t) => (
+            <Link
+              key={t}
+              to={`/stories/${t}`}
+              className={`font-mono text-[8px] tracking-[0.22em] uppercase transition-colors ${
+                t === category
+                  ? "text-[#1a1706]"
+                  : "text-[#1a1706]/35 hover:text-[#1a1706]/65"
+              }`}
+            >
+              {t}
+            </Link>
+          ))}
+        </div>
+      </nav>
+      <BookCallModal
+        open={bookCallOpen}
+        onClose={() => setBookCallOpen(false)}
+      />
 
-      <div className="flex flex-col md:flex-row flex-1 pt-[64px] md:pt-[72px] h-[100dvh] md:h-screen overflow-hidden">
-
+      <div className="flex flex-col md:flex-row flex-1  h-[100dvh] md:h-screen overflow-hidden">
         {/* ── Left: Media panel (desktop) ── */}
         <div className="hidden md:flex w-[52%] flex-shrink-0 relative overflow-hidden bg-[#0a0a0a]">
           {(look?.thumbs?.length > 1 || look?.video) && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-[5] flex flex-col gap-1.5">
-              {look?.thumbs?.length > 1 && look.thumbs.map((src, ti) => (
-                <div
-                  key={ti}
-                  onClick={() => spotlightThumb(src)}
-                  className={`w-[42px] h-[54px] overflow-hidden cursor-pointer border-[1.5px] transition-all duration-200 ${
-                    mediaType === "photo" && currentThumb === src
-                      ? "border-white opacity-100"
-                      : "border-white/30 opacity-55 hover:opacity-90 hover:border-white/65"
-                  }`}
-                >
-                  <img src={src} alt="" loading="lazy" className="w-full h-full object-cover block saturate-[0.7]" />
-                </div>
-              ))}
+              {look?.thumbs?.length > 1 &&
+                look.thumbs.map((src, ti) => (
+                  <div
+                    key={ti}
+                    onClick={() => spotlightThumb(src)}
+                    className={`w-[42px] h-[54px] overflow-hidden cursor-pointer border-[1.5px] transition-all duration-200 ${
+                      mediaType === "photo" && currentThumb === src
+                        ? "border-white opacity-100"
+                        : "border-white/30 opacity-55 hover:opacity-90 hover:border-white/65"
+                    }`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-full object-cover block saturate-[0.7]"
+                    />
+                  </div>
+                ))}
               {look?.video && (
                 <div
                   onClick={() => showMedia("video")}
                   className={`w-[42px] h-[54px] overflow-hidden cursor-pointer border-[1.5px] transition-all duration-200 relative ${
-                    mediaType === "video" ? "border-white opacity-100" : "border-white/30 opacity-55 hover:opacity-90 hover:border-white/65"
+                    mediaType === "video"
+                      ? "border-white opacity-100"
+                      : "border-white/30 opacity-55 hover:opacity-90 hover:border-white/65"
                   }`}
                 >
-                  <img src={look.img} alt="" loading="lazy" className="w-full h-full object-cover block saturate-[0.5] brightness-[0.55]" />
+                  <img
+                    src={look.img}
+                    alt=""
+                    loading="lazy"
+                    className="w-full h-full object-cover block saturate-[0.5] brightness-[0.55]"
+                  />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center text-[#1a1706] text-[8px] pl-0.5">▶</div>
+                    <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center text-[#1a1706] text-[8px] pl-0.5">
+                      ▶
+                    </div>
                   </div>
                 </div>
               )}
@@ -562,15 +795,23 @@ export default function StoriesPage() {
               <button
                 onClick={() => showMedia("photo")}
                 className={`font-['DM_Mono'] text-[7.5px] tracking-[0.2em] uppercase px-[11px] py-[5px] cursor-pointer border-none transition-all duration-200 ${
-                  mediaType === "photo" ? "bg-white/20 text-white backdrop-blur-md" : "bg-black/35 text-white/50 border border-white/15 backdrop-blur-sm"
+                  mediaType === "photo"
+                    ? "bg-white/20 text-white backdrop-blur-md"
+                    : "bg-black/35 text-white/50 border border-white/15 backdrop-blur-sm"
                 }`}
-              >Photo</button>
+              >
+                Photo
+              </button>
               <button
                 onClick={() => showMedia("video")}
                 className={`font-['DM_Mono'] text-[7.5px] tracking-[0.2em] uppercase px-[11px] py-[5px] cursor-pointer border-none transition-all duration-200 flex items-center gap-1.5 ${
-                  mediaType === "video" ? "bg-white text-[#1a1706]" : "bg-[#f5f0e6]/15 text-white border border-white/30 backdrop-blur-sm hover:bg-white/20"
+                  mediaType === "video"
+                    ? "bg-white text-[#1a1706]"
+                    : "bg-[#f5f0e6]/15 text-white border border-white/30 backdrop-blur-sm hover:bg-white/20"
                 }`}
-              >▶ Video</button>
+              >
+                ▶ Video
+              </button>
             </div>
           )}
 
@@ -580,25 +821,35 @@ export default function StoriesPage() {
               src={currentThumb}
               alt={look?.title ?? ""}
               className={`absolute inset-0 w-full  object-contain saturate-[0.9] ${mediaType === "photo" ? "block" : "hidden"}`}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             />
           </AnimatePresence>
 
-          <div className={`absolute inset-0 ${mediaType === "video" ? "block" : "hidden"}`}>
+          <div
+            className={`absolute inset-0 ${mediaType === "video" ? "block" : "hidden"}`}
+          >
             {look?.video && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(look.video) ? (
               <video
                 className="w-full h-full object-contain bg-black"
                 src={look.video}
                 controls
-              //  autoPlay 
+                //  autoPlay
                 playsInline
               />
             ) : (
               <iframe
                 className="w-full h-full border-none"
-                src={mediaType === "video" && look?.video ? ytEmbedUrl(look.video) : ""}
-                allowFullScreen allow="autoplay" title="story video"
+                src={
+                  mediaType === "video" && look?.video
+                    ? ytEmbedUrl(look.video)
+                    : ""
+                }
+                allowFullScreen
+                allow="autoplay"
+                title="story video"
               />
             )}
           </div>
@@ -608,35 +859,168 @@ export default function StoriesPage() {
 
           {look && (
             <div className="absolute bottom-6 left-[68px] z-[5]">
-              <div className="font-['Cormorant_Garamond'] italic text-[16px] text-white/70 mb-[3px]">{look.title}</div>
-              <div className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-white/40">{look.sub}</div>
+              <div className="font-['Cormorant_Garamond'] italic text-[16px] text-white/70 mb-[3px]">
+                {look.title}
+              </div>
+              <div className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-white/40">
+                {look.sub}
+              </div>
             </div>
           )}
         </div>
 
         {/* ── Mobile image strip ── */}
-        {look?.img && !isEditing && (
-          <div className="block md:hidden flex-shrink-0 h-[44vw] max-h-[260px] bg-[#0a0a0a] relative overflow-hidden">
-            <img src={look.img} alt={look.title ?? ""} className="w-full h-full object-cover saturate-[0.85]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent pointer-events-none" />
-            <div className="absolute bottom-3 left-4">
-              <div className="font-['Cormorant_Garamond'] italic text-white/80 text-base">{look.title}</div>
-              <div className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-white/45 mt-0.5">{look.sub}</div>
+        {/* ── Mobile media panel ── */}
+        {look && !isEditing && (
+          <div className="block md:hidden flex-shrink-0 bg-[#0a0a0a]">
+            {/* Main media area */}
+            <div
+              className="relative w-full"
+              style={{ height: "min(72vw, 340px)" }}
+            >
+              {/* Photo */}
+              <AnimatePresence mode="wait">
+                {mediaType === "photo" && (
+                  <motion.img
+                    key={currentThumb}
+                    src={currentThumb || look.img}
+                    alt={look.title ?? ""}
+                    className="absolute inset-0 w-full h-full object-contain saturate-[0.85]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Video */}
+              {mediaType === "video" && look.video && (
+                <div className="absolute inset-0 w-full h-full bg-black">
+                  {/\.(mp4|webm|ogg|mov)(\?|$)/i.test(look.video) ? (
+                    <video
+                      className="w-full h-full object-contain"
+                      src={look.video}
+                      controls
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full border-none"
+                      src={ytEmbedUrl(look.video)}
+                      allowFullScreen
+                      allow="autoplay"
+                      title="story video"
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Photo / Video toggle — top right */}
+              {look.video && (
+                <div className="absolute top-3 right-3 z-10 flex gap-1">
+                  <button
+                    onClick={() => showMedia("photo")}
+                    className={`font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase px-2.5 py-1.5 cursor-pointer border-none transition-all duration-200 ${
+                      mediaType === "photo"
+                        ? "bg-white/25 text-white backdrop-blur-md"
+                        : "bg-black/40 text-white/50 border border-white/15 backdrop-blur-sm"
+                    }`}
+                  >
+                    Photo
+                  </button>
+                  <button
+                    onClick={() => showMedia("video")}
+                    className={`font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase px-2.5 py-1.5 cursor-pointer border-none transition-all duration-200 flex items-center gap-1 ${
+                      mediaType === "video"
+                        ? "bg-white text-[#1a1706]"
+                        : "bg-black/40 text-white/70 border border-white/25 backdrop-blur-sm"
+                    }`}
+                  >
+                    ▶ Video
+                  </button>
+                </div>
+              )}
+
+              {/* Title overlay — bottom left */}
+              <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none bg-gradient-to-t from-black/65 to-transparent" />
+              <div className="absolute bottom-3 left-4 z-10">
+                <div className="font-['Cormorant_Garamond'] italic text-white/85 text-[17px] leading-tight">
+                  {look.title}
+                </div>
+                <div className="font-['DM_Mono'] text-[6.5px] tracking-[0.28em] uppercase text-white/45 mt-0.5">
+                  {look.sub}
+                </div>
+              </div>
             </div>
+
+            {/* Thumbnail filmstrip */}
+            {look.thumbs?.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto px-3 py-2.5 bg-[#0d0d0d] scrollbar-none">
+                {look.thumbs.map((src, ti) => (
+                  <div
+                    key={ti}
+                    onClick={() => spotlightThumb(src)}
+                    className={`flex-shrink-0 w-[46px] h-[58px] overflow-hidden cursor-pointer border-[1.5px] transition-all duration-200 ${
+                      mediaType === "photo" && currentThumb === src
+                        ? "border-white opacity-100"
+                        : "border-white/20 opacity-50 active:opacity-90"
+                    }`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-full object-cover saturate-[0.65]"
+                    />
+                  </div>
+                ))}
+                {/* Video thumbnail in strip */}
+                {look.video && (
+                  <div
+                    onClick={() => showMedia("video")}
+                    className={`flex-shrink-0 w-[46px] h-[58px] overflow-hidden cursor-pointer border-[1.5px] transition-all duration-200 relative ${
+                      mediaType === "video"
+                        ? "border-white opacity-100"
+                        : "border-white/20 opacity-50 active:opacity-90"
+                    }`}
+                  >
+                    <img
+                      src={look.img}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-full object-cover saturate-[0.4] brightness-50"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center text-[#1a1706] text-[7px] pl-[2px]">
+                        ▶
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {/* ── Right: Story / Edit panel ── */}
         <div className="flex-1 overflow-y-auto bg-white flex flex-col pt-8 pb-10 px-5 md:pt-12 md:pb-10 md:pr-14 md:pl-10 scrollbar-thin">
-
           {/* Back link — desktop */}
           {!isEditing && (
             <div className="hidden md:flex items-center mb-6">
-              <Link to="/" className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/80 transition-colors flex items-center gap-2">
+              <Link
+                to="/"
+                className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/80 transition-colors flex items-center gap-2"
+              >
                 ← Home
               </Link>
-              <span className="mx-2 text-[#1a1706]/20 font-['DM_Mono'] text-[7px]">/</span>
-              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40">Stories</span>
+              <span className="mx-2 text-[#1a1706]/20 font-['DM_Mono'] text-[7px]">
+                /
+              </span>
+              <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40">
+                Stories
+              </span>
             </div>
           )}
 
@@ -652,7 +1036,7 @@ export default function StoriesPage() {
             <>
               {/* Category tabs */}
               <div className="flex gap-1.5 mb-7 flex-wrap">
-                {CAT_TABS.map(c => (
+                {CAT_TABS.map((c) => (
                   <button
                     key={c.idx}
                     onClick={() => switchCat(c.idx)}
@@ -684,17 +1068,24 @@ export default function StoriesPage() {
                     Looks in this category
                   </div>
                   <div className="flex flex-col gap-[3px]">
-                    {catLooks.map(l => {
+                    {catLooks.map((l) => {
                       const li = (looks ?? []).indexOf(l);
                       return (
                         <div
                           key={l.id ?? li}
                           onClick={() => switchLook(li)}
                           className={`flex items-center gap-3 px-3.5 py-2.5 cursor-pointer border transition-all duration-200 ${
-                            curLook === li ? "bg-[#1a1706]/5 border-[#1a1706]/20" : "border-[#1a1706]/6 hover:bg-[#1a1706]/3 hover:border-[#1a1706]/14"
+                            curLook === li
+                              ? "bg-[#1a1706]/5 border-[#1a1706]/20"
+                              : "border-[#1a1706]/6 hover:bg-[#1a1706]/3 hover:border-[#1a1706]/14"
                           }`}
                         >
-                          <img src={l.thumbs?.[0] ?? l.img} alt={l.title} loading="lazy" className="w-8 h-10 object-cover flex-shrink-0 saturate-[0.7]" />
+                          <img
+                            src={l.thumbs?.[0] ?? l.img}
+                            alt={l.title}
+                            loading="lazy"
+                            className="w-8 h-10 object-cover flex-shrink-0 saturate-[0.7]"
+                          />
                           <div className="flex-1 min-w-0">
                             <div className="font-['Cormorant_Garamond'] italic text-[clamp(14px,1.2vw,16px)] text-[#1a1706]/70 truncate">
                               {l.title}
@@ -705,7 +1096,15 @@ export default function StoriesPage() {
                           </div>
                           {user && (
                             <button
-                              onClick={e => { e.stopPropagation(); setEditingLook({ ...l, thumbs: Array.isArray(l.thumbs) ? l.thumbs : [] }); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingLook({
+                                  ...l,
+                                  thumbs: Array.isArray(l.thumbs)
+                                    ? l.thumbs
+                                    : [],
+                                });
+                              }}
                               className="font-mono text-[8px] text-[#1a1706]/30 hover:text-[#1a1706]/65 bg-transparent border border-[#1a1706]/10 hover:border-[#1a1706]/30 px-2 py-1 cursor-pointer transition-colors shrink-0"
                               title="Edit look"
                             >
@@ -724,7 +1123,8 @@ export default function StoriesPage() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={curLook}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   >
@@ -732,7 +1132,9 @@ export default function StoriesPage() {
                       {look.title}
                     </div>
                     <div className="font-['DM_Mono'] text-[7.5px] tracking-[0.26em] uppercase text-[#1a1706]/50 mb-6">
-                      {look.sub}{look.sub && look.cat ? " · " : ""}{look.cat}
+                      {look.sub}
+                      {look.sub && look.cat ? " · " : ""}
+                      {look.cat}
                     </div>
 
                     {/* Voice bar */}
@@ -743,18 +1145,43 @@ export default function StoriesPage() {
                           className="w-8 h-8 rounded-full border border-[#1a1706]/18 bg-[#1a1706]/4 text-[#1a1706] flex items-center justify-center cursor-pointer transition-all duration-200 flex-shrink-0 hover:bg-[#1a1706]/10"
                         >
                           {voicePlaying ? (
-                            <svg width="10" height="11" viewBox="0 0 10 11" fill="currentColor">
-                              <rect x="0" y="0" width="3.5" height="11" rx="0.8" />
-                              <rect x="6.5" y="0" width="3.5" height="11" rx="0.8" />
+                            <svg
+                              width="10"
+                              height="11"
+                              viewBox="0 0 10 11"
+                              fill="currentColor"
+                            >
+                              <rect
+                                x="0"
+                                y="0"
+                                width="3.5"
+                                height="11"
+                                rx="0.8"
+                              />
+                              <rect
+                                x="6.5"
+                                y="0"
+                                width="3.5"
+                                height="11"
+                                rx="0.8"
+                              />
                             </svg>
                           ) : (
-                            <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
+                            <svg
+                              width="10"
+                              height="12"
+                              viewBox="0 0 10 12"
+                              fill="currentColor"
+                            >
                               <polygon points="0,0 10,6 0,12" />
                             </svg>
                           )}
                         </button>
                         <div className="flex-1 h-[2px] bg-[#1a1706]/8 rounded-[1px]">
-                          <div ref={voiceProgRef} className="h-full w-0 bg-[#1a1706]/50 rounded-[1px] [transition:width_0.1s_linear]" />
+                          <div
+                            ref={voiceProgRef}
+                            className="h-full w-0 bg-[#1a1706]/50 rounded-[1px] [transition:width_0.1s_linear]"
+                          />
                         </div>
                         <div className="font-['DM_Mono'] text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/32 whitespace-nowrap">
                           {voiceLabel}
@@ -766,7 +1193,15 @@ export default function StoriesPage() {
                     {look.story ? (
                       <div className="font-['Outfit'] text-[clamp(15px,1.4vw,18px)] text-[#1a1706]/80 leading-[1.9] mb-7 font-light">
                         {look.story.split("\n\n").map((para, pi) => (
-                          <span key={pi}>{pi > 0 && <><br /><br /></>}{para}</span>
+                          <span key={pi}>
+                            {pi > 0 && (
+                              <>
+                                <br />
+                                <br />
+                              </>
+                            )}
+                            {para}
+                          </span>
                         ))}
                       </div>
                     ) : (
@@ -793,7 +1228,14 @@ export default function StoriesPage() {
                       </button>
                       {user && (
                         <button
-                          onClick={() => setEditingLook({ ...look, thumbs: Array.isArray(look.thumbs) ? look.thumbs : [] })}
+                          onClick={() =>
+                            setEditingLook({
+                              ...look,
+                              thumbs: Array.isArray(look.thumbs)
+                                ? look.thumbs
+                                : [],
+                            })
+                          }
                           className="font-['Outfit'] text-[12px] font-medium tracking-[0.04em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] bg-transparent border border-[#1a1706]/15 hover:border-[#1a1706]/40 px-4 py-2.5 cursor-pointer transition-colors"
                         >
                           Edit Look
@@ -805,7 +1247,9 @@ export default function StoriesPage() {
               ) : (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/40 text-2xl mb-3">No stories yet.</div>
+                    <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/40 text-2xl mb-3">
+                      No stories yet.
+                    </div>
                     {user && (
                       <p className="font-mono text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/30 mt-2">
                         Use "+ Add New Look" above to get started.
@@ -817,7 +1261,10 @@ export default function StoriesPage() {
 
               {/* Back link — mobile */}
               <div className="md:hidden mt-10 pt-6 border-t border-[#1a1706]/8">
-                <Link to="/" className="font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] transition-colors">
+                <Link
+                  to="/"
+                  className="font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] transition-colors"
+                >
                   ← Back to Home
                 </Link>
               </div>
