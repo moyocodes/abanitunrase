@@ -14,7 +14,7 @@ import { sendBookingEmails } from "@/lib/email";
 const STATUS_OPTIONS = ["new", "held", "confirmed", "completed"];
 
 const STATUS_META = {
-  new:       { label: "Initiated",  badge: "bg-sky-50 text-sky-700 border-sky-200",        bar: "bg-sky-400" },
+  new:       { label: "Submitted",  badge: "bg-sky-50 text-sky-700 border-sky-200",        bar: "bg-sky-400" },
   held:      { label: "Held",       badge: "bg-amber-50 text-amber-700 border-amber-200",   bar: "bg-amber-400" },
   confirmed: { label: "Confirmed",  badge: "bg-emerald-50 text-emerald-700 border-emerald-200", bar: "bg-emerald-400" },
   completed: { label: "Completed",  badge: "bg-[#1a1706]/5 text-[#1a1706]/60 border-[#1a1706]/15", bar: "bg-[#1a1706]/30" },
@@ -29,7 +29,7 @@ const TYPE_META = {
 };
 
 const EMAIL_KIND = {
-  new:       "initiated",
+  new:       "form_submitted",
   held:      "hold",
   confirmed: undefined,   // falls through to payment template logic
   completed: "completed",

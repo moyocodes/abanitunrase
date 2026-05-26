@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getBookingsByEmail } from "@/lib/firestore";
 
 const STATUS_CONFIG = {
-  new:       { label: "Initiated",  cls: "bg-sky-50 text-sky-700 border-sky-200" },
+  new:       { label: "Submitted",  cls: "bg-sky-50 text-sky-700 border-sky-200" },
   held:      { label: "On Hold",    cls: "bg-amber-50 text-amber-700 border-amber-200" },
   confirmed: { label: "Confirmed ✓",cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   completed: { label: "Complete",   cls: "bg-[#1a1706]/5 text-[#1a1706]/70 border-[#1a1706]/15" },
