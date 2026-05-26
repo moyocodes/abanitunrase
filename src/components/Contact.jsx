@@ -1,13 +1,46 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Logo from "./ui/Logo";
 import Reveal from "./ui/Reveal";
 
-
-
-
 export default function Contact() {
-  const [toast, setToast] = useState(false);
+  const [toast, setToast] = useState(null); // null | "success" | "error"
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    firstName: "", lastName: "", email: "", phone: "", service: "", message: "",
+  });
+
+  function set(field) {
+    return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  }
+
+  async function handleSubmit() {
+    if (!form.email) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "enquiry",
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          phone: form.phone,
+          serviceName: form.service,
+          message: form.message,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setToast("success");
+      setForm({ firstName: "", lastName: "", email: "", phone: "", service: "", message: "" });
+    } catch {
+      setToast("error");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setToast(null), 4000);
+    }
+  }
+
   return (
     <section
       id="contact"
@@ -170,8 +203,8 @@ export default function Contact() {
               marginBottom: 14,
             }}
           >
-            {["First Name", "Last Name"].map((lbl) => (
-              <div key={lbl}>
+            {[["First Name", "firstName"], ["Last Name", "lastName"]].map(([lbl, field]) => (
+              <div key={field}>
                 <label
                   style={{
                     display: "block",
@@ -188,6 +221,8 @@ export default function Contact() {
                 <input
                   type="text"
                   placeholder={`Your ${lbl.toLowerCase()}`}
+                  value={form[field]}
+                  onChange={set(field)}
                   style={{
                     width: "100%",
                     padding: "12px 13px",
@@ -204,10 +239,10 @@ export default function Contact() {
             ))}
           </div>
           {[
-            ["Email Address", "email", "your@email.com"],
-            ["Phone", "tel", "+234 ..."],
-          ].map(([lbl, type, ph]) => (
-            <div key={lbl} style={{ marginBottom: 14 }}>
+            ["Email Address", "email", "email", "your@email.com"],
+            ["Phone", "phone", "tel", "+234 ..."],
+          ].map(([lbl, field, type, ph]) => (
+            <div key={field} style={{ marginBottom: 14 }}>
               <label
                 style={{
                   display: "block",
@@ -224,6 +259,8 @@ export default function Contact() {
               <input
                 type={type}
                 placeholder={ph}
+                value={form[field]}
+                onChange={set(field)}
                 style={{
                   width: "100%",
                   padding: "12px 13px",
@@ -253,6 +290,8 @@ export default function Contact() {
               Service
             </label>
             <select
+              value={form.service}
+              onChange={set("service")}
               style={{
                 width: "100%",
                 padding: "12px 13px",
@@ -294,6 +333,8 @@ export default function Contact() {
             <textarea
               rows={4}
               placeholder="Tell me about your vision, event date, or what you're looking for..."
+              value={form.message}
+              onChange={set("message")}
               style={{
                 width: "100%",
                 padding: "12px 13px",
@@ -309,10 +350,8 @@ export default function Contact() {
             />
           </div>
           <button
-            onClick={() => {
-              setToast(true);
-              setTimeout(() => setToast(false), 4000);
-            }}
+            onClick={handleSubmit}
+            disabled={loading}
             style={{
               width: "100%",
               padding: 15,
@@ -324,12 +363,13 @@ export default function Contact() {
               background: "#0a0a0a",
               color: "#fff",
               border: "none",
-              cursor: "pointer",
+              cursor: loading ? "default" : "pointer",
+              opacity: loading ? 0.6 : 1,
             }}
-            onMouseOver={(e) => (e.currentTarget.style.background = "#222")}
+            onMouseOver={(e) => { if (!loading) e.currentTarget.style.background = "#222"; }}
             onMouseOut={(e) => (e.currentTarget.style.background = "#0a0a0a")}
           >
-            Send Enquiry
+            {loading ? "Sending…" : "Send Enquiry"}
           </button>
           <p
             style={{
@@ -354,12 +394,14 @@ export default function Contact() {
             padding: "14px 22px",
             fontSize: 11,
             color: "#fff",
-            borderLeft: "2px solid rgba(255,255,255,0.2)",
+            borderLeft: `2px solid ${toast === "error" ? "#c0392b" : "rgba(255,255,255,0.2)"}`,
             zIndex: 200,
             animation: "fadeUp 0.4s ease",
           }}
         >
-          Enquiry sent — expect a response within 24 hours.
+          {toast === "error"
+            ? "Something went wrong — please try again."
+            : "Enquiry sent — expect a response within 24 hours."}
         </div>
       )}
     </section>

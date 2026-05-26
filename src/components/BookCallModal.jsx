@@ -41,6 +41,13 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
       return;
     }
     setSubmitting(true);
+    sendBookingEmails({
+      kind: "form_submitted",
+      email: email.trim(),
+      name: name.trim(),
+      phone: phone.trim(),
+      serviceName: selectedService.label,
+    }).catch(console.error);
     setTimeout(() => {
       setSubmitting(false);
       setShowPayment(true);
