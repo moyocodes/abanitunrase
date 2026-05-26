@@ -48,7 +48,7 @@ export default function Footer() {
   const waUrl = footerData.whatsappUrl || "https://wa.me/2348126286593";
   const waNumber = footerData.whatsappNumber || "+234 812 628 6593";
   const emailAddr = footerData.email || "Officialabanitunrase@gmail.com";
-  const brandSub = footerData.brandSub || "Lagos Styling House";
+  const brandSub = footerData.brandSub ||"You were meant to stand out, let me help you!";
   const copyrightYear = footerData.copyrightYear || "2026";
   const estYear = footerData.estYear || "2026";
 
@@ -125,7 +125,7 @@ export default function Footer() {
             <div className="text-[#f5f0e6]/80 text-3xl mb-1 tracking-[0.1em]">
               ABÁNITÚNRASE
             </div>
-            <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/45 mt-2">
+            <div className="font-mono text-[7.5px] tracking-[0.1em] italic text-[#f5f0e6]/45 mt-2">
               {brandSub}
             </div>
           </motion.div>
