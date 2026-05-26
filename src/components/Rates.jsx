@@ -133,7 +133,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     if (hoveredCard || editMode) return;
     intervalRef.current = setInterval(() => {
       setSpotlightIdx(i => (i + 1) % cards.length);
-    }, 15000);
+    }, 10000);
     return () => clearInterval(intervalRef.current);
   }, [hoveredCard, editMode, activeTab, cards.length]);
 
@@ -144,7 +144,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         const idx = TAB_KEYS.indexOf(prev);
         return TAB_KEYS[(idx + 1) % TAB_KEYS.length];
       });
-    }, 12000);
+    }, 4000);
     return () => clearInterval(tabIntervalRef.current);
   }, [hoveredCard, editMode]);
 
@@ -289,7 +289,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                   ? `Bridal · ${r.tier}`
                   : activeTab === "occasion"
                   ? `Occasion · ${r.tier}`
-                  : "Travel"}
+                  : `Travel · ${r.looks} Looks`}
               </div>
 
               <h3
@@ -328,7 +328,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                   />
                 </div>
                 <div className={`font-mono text-[6.5px] md:text-[7.5px] tracking-[0.2em] md:tracking-[0.22em] uppercase mt-0.5 md:mt-1 ${r.featured ? "text-[#f5f0e6]/35" : "text-[#1a1706]/35"}`}>
-                  NGN{activeTab === "occasion" ? " · Per Look" : ""}
+                  NGN{activeTab === "occasion" ? " · Per Look" : activeTab === "travel" ? " · Per Wardrobe" : ""}
                 </div>
               </div>
 
@@ -401,7 +401,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
             {ratesData.singlePackages?.length > 0 && (
               <div className="px-6 md:px-14 py-10 md:py-14">
-                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Single Packages</div>
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Individual Styling</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.singlePackages.map((pkg, i) => (
                     <div key={i} className="flex items-center justify-between py-3.5 gap-4">
@@ -423,7 +423,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
             {ratesData.otherPackages?.length > 0 && (
               <div className="px-6 md:px-14 py-10 md:py-14">
-                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Other Packages</div>
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Bridal Party</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.otherPackages.map((pkg, i) => (
                     <div key={i} className="flex items-center justify-between py-3.5 gap-4">

@@ -139,7 +139,7 @@ export default function CtaContact({ onBookCall }) {
       {/* Contact Section */}
       <section
         id="contact"
-        className="relative z-[2] bg-[#0e0d08] h-screen overflow-hidden flex items-center border-b border-white/[0.08] px-5 sm:px-8 md:px-16"
+        className="relative z-[2] bg-[#0e0d08] min-h-screen md:h-screen overflow-hidden flex items-center border-b border-white/[0.08] px-5 sm:px-8 md:px-16 py-16 md:py-0"
       >
         <EditableImage
           src={contactBackground}
@@ -148,11 +148,11 @@ export default function CtaContact({ onBookCall }) {
           overlay
           onUpload={(url) => saveBg({ contactBackground: url })}
         />
-        <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-[1fr_2fr] gap-10 md:gap-20 h-[82vh]">
+        <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 md:gap-20 md:h-[82vh]">
 
           {/* Left: info */}
           <motion.div
-            className="flex flex-col justify-between py-2"
+            className="flex flex-col gap-8 md:gap-0 md:justify-between py-2"
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -203,18 +203,18 @@ export default function CtaContact({ onBookCall }) {
 
           {/* Right: form card */}
           <motion.div
-            className="h-full"
+            className="md:h-full"
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 md:p-10 h-full flex flex-col justify-between">
+            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 md:p-10 md:h-full flex flex-col justify-between">
               <h3 className="font-['Cormorant_Garamond'] italic text-[#f5f0e6] text-3xl sm:text-4xl lg:text-5xl mb-4">
                 Start a Conversation
               </h3>
 
-              <form onSubmit={submitForm} className="grid grid-cols-2 gap-x-6 gap-y-4 flex-1">
+              <form onSubmit={submitForm} className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 flex-1">
                 {/* Name */}
                 <div className="flex flex-col gap-1">
                   <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Full Name</label>
