@@ -25,7 +25,7 @@ const DEFAULT_ATELIER = {
   sigName: "Fiponmileoluwa",
   sigRole: "Creative Director",
   estYear: "2024",
-  bgVideo: "/savessss.mp4",
+  // bgVideo: "/savessss.mp4",
   specializations: ["Bridal Styling", "Occasion Styling", "Travel — Kájáyelo"],
   sectionLabel: "A Note from the Styling House",
 };
@@ -41,7 +41,7 @@ const DEFAULT_RATES = {
 };
 
 const DEFAULT_HERO_META = {
-  tagline: "Lagos Styling House",
+  // tagline: "Lagos Styling House",
   subTagline: "Bridal · Occasion · Travel",
 };
 
@@ -88,7 +88,7 @@ const DEFAULT_CTA = {
   btn: "Get Started →",
   contactHeading: "Let's dress\nyou with\nintention.",
   contactBody: "Reach out to start a conversation about your day, your event, your trip — and what it should feel like to walk in.",
-  introVideo: "/savessss.mp4",
+  // introVideo: "/savessss.mp4",
 };
 
 const DEFAULT_GALLERY = {
@@ -99,7 +99,7 @@ const DEFAULT_GALLERY = {
 
 const DEFAULT_FOOTER = {
   tagline: "Dressed with\nintention.",
-  brandSub: "Lagos Styling House",
+  // brandSub: "Lagos Styling House",
   location: "Lagos, Nigeria",
   locationSub: "Available for travel worldwide",
   instagramUrl: "https://instagram.com/Abanitunrase",

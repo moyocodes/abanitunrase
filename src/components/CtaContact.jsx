@@ -268,11 +268,10 @@ export default function CtaContact({ onBookCall }) {
                 <div className="flex flex-col gap-1">
                   <label className="font-mono text-xs tracking-widest uppercase text-[#f5f0e6]/70">Event / Travel Date</label>
                   <input
-                    type="text"
-                    placeholder="DD / MM / YYYY"
+                    type="date"
                     value={formState.date}
                     onChange={e => setFormState(s => ({ ...s, date: e.target.value }))}
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
                   />
                 </div>
                 {/* Message */}

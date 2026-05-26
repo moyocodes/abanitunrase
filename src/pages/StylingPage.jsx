@@ -241,9 +241,7 @@ export default function StylingPage() {
         <span className="font-mono text-[7px] tracking-[0.4em] uppercase text-[#1a1706]/25">
           ABÁNITÚNRASE
         </span>
-        <span className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/20">
-          Lagos Styling House
-        </span>
+       
       </footer>
     </div>
   );

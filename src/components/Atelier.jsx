@@ -121,7 +121,7 @@ export default function Atelier() {
       </SectionPanel>
       {/* Faint bg video */}
       <video
-        src={atelier.bgVideo ?? "/savessss.mp4"}
+        src={atelier.bgVideo}
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover opacity-[0.14] pointer-events-none select-none saturate-[0.15]"
       />

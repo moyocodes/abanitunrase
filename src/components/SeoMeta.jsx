@@ -6,46 +6,46 @@ const SITE_URL = "https://abanitunrase.com";
 const DEFAULT_IMAGE = `${SITE_URL}/logo.jpg`;
 
 const DEFAULT_DESCRIPTION =
-  "ABÁNÍTÚNRASE is a Lagos styling house for bridal styling, occasion looks, and Kájáyelo travel wardrobe curation. Dressed with intention.";
+  "ABÁNÍTÚNRASE is a styling house for bridal styling, occasion looks, and Kájáyelo travel wardrobe curation. Dressed with intention.";
 
 const STYLING_META = {
   bridal: {
-    title: "Bridal Styling Lagos | ABÁNÍTÚNRASE",
+    title: "Bridal Styling | ABÁNÍTÚNRASE",
     description:
-      "Expert bridal styling for traditional ceremonies, court weddings, white weddings, and full wedding wardrobes in Lagos and beyond. Book your bridal consultation.",
-    keywords: "bridal styling Lagos, aso-oke styling, Nigerian wedding stylist, traditional wedding styling, Iyawo styling",
+      "Expert bridal styling for traditional ceremonies, court weddings, white weddings, and full wedding wardrobes in and beyond. Book your bridal consultation.",
+    keywords: "bridal styling, aso-oke styling, Nigerian wedding stylist, traditional wedding styling, Iyawo styling",
   },
   occasion: {
-    title: "Occasion Styling Lagos | ABÁNÍTÚNRASE",
+    title: "Occasion Styling | ABÁNÍTÚNRASE",
     description:
-      "Occasion styling for owambe, birthdays, corporate events, portraits, and standout Lagos entrances. Look your best every time.",
-    keywords: "occasion stylist Lagos, owambe styling, event styling Nigeria, birthday outfit styling Lagos",
+      "Occasion styling for owambe, birthdays, corporate events, portraits, and standout entrances. Look your best every time.",
+    keywords: "occasion stylist, owambe styling, event styling Nigeria, birthday outfit styling",
   },
   travel: {
     title: "Kájáyelo Travel Styling | ABÁNÍTÚNRASE",
     description:
       "Travel wardrobe curation for destination trips and holidays. Kájáyelo — because you should look exactly right wherever you land.",
-    keywords: "travel wardrobe curation, destination styling, Kajayelo, travel stylist Lagos, vacation wardrobe Nigeria",
+    keywords: "travel wardrobe curation, destination styling, Kajayelo, travel stylist, vacation wardrobe Nigeria",
   },
 };
 
 const PAGE_META = {
   "/": {
-    title: "ABÁNÍTÚNRASE | Lagos Styling House — Bridal, Occasion & Travel",
+    title: "ABÁNÍTÚNRASE |  Styling House — Bridal, Occasion & Travel",
     description: DEFAULT_DESCRIPTION,
-    keywords: "Lagos styling house, bridal stylist Nigeria, occasion stylist Lagos, travel wardrobe, ABÁNÍTÚNRASE, Fiponmileoluwa",
+    keywords: "Styling house, bridal stylist Nigeria, occasion stylist, travel wardrobe, ABÁNÍTÚNRASE, Fiponmileoluwa",
   },
   "/rates": {
-    title: "Rates & Styling Packages | ABÁNÍTÚNRASE Lagos",
+    title: "Rates & Styling Packages | ABÁNÍTÚNRASE ",
     description:
       "Explore ABÁNÍTÚNRASE bridal styling, occasion styling, Kájáyelo travel wardrobe, and consultation packages. Transparent pricing.",
-    keywords: "stylist rates Lagos, bridal styling price Nigeria, occasion stylist cost, consultation fee stylist",
+    keywords: "stylist rates, bridal styling price Nigeria, occasion stylist cost, consultation fee stylist",
   },
   "/stories": {
     title: "Styling Stories | ABÁNÍTÚNRASE",
     description:
       "Explore ABÁNÍTÚNRASE styling stories across bridal, occasion, and travel wardrobes. Looks built with intention.",
-    keywords: "styling lookbook Lagos, bridal looks Nigeria, occasion looks, travel outfits Africa",
+    keywords: "styling lookbook, bridal looks Nigeria, occasion looks, travel outfits Africa",
   },
 };
 
@@ -108,7 +108,7 @@ function pageMeta(pathname) {
   if (pathname.startsWith("/stories")) {
     return PAGE_META["/stories"];
   }
-  return PAGE_META[pathname] ?? { title: `${SITE_NAME} | Lagos Styling House`, description: DEFAULT_DESCRIPTION, keywords: "" };
+  return PAGE_META[pathname] ?? { title: `${SITE_NAME} | Styling House`, description: DEFAULT_DESCRIPTION, keywords: "" };
 }
 
 export default function SeoMeta() {
@@ -130,7 +130,7 @@ export default function SeoMeta() {
     setMeta('meta[property="og:description"]', { property: "og:description", content: meta.description });
     setMeta('meta[property="og:url"]', { property: "og:url", content: canonical });
     setMeta('meta[property="og:image"]', { property: "og:image", content: DEFAULT_IMAGE });
-    setMeta('meta[property="og:image:alt"]', { property: "og:image:alt", content: `${SITE_NAME} — Lagos Styling House` });
+    setMeta('meta[property="og:image:alt"]', { property: "og:image:alt", content: `${SITE_NAME} — Styling House` });
     setMeta('meta[property="og:locale"]', { property: "og:locale", content: "en_NG" });
 
     setMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary_large_image" });
