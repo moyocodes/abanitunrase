@@ -152,7 +152,7 @@ export default function BeforeYouBook() {
                     transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                     className="overflow-hidden"
                   >
-                    <p className="font-['Outfit'] text-[#1a1706]/75 text-[clamp(14px,1.3vw,16px)] leading-[1.85] font-light pb-4 pr-6 md:pr-16 max-w-3xl">
+                    <p className="font-['Outfit'] text-[#1a1706]/75 text-[clamp(14px,1.3vw,16px)] leading-[1.85] font-light pb-4 pr-6 md:pr-16 max-w-3xl whitespace-pre-line">
                       {item.a}
                     </p>
                   </motion.div>

@@ -28,26 +28,39 @@ function ScrollCharsAnimated({ text, scrollProgress, start, end, className }) {
   );
 }
 
-/* Word-by-word reveal tied to scroll progress */
+/* Word-by-word reveal tied to scroll progress — supports \n as line breaks */
 function ScrollWordsAnimated({ text, scrollProgress, start, end, className }) {
-  const words = (text ?? "").split(" ");
+  /* Build tokens: {type:"word", text} | {type:"br"} */
+  const tokens = [];
+  (text ?? "").split("\n").forEach((line, li) => {
+    if (li > 0) tokens.push({ type: "br" });
+    line.split(" ").filter(Boolean).forEach(w => tokens.push({ type: "word", text: w }));
+  });
+  const wordCount = tokens.filter(t => t.type === "word").length;
+
   const [count, setCount] = useState(() => {
     const v = scrollProgress.get();
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
-    return Math.round(t * words.length);
+    return Math.round(t * wordCount);
   });
   useMotionValueEvent(scrollProgress, "change", (v) => {
     const t = Math.max(0, Math.min(1, (v - start) / (end - start)));
-    const next = Math.round(t * words.length);
+    const next = Math.round(t * wordCount);
     setCount(prev => prev !== next ? next : prev);
   });
+
+  let wordIdx = 0;
   return (
     <span className={className} aria-label={text}>
-      {words.map((word, i) => (
-        <span key={i} className="transition-opacity duration-200" style={{ opacity: i < count ? 1 : 0.06 }}>
-          {word}{i < words.length - 1 ? " " : ""}
-        </span>
-      ))}
+      {tokens.map((token, i) => {
+        if (token.type === "br") return <br key={i} />;
+        const idx = wordIdx++;
+        return (
+          <span key={i} className="transition-opacity duration-200" style={{ opacity: idx < count ? 1 : 0.06 }}>
+            {token.text}{" "}
+          </span>
+        );
+      })}
     </span>
   );
 }

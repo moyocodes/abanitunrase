@@ -741,10 +741,10 @@ export function PanelField({ label, value, onChange, multiline = false }) {
       </label>
       {multiline ? (
         <textarea
-          rows={3}
+          rows={5}
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-white border border-[#1a1706]/12 p-2.5 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 resize-none font-['Georgia,Times_New_Roman,serif'] text-[13px]"
+          className="w-full bg-white border border-[#1a1706]/12 p-2.5 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 resize-y font-['Georgia,Times_New_Roman,serif'] text-[13px] leading-[1.7]"
         />
       ) : (
         <input
