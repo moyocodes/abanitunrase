@@ -202,12 +202,7 @@ export default function Categories({ onBook }) {
                       {expandedCat === cat.type ? "Close" : "See Rates"}
                       <span className={`transition-transform duration-300 inline-block ${expandedCat === cat.type ? "-rotate-180" : "rotate-0"}`}>↓</span>
                     </button>
-                    <button
-                      className="font-['DM_Mono'] text-[8.5px] tracking-[0.18em] uppercase px-5 py-[11px] bg-transparent text-[#1a1706]/50 border border-[#1a1706]/20 cursor-pointer transition-all duration-200 hover:text-[#1a1706] hover:border-[#1a1706]/55"
-                      onClick={() => goToStories(cat.type)}
-                    >
-                      Read Stories
-                    </button>
+                   
                   </motion.div>
                 </div>
               </div>
