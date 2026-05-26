@@ -42,7 +42,7 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
         initial="hidden"
         animate={hidden ? "hidden" : "visible"}
         variants={NAV_VARIANTS}
-        className={`fixed top-0 left-0 right-0 z-[200] flex items-center justify-between px-6 md:px-[52px] py-5 border-b origin-top transition-[background-color,border-color] duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-[200] flex items-center justify-between px-6 md:px-[52px] py-2.5 border-b origin-top transition-[background-color,border-color] duration-500 ${
           hidden ? "pointer-events-none" : ""
         } ${
           scrolled

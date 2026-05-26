@@ -182,10 +182,10 @@ export default function Lookbook() {
         </div>
       ) : (
         <div ref={containerRef} style={{ height: `${count * 100}vh` }}>
-          <div className="sticky top-0 h-screen overflow-hidden flex">
+          <div className="sticky top-0 h-screen overflow-hidden flex flex-col md:flex-row">
 
             {/* Left — text panel */}
-            <div className="w-[52%] flex flex-col justify-center px-4 md:px-16 py-10 relative bg-[#f0efeb]">
+            <div className="w-full md:w-[52%] order-2 md:order-1 flex flex-col justify-center px-5 md:px-16 py-5 md:py-10 relative bg-[#f0efeb]">
               {/* Dot navigation — in-flow below panel when panel open, absolute at top otherwise */}
               <div className={activePanel === "lookbook" ? "flex gap-2 mb-6" : "absolute top-8 left-6 md:left-16 flex gap-2"}>
                 {items.map((_, i) => (
@@ -227,7 +227,7 @@ export default function Lookbook() {
                       {activeLook.title}
                     </h3>
                     {activeLook.sub && (
-                      <div className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(12px,1.3vw,17px)] leading-[1.7] font-light mb-4 md:mb-8 max-w-sm">
+                      <div className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(11px,1.3vw,17px)] leading-[1.7] font-light mb-4 md:mb-8 max-w-sm">
                         {activeLook.sub}
                       </div>
                     )}
@@ -244,14 +244,14 @@ export default function Lookbook() {
             </div>
 
             {/* Right — image panel */}
-            <div className="flex-1 relative overflow-hidden bg-[#f0efeb]">
+            <div className="h-[72vh] shrink-0 md:h-auto md:flex-1 order-1 md:order-2 relative overflow-hidden bg-[#f0efeb]">
               <AnimatePresence mode="popLayout">
                 {activeLook?.img && (
                   <motion.img
                     key={`img-${activeIdx}`}
                     src={activeLook.img}
                     alt={activeLook.title}
-                    className="absolute inset-0 w-full h-full object-contain"
+                    className="absolute inset-0 w-full h-full object-contain object-top"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
