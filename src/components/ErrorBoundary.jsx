@@ -29,10 +29,10 @@ export default class ErrorBoundary extends Component {
           <p className="font-['Outfit'] text-[#f5f0e6]/40 text-[14px] mb-10 max-w-sm leading-relaxed font-light">
             An unexpected error occurred. Refresh the page or reach us at{" "}
             <a
-              href="mailto:Officialabanitunrase@gmail.com"
+              href="mailto:officialabanitunrase@gmail.com"
               className="text-[#f5f0e6]/60 hover:text-[#f5f0e6] transition-colors underline underline-offset-2"
             >
-              Officialabanitunrase@gmail.com
+              officialabanitunrase@gmail.com
             </a>{" "}
             if it persists.
           </p>
