@@ -94,7 +94,7 @@ export default function GlobalStyleQuiz() {
               ✦
             </span>
             <span className="hidden sm:inline">Find My Style</span>
-            <span className="md:hidden inline">Style</span>
+            <span className="md:hidden inline">Find My Style</span>
           </motion.button>
         </motion.div>
       )}
