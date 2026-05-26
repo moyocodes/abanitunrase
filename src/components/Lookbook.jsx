@@ -60,8 +60,9 @@ export default function Lookbook() {
     const rect  = containerRef.current.getBoundingClientRect();
     const total = containerRef.current.offsetHeight - window.innerHeight;
     if (total > 0) {
-      const prog = Math.max(0, Math.min(1, -rect.top / total));
-      setActiveIdx(Math.min(count - 1, Math.floor(prog * count)));
+      const prog   = Math.max(0, Math.min(1, -rect.top / total));
+      const newIdx = Math.min(count - 1, Math.floor(prog * count));
+      setActiveIdx(prev => prev === newIdx ? prev : newIdx);
     }
   }, [count]);
 
@@ -208,14 +209,14 @@ export default function Lookbook() {
                 {String(activeIdx + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
               </div>
 
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {activeLook && (
                   <motion.div
                     key={activeIdx}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -16 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                     className="flex flex-col"
                   >
                     <div className="font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/60 mb-2 md:mb-3 flex items-center gap-2">
@@ -244,14 +245,17 @@ export default function Lookbook() {
 
             {/* Right — image panel */}
             <div className="flex-1 relative overflow-hidden bg-[#f0efeb]">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {activeLook?.img && (
                   <motion.img
                     key={`img-${activeIdx}`}
                     src={activeLook.img}
                     alt={activeLook.title}
                     className="absolute inset-0 w-full h-full object-contain"
-                  
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18 }}
                   />
                 )}
               </AnimatePresence>

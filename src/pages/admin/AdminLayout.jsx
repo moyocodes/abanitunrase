@@ -5,7 +5,6 @@ import { useAuth } from "@/providers";
 const NAV = [
   { label: "Dashboard",  to: "/admin",           icon: "▦" },
   { label: "Bookings",   to: "/admin/bookings",   icon: "≡" },
-  { label: "Pricing",    to: "/admin/content",    icon: "◫" },
   { label: "Emails",     to: "/admin/emails",     icon: "✉" },
 ];
 
@@ -94,7 +93,7 @@ export default function AdminLayout({ children, title }) {
             className="fixed inset-0 z-40 bg-black/30 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="fixed top-0 left-0 bottom-0 z-50 w-52 bg-white border-r border-[#e8e5dc] flex flex-col md:hidden">
+          <aside className="fixed top-0 left-0 bottom-0 z-50 w-52 bg-white border-r border-[#e8e5dc] flex flex-col overflow-y-auto md:hidden">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </aside>
         </>
@@ -104,7 +103,7 @@ export default function AdminLayout({ children, title }) {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
 
         {/* Top bar */}
-        <header className="h-12 bg-white border-b border-[#e8e5dc] flex items-center px-5 gap-4 sticky top-0 z-30 flex-shrink-0">
+        <header className="h-12 bg-white border-b border-[#e8e5dc] flex items-center px-5 gap-4 flex-shrink-0">
           <button
             className="md:hidden font-mono text-[16px] text-[#1a1706]/60 bg-transparent border-none cursor-pointer leading-none"
             onClick={() => setSidebarOpen(true)}
