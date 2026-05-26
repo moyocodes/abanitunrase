@@ -285,6 +285,17 @@ export default function Categories({ onBook }) {
                       ))}
                     </div>
 
+                    {/* Travel Notes — travel only */}
+                    {cat.type === "travel" && ratesData?.travelNotes && (
+                      <div className="mt-8 pt-8 border-t border-[#1a1706]/[0.07]">
+                        <div className="whitespace-pre-wrap font-['Outfit'] text-[13px] md:text-[14px] text-[#1a1706]/70 leading-relaxed space-y-4">
+                          {ratesData.travelNotes.split("\n\n").map((paragraph, idx) => (
+                            <div key={idx} className="text-[#1a1706]/70">{paragraph}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Single + Other packages — bridal only */}
                     {cat.type === "bridal" && ((ratesData.singlePackages?.length > 0) || (ratesData.otherPackages?.length > 0)) && (
                       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#1a1706]/[0.07] border-t border-[#1a1706]/[0.07]">
