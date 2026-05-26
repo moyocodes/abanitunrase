@@ -65,7 +65,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const tabIntervalRef = useRef(null);
   const { bridal, occasion, travel, ratesData, refetch } = useData();
   const { editMode, activePanel, showToast } = useEditMode();
-  const [draft, setDraft] = useState({ heading: "", sectionLabel: "", note: "", consultations: [], packages: { bridal: [], occasion: [], travel: [] } });
+  const [draft, setDraft] = useState({ 
+    heading: "", 
+    sectionLabel: "", 
+    note: "", 
+    travelNotes: "",
+    consultations: [], 
+    packages: { bridal: [], occasion: [], travel: [] } 
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -74,6 +81,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         heading: ratesData.heading,
         sectionLabel: ratesData.sectionLabel,
         note: ratesData.note,
+        travelNotes: ratesData.travelNotes ?? "",
         consultations: ratesData.consultations.map(c => ({ ...c })),
         packages: {
           bridal: (bridal ?? []).map(p => ({ ...p })),
@@ -115,7 +123,14 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveSettings("rates", { ...ratesData, heading: draft.heading, sectionLabel: draft.sectionLabel, note: draft.note, consultations: draft.consultations });
+      await saveSettings("rates", { 
+        ...ratesData, 
+        heading: draft.heading, 
+        sectionLabel: draft.sectionLabel, 
+        note: draft.note,
+        travelNotes: draft.travelNotes,
+        consultations: draft.consultations 
+      });
       await savePricing("bridal", draft.packages.bridal);
       await savePricing("occasion", draft.packages.occasion);
       await savePricing("travel", draft.packages.travel);
@@ -162,6 +177,15 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         <PanelField label="Section Heading" value={draft.heading ?? ""} onChange={v => set("heading", v)} />
         <PanelField label="Section Label" value={draft.sectionLabel ?? ""} onChange={v => set("sectionLabel", v)} />
         <PanelField label="Header Note" value={draft.note ?? ""} onChange={v => set("note", v)} multiline />
+        
+        {/* Travel Notes */}
+        <PanelField 
+          label="Travel Category Notes" 
+          value={draft.travelNotes ?? ""} 
+          onChange={v => set("travelNotes", v)} 
+          multiline 
+          placeholder="Add content for the travel category (Polaroid Guide, Premium Add-ons, Terms & Conditions, etc.)"
+        />
 
         {/* Consultations */}
         <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-2">Consultations</p>
@@ -386,6 +410,27 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
           </div>
         ))}
       </motion.div>
+
+      {/* Travel Notes Section - Only shows when travel tab is active */}
+      {activeTab === "travel" && ratesData.travelNotes && (
+        <motion.div
+          className="bg-[#faf9f6] border-b border-black/[0.07]"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="px-6 md:px-16 py-8 md:py-12">
+            <div className="prose prose-sm md:prose max-w-4xl">
+              <div className="whitespace-pre-wrap font-['Outfit'] text-[14px] md:text-[15px] text-[#1a1706]/80 leading-relaxed space-y-6">
+                {ratesData.travelNotes.split("\n\n").map((paragraph, idx) => (
+                  <div key={idx}>{paragraph}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Single packages + Other packages — bridal tab only (configurable) */}
       {(ratesData.extrasVisibleOnTabs ?? ["bridal"]).includes(activeTab) &&
