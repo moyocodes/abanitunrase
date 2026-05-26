@@ -218,7 +218,7 @@ export default function Home() {
                 <span className="text-[clamp(18px,5vw,68px)]">
                   Arrive in looks that stands out,
                   <br />
-                  stays clean and remains timeless.
+                  stays clean and remains timeless
                 </span>
               ),
               med: null,
