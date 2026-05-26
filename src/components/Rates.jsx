@@ -148,7 +148,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     if (hoveredCard || editMode) return;
     intervalRef.current = setInterval(() => {
       setSpotlightIdx(i => (i + 1) % cards.length);
-    }, 10000);
+    }, 18000);
     return () => clearInterval(intervalRef.current);
   }, [hoveredCard, editMode, activeTab, cards.length]);
 
@@ -159,7 +159,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         const idx = TAB_KEYS.indexOf(prev);
         return TAB_KEYS[(idx + 1) % TAB_KEYS.length];
       });
-    }, 4000);
+    }, 12000);
     return () => clearInterval(tabIntervalRef.current);
   }, [hoveredCard, editMode]);
 
