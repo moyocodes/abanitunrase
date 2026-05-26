@@ -224,8 +224,7 @@ export default function Home() {
               med: null,
             },
             {
-              big: "ABÁNITÚNRASE.",
-       
+              big: <img src="/logwhi.png" alt="ABÁNITÚNRASE" className="h-[72px] w-auto object-contain" />,
               plain: true,
             },
           ].map((ch, i) => (

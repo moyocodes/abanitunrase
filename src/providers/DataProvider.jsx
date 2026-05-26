@@ -45,10 +45,16 @@ const DEFAULT_BEFORE = {
 };
 
 const DEFAULT_LOOKBOOK = {
-  heading: "",
-  season: "",
-  sub: "",
-  items: [],
+  heading: "Selected Works",
+  season: "SS 2026",
+  sub: "Bridal · Occasion · Travel\nLagos · Ibadan · Abroad",
+  items: [
+    { title: "The Vow",            img: "/id.jpg", cat: "Bridal",   catIdx: 0, sub: "White wedding styling — dressed to arrive and to be remembered." },
+    { title: "The Trad Bride",     img: "/id.jpg", cat: "Bridal",   catIdx: 0, sub: "Traditional engagement looks rooted in culture, built for the moment." },
+    { title: "The Family",         img: "/id.jpg", cat: "Occasion", catIdx: 1, sub: "Coordinated family dressing — intentional, cohesive, unforgettable." },
+    { title: "The Owambe Arrival", img: "/id.jpg", cat: "Occasion", catIdx: 1, sub: "Party dressing done right. Asọ-ọfì, colour, and confidence." },
+    { title: "The Weekend Escape", img: "/id.jpg", cat: "Travel",   catIdx: 2, sub: "A curated travel wardrobe for wherever the weekend takes you." },
+  ],
 };
 
 const DEFAULT_CTA = {
@@ -228,7 +234,7 @@ export function DataProvider({ children }) {
   const lookbookData = {
     ...DEFAULT_LOOKBOOK,
     ...(settings.lookbook ?? {}),
-    items: settings.lookbook?.items ?? [],
+    items: settings.lookbook?.items?.length ? settings.lookbook.items : DEFAULT_LOOKBOOK.items,
   };
   const heroMeta = { ...DEFAULT_HERO_META, ...(settings.heroMeta ?? {}) };
   const categoriesHdr = { ...DEFAULT_CATEGORIES_HDR, ...(settings.categoriesHdr ?? {}) };

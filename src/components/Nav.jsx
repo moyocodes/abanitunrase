@@ -50,13 +50,26 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             : "bg-transparent border-transparent"
         }`}
       >
-        {/* Logo */}
-        <button
+
+         {scrolled
+            ?  <button
           onClick={() => navigate("/")}
           className="flex items-center no-underline z-10 bg-transparent border-none cursor-pointer p-0"
         >
+          
           <img src="/logobg.png" alt="Abánitúnrase" className="h-8" />
         </button>
+            :  <button
+          onClick={() => navigate("/")}
+          className="flex items-center no-underline z-10 bg-transparent border-none cursor-pointer p-0"
+        >
+          
+          <img src="/logwhi.png" alt="Abánitúnrase" className="h-8" />
+        </button>}
+
+
+        {/* Logo */}
+       
 
         {/* Desktop Links */}
         <div className="hidden sm:flex gap-5 md:gap-7">
