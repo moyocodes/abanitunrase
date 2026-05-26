@@ -23,7 +23,7 @@ async function uploadFile(file) {
 /* ── Full look editor form ─────────────────────────────────────────────────── */
 function LookEditor({ initial, onSave, onDelete, onCancel }) {
   const [draft, setDraft] = useState({
-    title: "", sub: "", catIdx: 0, img: "", thumbs: [], video: "", story: "",
+    title: "", sub: "", catIdx: 0, img: "/id.jpg", thumbs: [], video: "", story: "",
     ...initial,
     thumbs: Array.isArray(initial?.thumbs) ? [...initial.thumbs] : [],
   });
@@ -536,7 +536,7 @@ export default function StoriesPage() {
               key={currentThumb}
               src={currentThumb}
               alt={look?.title ?? ""}
-              className={`absolute inset-0 w-full h-full object-contain saturate-[0.9] ${mediaType === "photo" ? "block" : "hidden"}`}
+              className={`absolute inset-0 w-full  object-contain saturate-[0.9] ${mediaType === "photo" ? "block" : "hidden"}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             />

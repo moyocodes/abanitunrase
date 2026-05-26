@@ -76,9 +76,9 @@ const DEFAULT_LOOKBOOK = {
   season: "SS 2026",
   sub: "Bridal · Occasion · Travel\nLagos · Ibadan · Abroad",
   items: [
-    { title: "Look 01", img: "", cat: "Bridal", catIdx: 0, sub: "" },
-    { title: "Look 02", img: "", cat: "Occasion", catIdx: 1, sub: "" },
-    { title: "Look 03", img: "", cat: "Travel", catIdx: 2, sub: "" },
+    { title: "Look 01", img: "/id.jpg", cat: "Bridal", catIdx: 0, sub: null },
+    { title: "Look 02", img: "/id.jpg", cat: "Occasion", catIdx: 1, sub: null },
+    { title: "Look 03", img: "/id.jpg", cat: "Travel", catIdx: 2, sub: null },
   ],
 };
 

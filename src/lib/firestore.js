@@ -104,7 +104,7 @@ export async function saveLook(look) {
   guard();
   const { id, ...data } = look;
   if (id) {
-    await updateDoc(doc(db, "looks", id), data);
+    await setDoc(doc(db, "looks", id), data, { merge: true });
     return id;
   }
   const ref = await addDoc(collection(db, "looks"), {

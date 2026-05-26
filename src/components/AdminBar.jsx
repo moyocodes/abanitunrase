@@ -310,7 +310,7 @@ function LookForm({ lookId, looks, onBack, onSaved }) {
   const [form, setForm] = useState(() =>
     existing
       ? { ...existing, thumbs: Array.isArray(existing.thumbs) ? existing.thumbs.join("\n") : existing.thumbs ?? "" }
-      : { id: "", cat: "Bridal", catIdx: 0, title: "", sub: "", img: "", thumbs: "", video: "", story: "" }
+      : { id: "", cat: "Bridal", catIdx: 0, title: "", sub: "", img: "/id.jpg", thumbs: "", video: "", story: "" }
   );
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");

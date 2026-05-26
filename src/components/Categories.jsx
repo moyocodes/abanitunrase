@@ -33,7 +33,7 @@ export default function Categories({ onBook }) {
     setDraft((prev) => prev.map((c, i) => i === idx ? { ...c, [field]: val } : c));
 
   const addCategory = () => setDraft(prev => [...prev, {
-    title: "New Category", yoruba: "", looks: 0, desc: "", catIdx: prev.length, img: "", type: `cat-${Date.now()}`,
+    title: "New Category", yoruba: "", looks: 0, desc: "", catIdx: prev.length, img: "/id.jpg", type: `cat-${Date.now()}`,
   }]);
 
   const removeCategory = (idx) => setDraft(prev => prev.filter((_, i) => i !== idx));
