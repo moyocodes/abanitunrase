@@ -133,7 +133,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     if (hoveredCard || editMode) return;
     intervalRef.current = setInterval(() => {
       setSpotlightIdx(i => (i + 1) % cards.length);
-    }, 3000);
+    }, 100000);
     return () => clearInterval(intervalRef.current);
   }, [hoveredCard, editMode, activeTab, cards.length]);
 
