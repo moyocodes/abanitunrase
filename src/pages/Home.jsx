@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useData } from "@/providers";
 import { INTRO_STEPS, INTRO_TRIGGER } from "@/data";
@@ -51,6 +51,7 @@ export default function Home() {
   /* ── Intro ── */
   const [introStep, setIntroStep] = useState(0);
   const [introDismissed, setIntroDismissed] = useState(false);
+  const introVideoRef = useRef(null);
 
   /* ── Gallery ── */
   const [dragOver, setDragOver] = useState(false);
@@ -65,6 +66,13 @@ export default function Home() {
     if (idx !== undefined) {
       setStoryLookIdx(idx);
       setStoryOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+    const section = location.state?.scrollTo;
+    if (section) {
+      setTimeout(() => {
+        document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
+      }, 120);
       window.history.replaceState({}, document.title);
     }
   }, []);
@@ -167,11 +175,13 @@ export default function Home() {
       {/* INTRO */}
       <div id="intro" className={introDismissed ? "fade-to-lookbook" : ""}>
         <video
+          ref={introVideoRef}
           src={introVideo}
           autoPlay
           muted
           loop
           playsInline
+          onLoadedMetadata={() => { if (introVideoRef.current) introVideoRef.current.currentTime = 2; }}
           className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none saturate-[0.4] brightness-[0.6]"
         />
         <div className="absolute top-0 left-0 right-0 flex gap-[3px] px-1.5 h-[3px] z-20">

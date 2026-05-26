@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { useData } from "@/providers";
 import { fmt } from "@/data";
+import Footer from "@/components/Footer";
+import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 
 const VALID_TYPES = ["bridal", "occasion", "travel"];
 
@@ -37,6 +40,7 @@ export default function StylingPage() {
   const { type } = useParams();
   const navigate = useNavigate();
   const { categories, bridal, occasion, travel, looks } = useData();
+  const [formOpen, setFormOpen] = useState(false);
 
   if (!VALID_TYPES.includes(type)) return <Navigate to="/" replace />;
 
@@ -46,8 +50,8 @@ export default function StylingPage() {
   const categoryLooks = (looks ?? []).filter((l) => l.catIdx === catIdx);
   const category = (categories ?? []).find((c) => c.type === type);
 
-  // Hero image — first look image or category image
-  const heroImg = categoryLooks[0]?.img ?? category?.img ?? "";
+  // Hero image — use the category image (synced with Categories section), fall back to first look
+  const heroImg = category?.img ?? categoryLooks[0]?.img ?? "";
 
   const handleStoryClick = (lookIdx) => {
     navigate("/", { state: { openStoryIdx: lookIdx } });
@@ -228,21 +232,21 @@ export default function StylingPage() {
         <p className="font-['Outfit'] text-[14px] text-[#f5f0e6]/50 leading-relaxed font-light max-w-md mx-auto mb-10">
           Every styling journey starts with a conversation. Tell us about your occasion and we&apos;ll build something unforgettable.
         </p>
-        <Link
-          to="/"
-          className="inline-block font-mono text-[9px] tracking-[0.32em] uppercase px-8 py-4 bg-[#f5f0e6] text-[#1a1706] hover:bg-white transition-colors"
+        <button
+          onClick={() => setFormOpen(true)}
+          className="font-mono text-[9px] tracking-[0.32em] uppercase px-8 py-4 bg-[#f5f0e6] text-[#1a1706] hover:bg-white transition-colors border-none cursor-pointer"
         >
           {meta.cta} →
-        </Link>
+        </button>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-[#1a1706]/[0.07] flex items-center justify-between">
-        <span className="font-mono text-[7px] tracking-[0.4em] uppercase text-[#1a1706]/25">
-          ABÁNITÚNRASE
-        </span>
-       
-      </footer>
+      <FormModal open={formOpen} onClose={() => setFormOpen(false)}>
+        {meta.formType === "wedding"  && <WeddingForm  onClose={() => setFormOpen(false)} />}
+        {meta.formType === "occasion" && <OccasionForm onClose={() => setFormOpen(false)} />}
+        {meta.formType === "travel"   && <TravelForm   onClose={() => setFormOpen(false)} />}
+      </FormModal>
+
+      <Footer />
     </div>
   );
 }

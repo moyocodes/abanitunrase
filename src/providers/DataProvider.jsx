@@ -120,7 +120,7 @@ export function DataProvider({ children }) {
   const [galleryItems, setGalleryItems] = useState([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
     try {

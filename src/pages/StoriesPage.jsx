@@ -8,6 +8,7 @@ import { saveLook, deleteLook } from "@/lib/firestore";
 import { ytEmbedUrl } from "@/data";
 import Nav from "@/components/Nav";
 import BookCallModal from "@/components/BookCallModal";
+import Footer from "@/components/Footer";
 
 const CAT_TABS = [
   { label: "Bridal",  idx: 0 },
@@ -824,6 +825,7 @@ export default function StoriesPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
