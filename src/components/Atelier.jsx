@@ -156,7 +156,7 @@ export default function Atelier() {
 
         <div className="grid grid-cols-[1fr_100px] md:grid-cols-[1fr_240px] gap-6 md:gap-24 items-start">
           <div>
-            <div className="mb-10 md:mb-12">
+            <div className="mb-2">
               <div className="font-['Cormorant_Garamond'] italic text-[clamp(26px,5.5vw,72px)] text-[#1a1706] leading-[1.08] tracking-[-0.02em]">
                 <ScrollCharsAnimated text={atelier.quote1} scrollProgress={scrollYProgress} start={0.04} end={0.22} />
               </div>
