@@ -60,6 +60,8 @@ export default function PaystackPayment({
     document.head.appendChild(script);
   }, []);
 
+  const chargeAmount = Math.round(amount * 1.02);
+
   const handlePay = () => {
     setError("");
     if (!email?.trim()) { setError("Please enter your email before payment."); return; }
@@ -72,7 +74,7 @@ export default function PaystackPayment({
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: email.trim(),
-      amount,
+      amount: chargeAmount,
       currency: PAYSTACK_CURRENCY,
       ref: reference,
       metadata: {
@@ -146,19 +148,17 @@ export default function PaystackPayment({
           "bg-[#1a1706]/2",
         )}
       >
-        <p
-          className={cn(
-            "font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4",
-          )}
-        >
-          Consultation Deposit
+        <p className="font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4">
+          Payment Summary
         </p>
-        <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-2">
-          {formatAmount(amount)}
+        <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-1">
+          {formatAmount(chargeAmount)}
         </div>
-        <p className="text-[#1a1706]/28 text-xs font-['DM_Mono'] tracking-wide mb-8">
-          Secure payment powered by Paystack
-        </p>
+        <div className="flex items-center gap-3 mb-8">
+          <span className="text-[#1a1706]/35 text-xs font-['DM_Mono'] tracking-wide">{formatAmount(amount)}</span>
+          <span className="text-[#1a1706]/25 text-xs font-['DM_Mono']">+</span>
+          <span className="text-[#1a1706]/35 text-xs font-['DM_Mono'] tracking-wide">2% processing fee</span>
+        </div>
 
         {error && (
           <p className="font-mono text-[9px] tracking-[0.16em] uppercase text-red-600/80 mb-4 border-l-2 border-red-400 pl-3">{error}</p>

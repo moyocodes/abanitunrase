@@ -77,7 +77,7 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             <a
               key={label}
               href={href}
-              className="font-mono text-[8.5px] tracking-[0.18em] uppercase no-underline text-black/55 hover:text-black transition-colors duration-300"
+              className={`font-mono text-[8.5px] tracking-[0.18em] uppercase no-underline transition-colors duration-300 ${scrolled ? "text-black/55 hover:text-black" : "text-[#f5f0e6]/75 hover:text-[#f5f0e6]"}`}
             >
               {label}
             </a>
@@ -89,14 +89,14 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           {onTrackBooking && (
             <button
               onClick={onTrackBooking}
-              className="font-mono text-[8px] tracking-[0.15em] uppercase text-black/40 hover:text-black/70 transition-colors duration-300 bg-transparent border-none cursor-pointer"
+              className={`font-mono text-[8px] tracking-[0.15em] uppercase transition-colors duration-300 bg-transparent border-none cursor-pointer ${scrolled ? "text-black/40 hover:text-black/70" : "text-[#f5f0e6]/50 hover:text-[#f5f0e6]/80"}`}
             >
               Track Booking
             </button>
           )}
           <button
             onClick={onBookCall}
-            className="font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
+            className={`font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border transition-all duration-300 cursor-pointer ${scrolled ? "border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12]" : "border-[#f5f0e6]/30 bg-[#f5f0e6]/[0.06] text-[#f5f0e6] hover:bg-[#f5f0e6]/[0.14]"}`}
           >
             Book a Session
           </button>
@@ -107,9 +107,9 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           onClick={() => setMenuOpen(!menuOpen)}
           className="sm:hidden flex flex-col justify-center gap-[5px] w-6 h-6 cursor-pointer bg-transparent border-none p-0 z-10"
         >
-          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
-          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-          <span className={`block h-px bg-black transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
+          <span className={`block h-px transition-all duration-300 ${scrolled ? "bg-black" : "bg-[#f5f0e6]"} ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
+          <span className={`block h-px transition-all duration-300 ${scrolled ? "bg-black" : "bg-[#f5f0e6]"} ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`block h-px transition-all duration-300 ${scrolled ? "bg-black" : "bg-[#f5f0e6]"} ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
         </button>
       </motion.nav>
 

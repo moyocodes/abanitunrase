@@ -133,7 +133,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     if (hoveredCard || editMode) return;
     intervalRef.current = setInterval(() => {
       setSpotlightIdx(i => (i + 1) % cards.length);
-    }, 100000);
+    }, 15000);
     return () => clearInterval(intervalRef.current);
   }, [hoveredCard, editMode, activeTab, cards.length]);
 
@@ -144,7 +144,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         const idx = TAB_KEYS.indexOf(prev);
         return TAB_KEYS[(idx + 1) % TAB_KEYS.length];
       });
-    }, 8000);
+    }, 12000);
     return () => clearInterval(tabIntervalRef.current);
   }, [hoveredCard, editMode]);
 
@@ -386,6 +386,66 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
           </div>
         ))}
       </motion.div>
+
+      {/* Single packages + Other packages — bridal tab only (configurable) */}
+      {(ratesData.extrasVisibleOnTabs ?? ["bridal"]).includes(activeTab) &&
+        ((ratesData.singlePackages?.length > 0) || (ratesData.otherPackages?.length > 0)) && (
+        <motion.div
+          className="bg-[#faf9f6] border-b border-black/[0.07]"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-black/[0.07]">
+
+            {ratesData.singlePackages?.length > 0 && (
+              <div className="px-6 md:px-14 py-10 md:py-14">
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Single Packages</div>
+                <div className="divide-y divide-black/[0.06]">
+                  {ratesData.singlePackages.map((pkg, i) => (
+                    <div key={i} className="flex items-center justify-between py-3.5 gap-4">
+                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80">{pkg.service}</span>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
+                        <button
+                          onClick={() => onBook ? onBook("wedding") : onBookCall?.()}
+                          className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
+                        >
+                          Book →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ratesData.otherPackages?.length > 0 && (
+              <div className="px-6 md:px-14 py-10 md:py-14">
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Other Packages</div>
+                <div className="divide-y divide-black/[0.06]">
+                  {ratesData.otherPackages.map((pkg, i) => (
+                    <div key={i} className="flex items-center justify-between py-3.5 gap-4">
+                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80">{pkg.service}</span>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
+                        <button
+                          onClick={() => onBook ? onBook("wedding") : onBookCall?.()}
+                          className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
+                        >
+                          Book →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </motion.div>
+      )}
     </section>
   );
 }

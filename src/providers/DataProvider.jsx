@@ -19,12 +19,46 @@ const DEFAULT_ATELIER = {
   sectionLabel: "",
 };
 
+const DEFAULT_BRIDAL = [
+  { package: "Aso Àsìkò",  tier: "IV",   includes: ["Engagement", "White Wedding"],                                             price: 2500000 },
+  { package: "Aso Ìgbáfè", tier: "V",    includes: ["Engagement", "White Wedding", "After Party"],                              price: 3000000, featured: true },
+  { package: "Aso Ojúdé",  tier: "VII",  includes: ["Pre-Wedding", "Engagement", "White Wedding", "After Party"],               price: 4000000 },
+  { package: "Aso Àrìyá",  tier: "VIII", includes: ["Pre-Wedding", "Civil Wedding", "Engagement", "White Wedding", "After Party"], price: 4800000 },
+];
+
+const DEFAULT_OCCASION = [
+  { package: "Káseré Jáde",   tier: "I",   includes: ["Party guest", "Special outing", "One look"],                        price: 300000 },
+  { package: "Káyáworán",     tier: "II",  includes: ["Birthday", "Corporate", "Head-shot", "One look"],                   price: 500000, featured: true },
+  { package: "Káànkò",        tier: "III", includes: ["Family photoshoot up to 3 people", "One look"],                     price: 1000000 },
+  { package: "Kábosagbo",     tier: "IV",  includes: ["Red carpet", "Premieres", "Themed events"],                         price: 1000000 },
+];
+
+const DEFAULT_TRAVEL = [
+  { package: "The Weekend Escape",   looks: 3, price: 500000 },
+  { package: "The Mid-Week Venture", looks: 4, price: 700000 },
+  { package: "The Grand Tour",       looks: 5, price: 900000, featured: true },
+  { package: "The Elite Collection", looks: 6, price: 1000000 },
+];
+
 const DEFAULT_RATES = {
   heading: "",
   sectionLabel: "",
   note: "",
   consultations: [],
   extrasVisibleOnTabs: ["bridal"],
+  singlePackages: [
+    { service: "Court Wedding",  price: 700000 },
+    { service: "White Wedding",  price: 700000 },
+    { service: "Engagement",     price: 700000 },
+    { service: "After Party",    price: 700000 },
+    { service: "Pre-Wedding",    price: 500000 },
+  ],
+  otherPackages: [
+    { service: "Introduction",         price: 700000 },
+    { service: "Mother of the Bride",  price: 500000 },
+    { service: "Mother of the Groom",  price: 500000 },
+    { service: "Bridal Party Styling", price: 1000000 },
+  ],
 };
 
 const DEFAULT_HERO_META = {
@@ -100,9 +134,9 @@ export function DataProvider({ children }) {
       if (looksData.length > 0) setLooks(looksData);
 
       setPricing({
-        bridal: pricingData.bridal?.length ? pricingData.bridal : [],
-        occasion: pricingData.occasion?.length ? pricingData.occasion : [],
-        travel: pricingData.travel?.length ? pricingData.travel : [],
+        bridal:  pricingData.bridal?.length  ? pricingData.bridal  : DEFAULT_BRIDAL,
+        occasion: pricingData.occasion?.length ? pricingData.occasion : DEFAULT_OCCASION,
+        travel:  pricingData.travel?.length  ? pricingData.travel  : DEFAULT_TRAVEL,
       });
 
       if (Object.keys(settingsData).length > 0) setSettings(settingsData);
@@ -226,6 +260,8 @@ export function DataProvider({ children }) {
     ...(settings.rates ?? {}),
     consultations: settings.rates?.consultations ?? [],
     extrasVisibleOnTabs: settings.rates?.extrasVisibleOnTabs ?? ["bridal"],
+    singlePackages: settings.rates?.singlePackages ?? DEFAULT_RATES.singlePackages,
+    otherPackages:  settings.rates?.otherPackages  ?? DEFAULT_RATES.otherPackages,
   };
   const lookbookData = {
     ...DEFAULT_LOOKBOOK,

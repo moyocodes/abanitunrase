@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
 import { getBookings, getContacts } from "@/lib/firestore";
+import { seedRates } from "@/lib/seedRates";
 
 const TYPE_COLORS = {
   wedding:      "text-purple-700 border-purple-400/50",
@@ -27,6 +28,21 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading]   = useState(true);
+  const [seeding, setSeeding]   = useState(false);
+  const [seedMsg, setSeedMsg]   = useState("");
+
+  const handleSeedRates = async () => {
+    setSeeding(true);
+    setSeedMsg("");
+    try {
+      await seedRates();
+      setSeedMsg("✓ Rates seeded successfully.");
+    } catch (e) {
+      setSeedMsg("✗ Failed: " + (e.message ?? "unknown error"));
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   useEffect(() => {
     Promise.all([getBookings(), getContacts()])
@@ -55,6 +71,22 @@ export default function AdminDashboard() {
         </p>
       ) : (
         <>
+          {/* Seed rates */}
+          <div className="mb-8 flex items-center gap-4 flex-wrap">
+            <button
+              onClick={handleSeedRates}
+              disabled={seeding}
+              className="font-mono text-[10px] tracking-[0.24em] uppercase px-5 py-2.5 border border-[#1a1706]/20 text-[#1a1706]/55 hover:border-[#1a1706]/50 hover:text-[#1a1706]/80 transition-colors bg-transparent cursor-pointer disabled:opacity-40"
+            >
+              {seeding ? "Seeding…" : "Seed Rates →"}
+            </button>
+            {seedMsg && (
+              <span className={`font-mono text-[10px] tracking-[0.16em] ${seedMsg.startsWith("✓") ? "text-emerald-600" : "text-red-500"}`}>
+                {seedMsg}
+              </span>
+            )}
+          </div>
+
           {/* Stats grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-12">
             {stats.map(({ label, value }) => (

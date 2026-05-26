@@ -403,8 +403,11 @@ export default function StoriesPage() {
     const pref =
       voices.find(v => v.name.includes("Google UK English Female")) ||
       voices.find(v => v.name.includes("Serena") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Daniel") && v.lang.startsWith("en")) ||
       voices.find(v => v.name.includes("Samantha") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.includes("Karen") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.includes("Moira") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.includes("Victoria") && v.lang.startsWith("en")) ||
+      voices.find(v => v.name.toLowerCase().includes("female") && v.lang.startsWith("en")) ||
       voices.find(v => v.lang === "en-GB") ||
       voices.find(v => v.lang.startsWith("en")) || null;
     if (pref) utt.voice = pref;
@@ -587,7 +590,7 @@ export default function StoriesPage() {
                 className="w-full h-full object-contain bg-black"
                 src={look.video}
                 controls
-                autoPlay
+              //  autoPlay 
                 playsInline
               />
             ) : (

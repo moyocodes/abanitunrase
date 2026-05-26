@@ -256,19 +256,19 @@ export default function Hero({ onBookCall, onQuiz }) {
       </SectionPanel>
 
       {/* Two rows — top scrolls left, bottom scrolls right */}
-      <div className="flex flex-col gap-2 md:gap-3 absolute inset-0 overflow-hidden">
+      <div className="flex flex-col gap-1.5 sm:gap-2 md:gap-3 absolute inset-0 overflow-hidden">
         {[row1, row2].map((row, ri) => (
           <div
             key={ri}
             className="flex-1 min-h-0 overflow-hidden relative [contain:paint]"
           >
             <div
-              className={`flex gap-2 md:gap-3 h-full w-max hover:[animation-play-state:paused] ${ri === 0 ? "animate-go-left" : "animate-go-right"}`}
+              className={`flex gap-1.5 sm:gap-2 md:gap-3 h-full w-max hover:[animation-play-state:paused] ${ri === 0 ? "animate-go-left" : "animate-go-right"}`}
             >
               {[...row, ...row].map((item, ci) => (
                 <div
                   key={ci}
-                  className="w-[150px] sm:w-[220px] md:w-[300px] h-full flex-shrink-0 overflow-hidden relative cursor-pointer"
+                  className="w-[120px] sm:w-[200px] md:w-[280px] lg:w-[320px] h-full flex-shrink-0 overflow-hidden relative cursor-pointer"
                   onClick={() => handleClick(item)}
                 >
                   <img
@@ -282,7 +282,7 @@ export default function Hero({ onBookCall, onQuiz }) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
                   {item.label && (
-                    <div className="absolute bottom-3 left-3 right-3 font-['Cormorant_Garamond'] text-[14px] italic text-[#f5f0e6]/80 leading-tight">
+                    <div className="absolute bottom-2 md:bottom-3 left-2 md:left-3 right-2 md:right-3 font-['Cormorant_Garamond'] text-[11px] md:text-[14px] italic text-[#f5f0e6]/80 leading-tight">
                       {item.label}
                     </div>
                   )}
@@ -300,29 +300,24 @@ export default function Hero({ onBookCall, onQuiz }) {
         ))}
       </div>
 
-      <div className="absolute inset-0 pointer-events-none z-[5] bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(10,8,2,0.28)_0%,transparent_100%)]" />
-      <div className="absolute inset-0 pointer-events-none z-[5] bg-[linear-gradient(to_bottom,rgba(10,8,2,0.28)_0%,rgba(10,8,2,0.08)_40%,rgba(10,8,2,0.08)_60%,rgba(10,8,2,0.38)_100%)]" />
+      <div className="absolute inset-0 pointer-events-none z-[5] bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(10,8,2,0.35)_0%,transparent_100%)]" />
+      <div className="absolute inset-0 pointer-events-none z-[5] bg-[linear-gradient(to_bottom,rgba(10,8,2,0.32)_0%,rgba(10,8,2,0.10)_40%,rgba(10,8,2,0.10)_60%,rgba(10,8,2,0.42)_100%)]" />
 
-      <div className="absolute inset-0 z-[6] flex flex-col items-center justify-center pointer-events-none select-none">
-     
-       
-        <div className="w-16 h-px bg-[#f5f0e6]/28 my-5" />
-         <div className="font-['DM_Mono'] text-[15px] md:text-[8px] tracking-[0.5em] uppercase text-[#f5f0e6]/60 ">
+      <div className="absolute inset-0 z-[6] flex flex-col items-center justify-center pointer-events-none select-none px-6">
+        <div className="w-10 md:w-16 h-px bg-[#f5f0e6]/28 my-3 md:my-5" />
+        <div className="font-['DM_Mono'] text-[8px] md:text-[8px] tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#f5f0e6]/60 text-center">
           {heroMeta.tagline}
         </div>
-        {/* <div className="font-['Outfit'] text-[clamp(13px,1.3vw,17px)] text-[#f5f0e6]/65 leading-relaxed font-light text-center tracking-[0.12em]">
-          {heroMeta.subTagline}
-        </div> */}
-        <div className="flex items-center gap-4 mt-10 pointer-events-auto flex-wrap justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mt-8 md:mt-10 pointer-events-auto w-full sm:w-auto">
           <button
             onClick={onBookCall}
-            className="font-['DM_Mono'] text-[9px] tracking-[0.32em] uppercase px-5 py-3 sm:px-7 sm:py-4 bg-[#f5f0e6] text-[#1a1706] border-none cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-lg"
+            className="font-['DM_Mono'] text-[8px] md:text-[9px] tracking-[0.32em] uppercase w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-4 bg-[#f5f0e6] text-[#1a1706] border-none cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-lg"
           >
             Book a Consultation
           </button>
           <button
             onClick={onQuiz}
-            className="font-['DM_Mono'] text-[9px] tracking-[0.32em] uppercase px-5 py-3 sm:px-7 sm:py-4 bg-transparent text-[#f5f0e6]/75 border border-[#f5f0e6]/30 cursor-pointer transition-all duration-300 hover:text-[#f5f0e6] hover:border-[#f5f0e6]/65"
+            className="font-['DM_Mono'] text-[8px] md:text-[9px] tracking-[0.32em] uppercase w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-4 bg-transparent text-[#f5f0e6]/75 border border-[#f5f0e6]/30 cursor-pointer transition-all duration-300 hover:text-[#f5f0e6] hover:border-[#f5f0e6]/65"
           >
             Find My Style
           </button>

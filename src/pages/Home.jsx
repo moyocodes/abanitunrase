@@ -300,7 +300,7 @@ export default function Home() {
           <BeforeYouBook />
         </div>
 
-        <div className="sticky top-0 z-[30]">
+        <div className="relative z-[30]">
           <Rates
             onBookCall={() => setBookCallOpen(true)}
             onBook={(type) => setFormType(type)}
@@ -321,11 +321,11 @@ export default function Home() {
               uploading={galleryUploading}
             />
           </div>
+        </div>
 
-          <div className="relative z-[1]">
-            <CtaContact onBookCall={() => setBookCallOpen(true)} />
-            <Footer />
-          </div>
+        <div className="relative z-[50]">
+          <CtaContact onBookCall={() => setBookCallOpen(true)} />
+          <Footer />
         </div>
       </div>
 

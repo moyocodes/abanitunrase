@@ -14,7 +14,7 @@ const panelReveal = {
 export default function Categories({ onBook }) {
   const [expandedCat, setExpandedCat] = useState(null);
   const navigate = useNavigate();
-  const { categories, categoriesHdr, bridal, occasion, travel, refetch } = useData();
+  const { categories, categoriesHdr, bridal, occasion, travel, ratesData, refetch } = useData();
   const { activePanel, showToast } = useEditMode();
   const RATES = { bridal, occasion, travel };
 
@@ -284,6 +284,44 @@ export default function Categories({ onBook }) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Single + Other packages — bridal only */}
+                    {cat.type === "bridal" && ((ratesData.singlePackages?.length > 0) || (ratesData.otherPackages?.length > 0)) && (
+                      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#1a1706]/[0.07] border-t border-[#1a1706]/[0.07]">
+                        {ratesData.singlePackages?.length > 0 && (
+                          <div className="pt-8 pb-4 md:pr-14">
+                            <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mb-5">Single Packages</div>
+                            <div className="divide-y divide-[#1a1706]/[0.06]">
+                              {ratesData.singlePackages.map((pkg, i) => (
+                                <div key={i} className="flex items-center justify-between py-3 gap-4">
+                                  <span className="font-['Outfit'] text-[13px] md:text-[14px] font-light text-[#1a1706]/75">{pkg.service}</span>
+                                  <div className="flex items-center gap-3 flex-shrink-0">
+                                    <span className="font-['Cormorant_Garamond'] text-[17px] md:text-[20px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
+                                    <button onClick={() => onBook?.("wedding")} className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer">Book →</button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {ratesData.otherPackages?.length > 0 && (
+                          <div className="pt-8 pb-4 md:pl-14">
+                            <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mb-5">Other Packages</div>
+                            <div className="divide-y divide-[#1a1706]/[0.06]">
+                              {ratesData.otherPackages.map((pkg, i) => (
+                                <div key={i} className="flex items-center justify-between py-3 gap-4">
+                                  <span className="font-['Outfit'] text-[13px] md:text-[14px] font-light text-[#1a1706]/75">{pkg.service}</span>
+                                  <div className="flex items-center gap-3 flex-shrink-0">
+                                    <span className="font-['Cormorant_Garamond'] text-[17px] md:text-[20px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
+                                    <button onClick={() => onBook?.("wedding")} className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer">Book →</button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

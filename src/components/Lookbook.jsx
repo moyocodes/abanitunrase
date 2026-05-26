@@ -74,7 +74,7 @@ export default function Lookbook() {
 
   const handleViewCategory = (item) => {
     const cat = CAT_ROUTE[item.catIdx ?? 0] ?? "bridal";
-    navigate(`/styling/${cat}`);
+    navigate(`/stories/${cat}`);
   };
 
   const activeLook = items[activeIdx] ?? null;
