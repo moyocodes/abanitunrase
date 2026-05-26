@@ -8,7 +8,7 @@ import { saveSettings } from "@/lib/firestore";
 const CAT_ROUTE  = ["bridal", "occasion", "travel"];
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 
-const BLANK_ITEM = { title: "", sub: "", cat: "Bridal", catIdx: 0, img: "/id.jpg" };
+const BLANK_ITEM = { title: "", sub: "", cat: "Bridal", catIdx: 0, img: null };
 
 export default function Lookbook() {
   const navigate = useNavigate();
