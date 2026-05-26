@@ -85,7 +85,7 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             onClick={onBookCall}
             className="font-mono text-[8.5px] tracking-[0.18em] uppercase px-5 py-[10px] border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
           >
-            Book a Fitting
+            Book a Session
           </button>
         </div>
 
@@ -129,7 +129,7 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           onClick={() => { onBookCall(); setMenuOpen(false); }}
           className="mt-2 font-mono text-[11px] tracking-[0.18em] uppercase px-5 py-3 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer self-start"
         >
-          Book a Fitting
+          Book a Session
         </button>
       </motion.div>
     </>

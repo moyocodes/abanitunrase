@@ -146,7 +146,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
 
               {/* Eyebrow */}
               <div className="font-['DM_Mono'] text-[11px] tracking-[0.28em] uppercase text-[#1a1706]/40 mb-2">
-                Book a Fitting
+                Book a Session
               </div>
 
               {/* Title */}

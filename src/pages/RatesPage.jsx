@@ -66,7 +66,7 @@ export default function RatesPage() {
           onClick={() => setBookCallOpen(true)}
           className="font-mono text-[8px] md:text-[8.5px] tracking-[0.18em] uppercase px-4 py-2.5 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
         >
-          Book a Fitting
+          Book a Session
         </button>
       </nav>
 
