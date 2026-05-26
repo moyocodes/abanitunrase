@@ -3,31 +3,44 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getBookingsByEmail } from "@/lib/firestore";
 
 const STATUS_CONFIG = {
-  new:       { label: "Submitted",   cls: "bg-sky-50 text-sky-700 border-sky-200" },
-  held:      { label: "On Hold",     cls: "bg-amber-50 text-amber-700 border-amber-200" },
-  confirmed: { label: "Confirmed ✓", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  completed: { label: "Complete",    cls: "bg-[#1a1706]/5 text-[#1a1706]/70 border-[#1a1706]/15" },
+  new: { label: "Submitted", cls: "bg-sky-50 text-sky-700 border-sky-200" },
+  held: {
+    label: "On Hold",
+    cls: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  confirmed: {
+    label: "Confirmed ✓",
+    cls: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  completed: {
+    label: "Complete",
+    cls: "bg-[#1a1706]/5 text-[#1a1706]/70 border-[#1a1706]/15",
+  },
 };
 
 const TYPE_LABELS = {
-  wedding:      "Wedding Styling",
-  occasion:     "Occasion Styling",
-  travel:       "Kájáyelo Travel",
+  wedding: "Wedding Styling",
+  occasion: "Occasion Styling",
+  travel: "Kájáyelo Travel",
   consultation: "Consultation",
 };
 
 function formatDate(ts) {
   if (!ts) return "—";
   const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
-  return d.toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
+  return d.toLocaleDateString("en-NG", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export default function BookingLookup({ open, onClose, onContinuePayment }) {
-  const [email, setEmail]     = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [bookings, setBookings] = useState([]);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -49,15 +62,20 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
   const handleClose = () => {
     onClose();
     setTimeout(() => {
-      setEmail(""); setBookings([]); setSearched(false); setError("");
+      setEmail("");
+      setBookings([]);
+      setSearched(false);
+      setError("");
     }, 400);
   };
 
   const now = new Date();
   const isExpiredHold = (b) =>
-    b.status === "held" && b.data?.heldUntil && new Date(b.data.heldUntil) < now;
+    b.status === "held" &&
+    b.data?.heldUntil &&
+    new Date(b.data.heldUntil) < now;
 
-  const active       = bookings.filter((b) => !isExpiredHold(b));
+  const active = bookings.filter((b) => !isExpiredHold(b));
   const expiredCount = bookings.length - active.length;
 
   const fieldBase =
@@ -117,7 +135,9 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
             {/* ── Scrollable body ── */}
             <div
               className="flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-6 sm:px-12 sm:pt-6 sm:pb-10"
-              style={{ paddingBottom: "max(24px, env(safe-area-inset-bottom))" }}
+              style={{
+                paddingBottom: "max(24px, env(safe-area-inset-bottom))",
+              }}
             >
               <div className="font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase text-[#1a1706]/30 mb-2">
                 Booking Status
@@ -127,7 +147,10 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
               </div>
 
               {/* Search form — stacks on mobile, side-by-side on sm+ */}
-              <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-8">
+              <form
+                onSubmit={handleSearch}
+                className="flex flex-col sm:flex-row gap-3 mb-8"
+              >
                 <input
                   className={fieldBase + " sm:flex-1"}
                   type="email"
@@ -157,8 +180,8 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                 </p>
               )}
 
-              {searched && (
-                active.length === 0 ? (
+              {searched &&
+                (active.length === 0 ? (
                   <div className="text-center py-10">
                     <div className="font-['Cormorant_Garamond'] italic text-[clamp(20px,2.4vw,30px)] text-[#1a1706]/45 mb-3">
                       No active bookings found.
@@ -173,14 +196,15 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                   <div className="flex flex-col gap-4">
                     {expiredCount > 0 && (
                       <p className="font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase text-[#1a1706]/30">
-                        {expiredCount} expired hold{expiredCount > 1 ? "s" : ""} not shown
+                        {expiredCount} expired hold{expiredCount > 1 ? "s" : ""}{" "}
+                        not shown
                       </p>
                     )}
 
                     {active.map((b) => {
-                      const cfg       = STATUS_CONFIG[b.status] ?? STATUS_CONFIG.new;
+                      const cfg = STATUS_CONFIG[b.status] ?? STATUS_CONFIG.new;
                       const typeLabel = TYPE_LABELS[b.type] ?? b.type;
-                      const service   = b.data?.service || typeLabel;
+                      const service = b.data?.service || typeLabel;
                       return (
                         <div
                           key={b.id}
@@ -195,26 +219,33 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                                 {typeLabel} · {formatDate(b.createdAt)}
                               </div>
                             </div>
-                            <span className={`font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase px-2 py-1 border flex-shrink-0 ${cfg.cls} whitespace-nowrap`}>
+                            <span
+                              className={`font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase px-2 py-1 border flex-shrink-0 ${cfg.cls} whitespace-nowrap`}
+                            >
                               {cfg.label}
                             </span>
                           </div>
 
-                          {b.status === "held" && !isExpiredHold(b) && onContinuePayment && (
-                            <div className="mt-3 pt-3 border-t border-[#1a1706]/8">
-                              <button
-                                onClick={() => { handleClose(); onContinuePayment(b); }}
-                                className="
+                          {b.status === "held" &&
+                            !isExpiredHold(b) &&
+                            onContinuePayment && (
+                              <div className="mt-3 pt-3 border-t border-[#1a1706]/8">
+                                <button
+                                  onClick={() => {
+                                    handleClose();
+                                    onContinuePayment(b);
+                                  }}
+                                  className="
                                   font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase
                                   w-full sm:w-auto px-5 py-3
                                   bg-[#1a1706] text-[#f5f0e6]
                                   hover:bg-black transition-colors cursor-pointer border-none
                                 "
-                              >
-                                Complete Payment →
-                              </button>
-                            </div>
-                          )}
+                                >
+                                  Complete Payment →
+                                </button>
+                              </div>
+                            )}
 
                           {b.data?.preferredTime && (
                             <div className="font-['DM_Mono'] text-[7.5px] tracking-[0.15em] uppercase text-[#1a1706]/40">
@@ -229,8 +260,7 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                       Questions? Email officialabanitunrase@gmail.com
                     </p>
                   </div>
-                )
-              )}
+                ))}
             </div>
           </motion.div>
         </>

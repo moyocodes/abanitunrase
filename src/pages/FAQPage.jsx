@@ -34,7 +34,6 @@ export default function FAQPage() {
       <Nav hidden={false} onBookCall={() => {}} />
 
       <div className="max-w-[820px] mx-auto px-6 md:px-10 pt-28 pb-20">
-
         {/* eyebrow */}
         <div className="font-['DM_Mono'] text-[8px] tracking-[0.4em] uppercase text-[#1a1706]/40 mb-4">
           ABÁNITÚNRASE
@@ -63,7 +62,11 @@ export default function FAQPage() {
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-20px" }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: i * 0.07 }}
+                transition={{
+                  duration: 0.6,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: i * 0.07,
+                }}
               >
                 <button
                   className="w-full flex items-center justify-between gap-4 py-4 text-left group cursor-pointer bg-transparent border-none"
@@ -105,11 +108,12 @@ export default function FAQPage() {
               Still have questions?
             </div>
             <p className="font-['Outfit'] text-[14px] text-[#1a1706]/55 leading-relaxed">
-              Reach us on WhatsApp or email — we usually respond within a few hours.
+              Reach us on WhatsApp or email — we usually respond within a few
+              hours.
             </p>
           </div>
           <a
-            href="mailto:Officialabanitunrase@gmail.com"
+            href="mailto:officialabanitunrase@gmail.com"
             className="font-['DM_Mono'] text-[8px] tracking-[0.28em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors whitespace-nowrap no-underline"
           >
             Email Us →
