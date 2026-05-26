@@ -51,7 +51,7 @@ export default function Categories({ onBook }) {
   };
 
   const toggleRates = (type) => setExpandedCat(prev => prev === type ? null : type);
-  const goToStories = (catType) => navigate("/stories/" + catType);
+  const goToStories = (catType) => navigate("/styling/" + catType);
 
   const saveCategory = async (updatedCat) => {
     const updated = categories.map((c) => c.type === updatedCat.type ? updatedCat : c);

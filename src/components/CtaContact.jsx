@@ -10,13 +10,15 @@ export default function CtaContact({ onBookCall }) {
   const [formState, setFormState] = useState({ name: "", phone: "", email: "", service: "", date: "", message: "" });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formDone, setFormDone] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const submitForm = e => {
     e.preventDefault();
     if (!formState.name.trim() || !formState.phone.trim() || !formState.email.trim()) {
-      alert("Please fill in all required fields");
+      setFormError("Please fill in your name, phone and email.");
       return;
     }
+    setFormError("");
     setFormSubmitting(true);
     saveContact(formState);
     sendBookingEmails({
@@ -284,6 +286,9 @@ export default function CtaContact({ onBookCall }) {
                     className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
+                {formError && (
+                  <p className="col-span-2 font-mono text-[8px] tracking-[0.16em] uppercase text-red-300 border-l-2 border-red-400 pl-3">{formError}</p>
+                )}
                 {/* Submit */}
                 <div className="col-span-2 flex gap-4 items-center pt-2">
                   <button

@@ -118,7 +118,7 @@ export function DataProvider({ children }) {
   const [galleryItems, setGalleryItems] = useState([...PLACEHOLDER_MEDIA]);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchAll = async () => {
     try {

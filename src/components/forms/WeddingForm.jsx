@@ -542,7 +542,7 @@ export default function WeddingForm({ onComplete }) {
                 <div
                   className={cn(
                     "mt-0.5 w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-colors",
-                    data[key] ? "border-white/50 bg-white/5" : "border-white/25 group-hover:border-white/40"
+                    data[key] ? "border-[#1a1706] bg-[#1a1706]" : "border-[#1a1706]/30 group-hover:border-[#1a1706]/60"
                   )}
                   onClick={() => set(key, !data[key])}
                 >

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
 import { getBookings, getContacts } from "@/lib/firestore";
-import { seedFirebase } from "@/lib/seed";
 
 const TYPE_COLORS = {
   wedding:      "text-purple-700 border-purple-400/50",
@@ -28,21 +27,6 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading]   = useState(true);
-  const [seeding, setSeeding]   = useState(false);
-  const [seedMsg, setSeedMsg]   = useState("");
-
-  const handleSeed = async () => {
-    setSeeding(true);
-    setSeedMsg("");
-    try {
-      await seedFirebase();
-      setSeedMsg("✓ Seeded successfully — refresh to see data.");
-    } catch (e) {
-      setSeedMsg(`Error: ${e.message}`);
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   useEffect(() => {
     Promise.all([getBookings(), getContacts()])
@@ -157,22 +141,6 @@ export default function AdminDashboard() {
                 </table>
               </div>
             )}
-          </div>
-
-          {/* Seed */}
-          <div className="mb-6 border border-dashed border-[#1a1706]/15 bg-white p-5 flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <div className="font-mono text-[11px] tracking-[0.18em] uppercase text-[#1a1706]/50 font-bold mb-1">Seed Initial Data</div>
-              <div className="font-mono text-[10px] text-[#1a1706]/40">Writes static looks &amp; categories to Firestore. Safe to re-run.</div>
-              {seedMsg && <div className="font-mono text-[10px] mt-1 text-emerald-600">{seedMsg}</div>}
-            </div>
-            <button
-              onClick={handleSeed}
-              disabled={seeding}
-              className="font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2 border border-[#1a1706]/20 text-[#1a1706]/55 hover:border-[#1a1706]/40 hover:text-[#1a1706]/80 transition-colors font-semibold bg-transparent cursor-pointer disabled:opacity-40 whitespace-nowrap"
-            >
-              {seeding ? "Seeding…" : "Seed →"}
-            </button>
           </div>
 
           {/* Quick links */}

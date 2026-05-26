@@ -9,7 +9,13 @@ export default function RadioGroup({ options, value, onChange, name }) {
         const isSelected = value === optValue;
 
         return (
-          <label key={optValue} className={cn("flex items-center gap-3 py-2 cursor-pointer group")}>
+          <label
+            key={optValue}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+              isSelected ? "bg-[#1a1706]" : "bg-[#1a1706]/[0.04] hover:bg-[#1a1706]/[0.08]"
+            )}
+          >
             <input
               type="radio"
               name={name}
@@ -21,12 +27,12 @@ export default function RadioGroup({ options, value, onChange, name }) {
             <div
               className={cn(
                 "w-4 h-4 rounded-full border flex items-center justify-center transition-colors flex-shrink-0",
-                isSelected ? "border-[#1a1706]/60" : "border-black/20 group-hover:border-black/40"
+                isSelected ? "border-[#f5f0e6]/60" : "border-[#1a1706]/30"
               )}
             >
-              {isSelected && <div className="w-2 h-2 rounded-full bg-[#1a1706]" />}
+              {isSelected && <div className="w-2 h-2 rounded-full bg-[#f5f0e6]" />}
             </div>
-            <span className="text-sm text-black/65 group-hover:text-black/90 transition-colors">
+            <span className={cn("text-sm font-medium transition-colors", isSelected ? "text-[#f5f0e6]" : "text-[#1a1706]/70")}>
               {optLabel}
             </span>
           </label>

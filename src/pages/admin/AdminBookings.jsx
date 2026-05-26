@@ -28,6 +28,14 @@ const TYPE_META = {
   coupleConsultation: { label: "Couple",   cls: "bg-orange-50 text-orange-700 border-orange-200" },
 };
 
+const TYPE_AMOUNT = {
+  wedding:            5000000,
+  occasion:           3000000,
+  travel:             5000000,
+  consultation:       10000000,
+  coupleConsultation: 15000000,
+};
+
 const EMAIL_KIND = {
   new:       "form_submitted",
   held:      "hold",
@@ -285,7 +293,7 @@ function DeleteModal({ name, onConfirm, onCancel }) {
 function Toast({ message, type }) {
   return (
     <div
-      className="fixed top-6 right-6 z-[60] px-5 py-3 font-mono text-[11px] tracking-[0.14em] uppercase font-semibold text-white shadow-lg"
+      className="fixed top-4 left-4 z-[60] px-5 py-3 font-mono text-[11px] tracking-[0.14em] uppercase font-semibold text-white shadow-lg"
       style={{ background: type === "error" ? "#c0392b" : "#1a1706" }}
     >
       {message}
@@ -443,32 +451,39 @@ export default function AdminBookings() {
         />
       )}
 
-      {paymentBooking && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md border border-[#e8e5dc]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e5dc]">
-              <div>
-                <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/50 font-semibold mb-0.5">Confirm Booking</div>
-                <div className="font-['Outfit'] text-[15px] font-semibold text-[#1a1706]">{paymentBooking.data?.fullName || paymentBooking.data?.name}</div>
+      {paymentBooking && (() => {
+        const bookingAmount = paymentBooking.data?.amount || TYPE_AMOUNT[paymentBooking.type] || 0;
+        const serviceLabel = paymentBooking.data?.service || TYPE_META[paymentBooking.type]?.label || paymentBooking.type;
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md border border-[#e8e5dc]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e5dc]">
+                <div>
+                  <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/50 font-semibold mb-0.5">Confirm Booking</div>
+                  <div className="font-['Outfit'] text-[15px] font-semibold text-[#1a1706]">{paymentBooking.data?.fullName || paymentBooking.data?.name}</div>
+                  <div className="font-mono text-[11px] text-[#1a1706]/50 mt-0.5">
+                    ₦{(bookingAmount / 100).toLocaleString("en-NG")} · {serviceLabel}
+                  </div>
+                </div>
+                <button onClick={() => setPaymentBooking(null)} className="text-[20px] text-[#1a1706]/40 hover:text-[#1a1706]/80 bg-transparent border-none cursor-pointer">✕</button>
               </div>
-              <button onClick={() => setPaymentBooking(null)} className="text-[20px] text-[#1a1706]/40 hover:text-[#1a1706]/80 bg-transparent border-none cursor-pointer">✕</button>
-            </div>
-            <div className="px-6">
-              <PaystackPayment
-                email={paymentBooking.data?.email}
-                amount={paymentBooking.data?.amount}
-                name={paymentBooking.data?.fullName || paymentBooking.data?.name}
-                phone={paymentBooking.data?.phone}
-                preferredTime={paymentBooking.data?.preferredTime}
-                formType={paymentBooking.type}
-                serviceName={paymentBooking.data?.service}
-                onSuccess={handlePaymentSuccess}
-                onClose={() => setPaymentBooking(null)}
-              />
+              <div className="px-6">
+                <PaystackPayment
+                  email={paymentBooking.data?.email}
+                  amount={bookingAmount}
+                  name={paymentBooking.data?.fullName || paymentBooking.data?.name}
+                  phone={paymentBooking.data?.phone}
+                  preferredTime={paymentBooking.data?.preferredTime}
+                  formType={paymentBooking.type}
+                  serviceName={serviceLabel}
+                  onSuccess={handlePaymentSuccess}
+                  onClose={() => setPaymentBooking(null)}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 mb-5 border-b border-[#e8e5dc]">

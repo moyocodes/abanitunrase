@@ -167,10 +167,10 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
       <AnimatePresence>
         {shareToast && (
           <motion.div
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 font-['DM_Mono'] text-[8.5px] tracking-[0.28em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] z-[900] pointer-events-none"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
+            className="fixed top-4 left-4 font-['DM_Mono'] text-[8.5px] tracking-[0.28em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] z-[900] pointer-events-none"
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
             transition={{ duration: 0.3 }}
           >
             Link copied to clipboard

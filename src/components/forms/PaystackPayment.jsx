@@ -44,6 +44,7 @@ export default function PaystackPayment({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
+  const [error, setError] = useState("");
   const serviceName =
     serviceNameProp || formNames[formType] || "Styling Consultation";
   const paystackReady = scriptReady && !!PAYSTACK_PUBLIC_KEY;
@@ -60,28 +61,11 @@ export default function PaystackPayment({
   }, []);
 
   const handlePay = () => {
-    if (!email?.trim()) {
-      alert("Please enter your email before payment.");
-      return;
-    }
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      alert("Payment amount is invalid. Please contact us directly.");
-      return;
-    }
-
-    if (!scriptReady || !window.PaystackPop) {
-      alert("Payment system is loading. Please try again in a moment.");
-      return;
-    }
-
-    if (!PAYSTACK_PUBLIC_KEY) {
-      alert(
-        "Paystack is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.",
-      );
-      return;
-    }
-
+    setError("");
+    if (!email?.trim()) { setError("Please enter your email before payment."); return; }
+    if (!Number.isFinite(amount) || amount <= 0) { setError("Payment amount is invalid. Please contact us directly."); return; }
+    if (!scriptReady || !window.PaystackPop) { setError("Payment system is loading. Please try again."); return; }
+    if (!PAYSTACK_PUBLIC_KEY) { setError("Paystack is not configured."); return; }
     setLoading(true);
 
     const reference = paymentReference(formType);
@@ -175,6 +159,10 @@ export default function PaystackPayment({
         <p className="text-[#1a1706]/28 text-xs font-['DM_Mono'] tracking-wide mb-8">
           Secure payment powered by Paystack
         </p>
+
+        {error && (
+          <p className="font-mono text-[9px] tracking-[0.16em] uppercase text-red-600/80 mb-4 border-l-2 border-red-400 pl-3">{error}</p>
+        )}
 
         <button
           onClick={handlePay}

@@ -8,14 +8,13 @@ export default function SelectInput({ options, value, onChange, placeholder }) {
         value={value}
         onChange={onChange}
         className={cn(
-          "w-full bg-transparent border-b border-black/12 py-3",
-          "text-[#1a1706] text-sm appearance-none",
-          "outline-none focus:border-black/40 transition-colors cursor-pointer",
-          !value && "text-black/30"
+          "w-full bg-[#1a1706] border border-[#1a1706]/0 px-3 py-3 pr-8",
+          "text-sm appearance-none outline-none transition-colors cursor-pointer focus:border-[#f5f0e6]/20",
+          value ? "text-[#f5f0e6]" : "text-[#f5f0e6]/35"
         )}
       >
         {placeholder && (
-          <option value="" disabled className="bg-white text-black/40">
+          <option value="" disabled className="bg-[#1a1706] text-[#f5f0e6]/50">
             {placeholder}
           </option>
         )}
@@ -23,13 +22,13 @@ export default function SelectInput({ options, value, onChange, placeholder }) {
           const optValue = typeof option === "string" ? option : option.value;
           const optLabel = typeof option === "string" ? option : option.label;
           return (
-            <option key={optValue} value={optValue} className="bg-white text-[#1a1706]">
+            <option key={optValue} value={optValue} className="bg-[#1a1706] text-[#f5f0e6]">
               {optLabel}
             </option>
           );
         })}
       </select>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-black/35">
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#f5f0e6]/40">
         <ChevronDown size={14} />
       </div>
     </div>

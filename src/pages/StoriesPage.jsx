@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "@/providers";
@@ -32,6 +33,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
   const [thumbUploading, setThumbUploading] = useState(false);
   const [videoUploading, setVideoUploading] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
+  const [uploadErr, setUploadErr] = useState("");
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -39,7 +41,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
     const file = e.target.files?.[0]; if (!file) return;
     setImgUploading(true);
     try { set("img", await uploadFile(file)); }
-    catch { alert("Image upload failed"); }
+    catch { fireToast("Image upload failed"); }
     finally { setImgUploading(false); e.target.value = ""; }
   };
 
@@ -50,7 +52,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
     try {
       const urls = await Promise.all(files.map(uploadFile));
       set("thumbs", [...draft.thumbs, ...urls]);
-    } catch { alert("Thumbnail upload failed"); }
+    } catch { setUploadErr("Thumbnail upload failed"); }
     finally { setThumbUploading(false); e.target.value = ""; }
   };
 
@@ -65,7 +67,7 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
       const { uploadToCloudinary } = await import("@/lib/cloudinary");
       const url = await uploadToCloudinary(file, (pct) => setVideoProgress(pct));
       set("video", url);
-    } catch { alert("Video upload failed"); }
+    } catch { setUploadErr("Video upload failed"); }
     finally { setVideoUploading(false); setVideoProgress(0); e.target.value = ""; }
   };
 
@@ -81,6 +83,9 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
 
   return (
     <div className="flex flex-col gap-5">
+      {uploadErr && (
+        <p className="font-mono text-[9px] tracking-[0.16em] uppercase text-red-600/80 border-l-2 border-red-400 pl-3 -mb-2">{uploadErr}</p>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-[#1a1706]/8">
         <button
@@ -284,6 +289,24 @@ function LookEditor({ initial, onSave, onDelete, onCancel }) {
   );
 }
 
+/* ── Confirm modal ─────────────────────────────────────────────────────────── */
+function ConfirmModal({ message, onConfirm, onCancel }) {
+  return createPortal(
+    <div className="fixed inset-0 z-[999999] bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-xs border border-[#e8e5dc] shadow-2xl">
+        <div className="px-5 py-4 border-b border-[#e8e5dc]">
+          <div className="font-['Outfit'] text-[14px] text-[#1a1706] font-medium">{message}</div>
+        </div>
+        <div className="px-5 py-3 flex gap-2 justify-end">
+          <button onClick={onCancel} className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 border border-[#1a1706]/20 text-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer">Cancel</button>
+          <button onClick={onConfirm} className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors border-none cursor-pointer">Delete</button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 /* ── Main page ─────────────────────────────────────────────────────────────── */
 export default function StoriesPage() {
   const { category } = useParams();
@@ -315,6 +338,9 @@ export default function StoriesPage() {
   /* ── Toast ── */
   const [toast, setToast] = useState("");
   const fireToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
+
+  /* ── Confirm delete ── */
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   /* ── Share toast ── */
   const [shareToast, setShareToast] = useState(false);
@@ -438,8 +464,14 @@ export default function StoriesPage() {
     if (!payload.id) setActiveCatIdx(payload.catIdx ?? 0);
   };
 
-  const handleDeleteLook = async (id) => {
-    if (!id || !window.confirm("Delete this look? This cannot be undone.")) return;
+  const handleDeleteLook = (id) => {
+    if (!id) return;
+    setConfirmDeleteId(id);
+  };
+
+  const doDeleteLook = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     await deleteLook(id);
     await refetch();
     fireToast("Look deleted.");
@@ -463,13 +495,20 @@ export default function StoriesPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f3f0] flex flex-col">
+      {confirmDeleteId && (
+        <ConfirmModal
+          message="Delete this look? This cannot be undone."
+          onConfirm={doDeleteLook}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
       {/* Toast */}
       <AnimatePresence>
         {(shareToast || toast) && (
           <motion.div
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 font-['Outfit'] text-[13px] font-medium px-6 py-3 bg-[#1a1706] text-[#f5f0e6] z-[900] pointer-events-none whitespace-nowrap"
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.3 }}
+            className="fixed top-4 left-4 font-['Outfit'] text-[13px] font-medium px-6 py-3 bg-[#1a1706] text-[#f5f0e6] z-[900] pointer-events-none whitespace-nowrap"
+            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.3 }}
           >
             {toast || "Link copied to clipboard"}
           </motion.div>

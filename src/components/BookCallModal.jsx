@@ -34,12 +34,15 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
     }
   }, [open, autoPayment]);
 
+  const [formError, setFormError] = useState("");
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !phone.trim()) {
-      alert("Please fill in all required fields");
+      setFormError("Please fill in your name, email and phone.");
       return;
     }
+    setFormError("");
     setSubmitting(true);
     sendBookingEmails({
       kind: "form_submitted",
@@ -275,6 +278,10 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                       <input className={fieldBase} id="bcm-time" type="datetime-local" value={time} onChange={e => setTime(e.target.value)} />
                     </div>
                   </div>
+
+                  {formError && (
+                    <p className="font-['DM_Mono'] text-[8px] tracking-[0.16em] uppercase text-red-500/80 border-l-2 border-red-400 pl-3">{formError}</p>
+                  )}
 
                   {/* Submit */}
                   <button

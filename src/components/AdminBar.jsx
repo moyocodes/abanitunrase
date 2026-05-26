@@ -1,10 +1,29 @@
 import { createContext, useContext, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/providers";
 import { useData } from "@/providers";
 import { saveLook, deleteLook } from "@/lib/firestore";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { fmt } from "@/data";
+
+/* ── Confirm Modal ──────────────────────────────────────── */
+function ConfirmModal({ message, onConfirm, onCancel }) {
+  return createPortal(
+    <div className="fixed inset-0 z-[999999] bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-xs border border-[#e8e5dc] shadow-2xl">
+        <div className="px-5 py-4 border-b border-[#e8e5dc]">
+          <div className="font-['Outfit'] text-[14px] text-[#1a1706] font-medium">{message}</div>
+        </div>
+        <div className="px-5 py-3 flex gap-2 justify-end">
+          <button onClick={onCancel} className="font-mono text-[10px] tracking-[0.14em] uppercase px-4 py-1.5 border border-[#1a1706]/15 text-[#1a1706]/55 hover:text-[#1a1706]/80 transition-colors bg-transparent cursor-pointer">Cancel</button>
+          <button onClick={onConfirm} className="font-mono text-[10px] tracking-[0.14em] uppercase px-4 py-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors border-none cursor-pointer">Delete</button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 /* ── Context ────────────────────────────────────────────── */
 const Ctx = createContext({ editMode: false, openLook: () => {}, activePanel: null, openPanel: () => {}, closePanel: () => {}, showToast: () => {} });
@@ -134,7 +153,7 @@ export function AdminEditProvider({ children }) {
     <Ctx.Provider value={{ editMode, openLook, activePanel, openPanel, closePanel, showToast }}>
       {children}
       {toastMsg && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9998] bg-[#1a1706] text-[#f5f0e6] font-mono text-[8px] tracking-[0.3em] uppercase px-5 py-2.5 shadow-xl pointer-events-none whitespace-nowrap">
+        <div className="fixed top-4 left-4 z-[9998] bg-[#1a1706] text-[#f5f0e6] font-mono text-[8px] tracking-[0.3em] uppercase px-5 py-2.5 shadow-xl pointer-events-none whitespace-nowrap">
           {toastMsg}
         </div>
       )}
@@ -193,7 +212,7 @@ function UploadImageField({ label, value, onChange }) {
       onChange(url);
       showToast("Uploaded ✓");
     } catch (ex) {
-      alert(ex.message ?? "Upload failed");
+      showToast(ex.message ?? "Upload failed");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -234,7 +253,7 @@ function UploadMediaField({ label, value, onChange }) {
       onChange(url);
       showToast("Uploaded ✓");
     } catch (ex) {
-      alert(ex.message ?? "Upload failed");
+      showToast(ex.message ?? "Upload failed");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -275,7 +294,7 @@ function UploadThumbsField({ label, value, onChange }) {
       onChange(existing + url);
       showToast("Thumbnail added ✓");
     } catch (ex) {
-      alert(ex.message ?? "Upload failed");
+      showToast(ex.message ?? "Upload failed");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -399,12 +418,14 @@ const SECTIONS = [
 function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
   const { signOut } = useAuth();
   const { looks, refetch } = useData();
+  const { showToast } = useEditMode();
   const [expanded, setExpanded] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this look?")) return;
-    try { await deleteLook(id); await refetch(); }
-    catch { alert("Delete failed."); }
+  const handleDelete = async () => {
+    try { await deleteLook(confirmId); await refetch(); showToast("Look deleted"); }
+    catch { showToast("Delete failed"); }
+    finally { setConfirmId(null); }
   };
 
   const panelOpen = Boolean(looksPanel);
@@ -485,7 +506,7 @@ function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(look.id)}
+                          onClick={() => setConfirmId(look.id)}
                           className="font-mono text-[7px] tracking-[0.15em] uppercase text-red-500/40 hover:text-red-500/80 transition-colors shrink-0"
                         >
                           Del
@@ -508,6 +529,7 @@ function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
           </div>
         </div>
       )}
+      {confirmId && <ConfirmModal message="Delete this look?" onConfirm={handleDelete} onCancel={() => setConfirmId(null)} />}
     </>
   );
 }
@@ -516,11 +538,13 @@ function FloatingAdmin({ looksPanel, setLooksPanel, closeLooks }) {
 function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, closeLooks, openPanel }) {
   const { signOut } = useAuth();
   const { looks, refetch } = useData();
+  const { showToast } = useEditMode();
+  const [confirmId, setConfirmId] = useState(null);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this look?")) return;
-    try { await deleteLook(id); await refetch(); }
-    catch { alert("Delete failed."); }
+  const handleDelete = async () => {
+    try { await deleteLook(confirmId); await refetch(); showToast("Look deleted"); }
+    catch { showToast("Delete failed"); }
+    finally { setConfirmId(null); }
   };
 
   const panelOpen = Boolean(looksPanel);
@@ -628,7 +652,7 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(look.id)}
+                          onClick={() => setConfirmId(look.id)}
                           className="font-mono text-[7px] tracking-[0.15em] uppercase text-red-500/40 hover:text-red-500/80 transition-colors shrink-0"
                         >
                           Del
@@ -651,6 +675,7 @@ function InlineAdminBar({ editMode, setEditMode, looksPanel, setLooksPanel, clos
           </div>
         </div>
       )}
+      {confirmId && <ConfirmModal message="Delete this look?" onConfirm={handleDelete} onCancel={() => setConfirmId(null)} />}
     </>
   );
 }
@@ -685,7 +710,7 @@ export function SectionEditButton({ panelId }) {
 export function SectionPanel({ panelId, title, children }) {
   const { activePanel, closePanel } = useEditMode();
   if (activePanel !== panelId) return null;
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-[99998] bg-black/30 cursor-pointer" onClick={closePanel} />
       <div className="fixed top-0 right-0 bottom-0 w-[min(100vw,400px)] z-[99999] bg-[#f8f7f3] overflow-y-auto shadow-2xl" data-admin-panel>
@@ -702,7 +727,8 @@ export function SectionPanel({ panelId, title, children }) {
           <div className="space-y-4">{children}</div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
@@ -771,7 +797,7 @@ export function PanelImageField({ label, value, onChange }) {
       onChange(url);
       showToast("Image uploaded ✓");
     } catch (ex) {
-      alert(ex.message ?? "Upload failed");
+      showToast(ex.message ?? "Upload failed");
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -813,7 +839,7 @@ export function PanelVideoField({ label, value, onChange }) {
       onChange(url);
       showToast("Video uploaded ✓");
     } catch (ex) {
-      alert(ex.message ?? "Upload failed");
+      showToast(ex.message ?? "Upload failed");
     } finally {
       setUploading(false);
       setProgress(0);

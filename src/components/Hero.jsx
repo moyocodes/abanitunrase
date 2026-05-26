@@ -90,8 +90,9 @@ export default function Hero({ onBookCall, onQuiz }) {
   };
 
   /* Split by row field: row 2 → bottom, everything else → top */
-  const row1 = (heroItems ?? []).filter(i => (i.row ?? 1) !== 2);
-  const row2 = (heroItems ?? []).filter(i => (i.row ?? 1) === 2);
+  const byPos = (a, b) => (a.position ?? 99) - (b.position ?? 99);
+  const row1 = (heroItems ?? []).filter(i => (i.row ?? 1) !== 2).sort(byPos);
+  const row2 = (heroItems ?? []).filter(i => (i.row ?? 1) === 2).sort(byPos);
 
   const handleClick = (item) => {
     if (!editMode && item.type) navigate(`/styling/${item.type}`);
@@ -143,6 +144,23 @@ export default function Hero({ onBookCall, onQuiz }) {
                       <option value="travel">Travel</option>
                     </select>
                   </div>
+                  {(() => {
+                    const rowCount = heroDraft.filter(i => (i.row ?? 1) === (item.row ?? 1)).length;
+                    return (
+                      <div className="flex gap-1 items-center">
+                        <span className="font-mono text-[6.5px] uppercase text-[#1a1706]/35 shrink-0">Column</span>
+                        <select
+                          value={item.position ?? idx + 1}
+                          onChange={e => setItem(idx, "position", Number(e.target.value))}
+                          className="font-mono text-[7px] uppercase bg-transparent text-[#1a1706]/60 border border-[#1a1706]/15 outline-none px-1 py-0.5 cursor-pointer flex-1"
+                        >
+                          {Array.from({ length: rowCount }, (_, n) => n + 1).map(n => (
+                            <option key={n} value={n}>Col {n}</option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <button
                   onClick={() => removeItem(idx)}
