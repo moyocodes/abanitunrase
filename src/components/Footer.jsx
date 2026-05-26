@@ -123,7 +123,7 @@ export default function Footer() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="text-[#f5f0e6]/80 text-3xl mb-1 tracking-[0.1em]">
-              ABÁNITÚNRASE
+         <img src="/logwhi.png" className="h-10"/>
             </div>
             <div className="font-mono text-[7.5px] tracking-[0.1em] italic text-[#f5f0e6]/45 mt-2">
               {brandSub}
