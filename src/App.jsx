@@ -11,6 +11,8 @@ import StylingPage from "@/pages/StylingPage";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfUse from "@/pages/TermsOfUse";
 import SizeGuide from "@/pages/SizeGuide";
+import BookingPolicy from "@/pages/BookingPolicy";
+import FAQPage from "@/pages/FAQPage";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminRegister from "@/pages/admin/AdminRegister";
@@ -32,6 +34,8 @@ export default function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfUse />} />
           <Route path="/size-guide" element={<SizeGuide />} />
+          <Route path="/booking-policy" element={<BookingPolicy />} />
+          <Route path="/faqs" element={<FAQPage />} />
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />

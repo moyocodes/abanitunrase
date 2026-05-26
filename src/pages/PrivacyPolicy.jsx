@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 
 export default function PrivacyPolicy() {
   return (
@@ -164,6 +165,7 @@ export default function PrivacyPolicy() {
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
