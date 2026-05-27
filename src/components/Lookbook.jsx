@@ -260,11 +260,7 @@ export default function Lookbook() {
                 )}
               </AnimatePresence>
               {/* Image caption */}
-              {activeLook && (
-                <div className="absolute bottom-8 left-8 z-20">
-                  <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/50 text-xl mb-1">{activeLook.title}</div>
-                </div>
-              )}
+           
             </div>
 
 
