@@ -37,20 +37,20 @@ export default function Footer({ onTrackBooking, onContact }) {
             <div className="mb-2">
               <Logo size={26} />
             </div>
-            <p className="text-sm text-white/60 leading-relaxed">
+            <p className="text-xs text-white/60 leading-relaxed">
               You were meant to stand out,let us help you!
             </p>
           </div>
 
           {/* Shop Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">Styling</h3>
+            <h3 className="text-xs font-semibold uppercase text-white mb-5">Styling</h3>
             <div className="flex flex-col gap-4">
               {SHOP_LINKS.map(({ label, href }) => (
                 <Link
                   key={label}
                   to={href}
-                  className="text-sm text-white/60 hover:text-white transition-colors duration-200"
+                  className="text-xs text-white/60 hover:text-white transition-colors duration-200"
                 >
                   {label}
                 </Link>
@@ -60,7 +60,7 @@ export default function Footer({ onTrackBooking, onContact }) {
 
           {/* Company Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">Links</h3>
+            <h3 className="text-xs font-semibold text-white uppercase mb-5">Links</h3>
             <div className="flex flex-col gap-4">
               {COMPANY_LINKS.map(({ label, href }) => {
                 if (label === "Track Booking" && onTrackBooking) {
@@ -68,7 +68,7 @@ export default function Footer({ onTrackBooking, onContact }) {
                     <button
                       key={label}
                       onClick={onTrackBooking}
-                      className="text-sm text-white/60 hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer text-left"
+                      className="text-xs text-white/60 hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer text-left"
                     >
                       {label}
                     </button>
@@ -79,7 +79,7 @@ export default function Footer({ onTrackBooking, onContact }) {
                     <button
                       key={label}
                       onClick={onContact}
-                      className="text-sm text-white/60 hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer text-left"
+                      className="text-xs text-white/60 hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer text-left"
                     >
                       {label}
                     </button>
@@ -89,7 +89,7 @@ export default function Footer({ onTrackBooking, onContact }) {
                   <Link
                     key={label}
                     to={href}
-                    className="text-sm text-white/60 hover:text-white transition-colors duration-200"
+                    className="text-xs text-white/60 hover:text-white transition-colors duration-200"
                   >
                     {label}
                   </Link>
@@ -100,14 +100,14 @@ export default function Footer({ onTrackBooking, onContact }) {
 
           {/* Legal Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">Legal</h3>
+            <h3 className="text-xs font-semibold text-white uppercase mb-5">Legal</h3>
             <div className="flex flex-col gap-4">
               {LEGAL_LINKS.map(({ label, href }) =>
                 href.startsWith("/") && !href.startsWith("/#") ? (
                   <Link
                     key={label}
                     to={href}
-                    className="text-sm text-white/60 hover:text-white transition-colors duration-200"
+                    className="text-xs text-white/60 hover:text-white transition-colors duration-200"
                   >
                     {label}
                   </Link>
