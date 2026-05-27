@@ -21,9 +21,9 @@ const LEGAL_LINKS = [
 ];
 
 const SOCIAL_LINKS = [
-  { label: "Instagram", href: "https://instagram.com/Abanitunrase" },
-  { label: "Pinterest", href: "#" },
-  { label: "TikTok", href: "#" },
+  // { label: "Instagram", href: "https://instagram.com/Abanitunrase" },
+  // { label: "Pinterest", href: "#" },
+  // { label: "TikTok", href: "#" },
 ];
 
 export default function Footer({ onTrackBooking, onContact }) {
