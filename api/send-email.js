@@ -1,4 +1,4 @@
-const DEFAULT_FROM = "ABÁNÍTÚNRASE <booking@abanitunrase.com>";
+const DEFAULT_FROM = "ABÁNÍTÚNRASE <bookings@abanitunrase.com>";
 const DEFAULT_TO = "officialabanitunrase@gmail.com";
 
 function escapeHtml(value = "") {
