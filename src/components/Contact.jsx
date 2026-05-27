@@ -111,7 +111,7 @@ export default function Contact() {
             within 24 hours.
           </p>
           {[
-            ["✉", "hello@abanitunrase.com"],
+            ["✉", "contact@abanitunrase.com"],
             ["☎", "+234 800 000 0000"],
             ["📍", "Lagos, Nigeria"],
             ["@", "@abanitunrase"],
