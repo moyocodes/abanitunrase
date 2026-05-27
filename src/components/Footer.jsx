@@ -32,22 +32,19 @@ export default function Footer({ onTrackBooking, onContact }) {
       {/* Main content section */}
       <div className="px-5 sm:px-10 md:px-16 py-12 md:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-10">
-          
           {/* Logo & Description */}
           <div>
-            <div className="mb-6">
+            <div className="mb-2">
               <Logo size={26} />
             </div>
             <p className="text-sm text-white/60 leading-relaxed">
-              Curated collections for your most special moments. Premium styling and booking experiences in Lagos, Nigeria.
+              You were meant to stand out,let us help you!
             </p>
           </div>
 
           {/* Shop Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">
-              Styling
-            </h3>
+            <h3 className="text-sm font-semibold text-white mb-5">Styling</h3>
             <div className="flex flex-col gap-4">
               {SHOP_LINKS.map(({ label, href }) => (
                 <Link
@@ -63,9 +60,7 @@ export default function Footer({ onTrackBooking, onContact }) {
 
           {/* Company Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">
-              Links
-            </h3>
+            <h3 className="text-sm font-semibold text-white mb-5">Links</h3>
             <div className="flex flex-col gap-4">
               {COMPANY_LINKS.map(({ label, href }) => {
                 if (label === "Track Booking" && onTrackBooking) {
@@ -105,9 +100,7 @@ export default function Footer({ onTrackBooking, onContact }) {
 
           {/* Legal Column */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-5">
-              Legal
-            </h3>
+            <h3 className="text-sm font-semibold text-white mb-5">Legal</h3>
             <div className="flex flex-col gap-4">
               {LEGAL_LINKS.map(({ label, href }) =>
                 href.startsWith("/") && !href.startsWith("/#") ? (
@@ -126,7 +119,7 @@ export default function Footer({ onTrackBooking, onContact }) {
                   >
                     {label}
                   </a>
-                )
+                ),
               )}
             </div>
           </div>
@@ -153,9 +146,7 @@ export default function Footer({ onTrackBooking, onContact }) {
               </a>
             ))}
           </div>
-          <p className="text-xs text-white/40">
-            Lagos, Nigeria
-          </p>
+          <p className="text-xs text-white/40">Lagos, Nigeria</p>
         </div>
       </div>
     </footer>
