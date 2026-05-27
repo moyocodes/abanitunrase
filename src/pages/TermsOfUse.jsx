@@ -136,7 +136,7 @@ export default function TermsOfUse() {
         </h2>
         <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
           Should you need to reschedule a confirmed booking, please notify us as
-          early as possible — ideally at least 48 hours before your scheduled
+          early as possible — ideally at least 24 hours before your scheduled
           appointment. We will do our best to accommodate a new date subject to
           availability. Rescheduling requests made with less than 24 hours'
           notice may forfeit the original consultation fee and require a new

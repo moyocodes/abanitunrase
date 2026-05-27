@@ -61,8 +61,8 @@ export default function BookingPolicy() {
         </h2>
         <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
           We understand that plans change. You may reschedule your consultation
-          once at no additional cost, provided you give us at least 48
-          hours&apos; notice. Rescheduling requests made with less than 48
+          once at no additional cost, provided you give us at least 24
+          hours&apos; notice. Rescheduling requests made with less than 24
           hours&apos; notice will incur a rescheduling fee of 20% of the
           original consultation fee.
         </p>
@@ -103,9 +103,9 @@ export default function BookingPolicy() {
           6. Spot Hold
         </h2>
         <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
-          If you are not ready to pay immediately, we offer a 48-hour spot hold.
+          If you are not ready to pay immediately, we offer a 24-hour spot hold.
           This reserves your preferred time slot while you arrange payment. If
-          full payment is not received within 48 hours, the hold expires and the
+          full payment is not received within 24 hours, the hold expires and the
           slot is released. A spot hold does not guarantee availability — it is
           a courtesy reservation subject to confirmation.
         </p>
@@ -116,7 +116,7 @@ export default function BookingPolicy() {
         </h2>
         <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
           Full styling engagements (Bridal, Occasion, or Travel) require a 50%
-          deposit to commence work. The balance is due no later than 48 hours
+          deposit to commence work. The balance is due no later than 24 hours
           before your first in-person session or wardrobe delivery. Work does
           not begin until the deposit is received and confirmed.
         </p>

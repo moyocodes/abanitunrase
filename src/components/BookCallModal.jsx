@@ -67,7 +67,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
   const handleHold = async () => {
     if (!email.trim()) return;
     setHoldState("submitting");
-    const expiresAt  = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const expiresAt  = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const heldUntil  = expiresAt.toLocaleString("en-NG", { dateStyle: "long" });
     await saveBooking("consultation", {
       fullName: name, email: email.trim(), phone,
@@ -204,7 +204,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                       </div>
                       <p className="font-['Outfit'] text-[15px] text-[#1a1706]/55
                                     leading-relaxed mb-7 max-w-xs mx-auto">
-                        Check your email. Your hold expires in 48 hours.
+                        Check your email. Your hold expires in 24 hours.
                       </p>
                       <button
                         onClick={handleClose}
@@ -224,7 +224,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                       </div>
                       <p className="font-['Outfit'] text-[14px] sm:text-[15px]
                                     text-[#1a1706]/55 leading-relaxed mb-7 max-w-xs mx-auto">
-                        Reserve your spot for 48 hours — we&apos;ll hold it while you decide.
+                        Reserve your spot for 24 hours — we&apos;ll hold it while you decide.
                       </p>
                       <div className="flex flex-col gap-3 max-w-xs mx-auto">
                         <button
@@ -244,7 +244,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                                      hover:text-[#1a1706] transition-colors cursor-pointer
                                      bg-transparent disabled:opacity-40"
                         >
-                          {holdState === "submitting" ? "Reserving…" : "Hold for 48 hours →"}
+                          {holdState === "submitting" ? "Reserving…" : "Hold for 24 hours →"}
                         </button>
                         <button
                           onClick={handleClose}
