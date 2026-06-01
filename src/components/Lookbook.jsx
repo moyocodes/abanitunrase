@@ -20,9 +20,13 @@ export default function Lookbook() {
   useEffect(() => {
     if (activePanel === "lookbook") {
       setDraft({ heading: lookbookData.heading, season: lookbookData.season, sub: lookbookData.sub });
-      setItemsDraft((lookbookData.items ?? []).map(i => ({ ...i })));
+      setItemsDraft((lookbookData.items ?? []).map(i => {
+        const live = i.lookId ? looks.find(l => l.id === i.lookId) : null;
+        if (live) return { ...i, title: live.title, sub: live.sub ?? "", img: live.img, catIdx: live.catIdx ?? 0, cat: CAT_LABELS[live.catIdx ?? 0] };
+        return { ...i };
+      }));
     }
-  }, [activePanel, lookbookData]);
+  }, [activePanel, lookbookData, looks]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -68,7 +72,9 @@ export default function Lookbook() {
   const containerRef = useRef(null);
   const [activeIdx, setActiveIdx] = useState(0);
 
-  const items = lookbookData.items ?? [];
+  const items = (lookbookData.items ?? [])
+    .map(i => i.lookId ? looks.find(l => l.id === i.lookId) : null)
+    .filter(Boolean);
   const count = items.length;
 
   const onScroll = useCallback(() => {
@@ -116,7 +122,7 @@ export default function Lookbook() {
                 {item.img && <img src={item.img} alt={item.title} className="w-8 h-10 object-cover shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <div className="font-body text-[#1a1706] text-[10px] truncate">{item.title}</div>
-                  <div className="font-mono text-[6px] tracking-[0.2em] uppercase text-[#1a1706]/35">{CAT_LABELS[item.catIdx ?? 0]}</div>
+                  {item.sub && <div className="font-mono text-[6px] tracking-[0.15em] text-[#1a1706]/35 truncate">{item.sub}</div>}
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <button onClick={() => moveItem(idx, -1)} disabled={idx === 0}
@@ -145,7 +151,7 @@ export default function Lookbook() {
                   {look.img && <img src={look.img} alt={look.title} className="w-8 h-10 object-cover shrink-0" />}
                   <div className="flex-1 min-w-0">
                     <div className="font-body text-[#1a1706] text-[10px] truncate">{look.title}</div>
-                    <div className="font-mono text-[6px] tracking-[0.2em] uppercase text-[#1a1706]/35">{CAT_LABELS[look.catIdx ?? 0]}</div>
+                    {look.sub && <div className="font-mono text-[6px] tracking-[0.15em] text-[#1a1706]/35 truncate">{look.sub}</div>}
                   </div>
                   <span className={`font-mono text-[8px] shrink-0 px-1 ${active ? "text-[#1a1706]/70" : "text-[#1a1706]/25"}`}>{active ? "✓" : "+"}</span>
                 </button>
@@ -227,7 +233,7 @@ export default function Lookbook() {
                   >
                     <div className="font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/60 mb-2 md:mb-3 flex items-center gap-2">
                       <span className="w-3 md:w-4 h-px bg-[#1a1706]/30 inline-block" />
-                      {activeLook.cat || CAT_LABELS[activeLook.catIdx ?? 0]}
+                      {activeLook.cat}
                     </div>
                     <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(24px,4vw,60px)] leading-[1.05] tracking-tight font-normal mb-2 md:mb-3">
                       {activeLook.title}
