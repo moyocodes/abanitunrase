@@ -51,7 +51,16 @@ export default function Home() {
   /* ── Intro ── */
   const [introStep, setIntroStep] = useState(0);
   const [introDismissed, setIntroDismissed] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const introVideoRef = useRef(null);
+
+  /* Derive a first-frame thumbnail from a Cloudinary video URL */
+  const introVideoPoster = (() => {
+    if (!introVideo) return "";
+    const m = introVideo.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/video\/upload\/)((?:v\d+\/)?)(.+?)(\.[a-z0-9]+)(\?.*)?$/i);
+    if (!m) return "";
+    return `${m[1]}so_0/${m[2]}${m[3]}.jpg`;
+  })();
 
   /* ── Gallery ── */
   const [dragOver, setDragOver] = useState(false);
@@ -174,13 +183,24 @@ export default function Home() {
 
       {/* INTRO */}
       <div id="intro" className={introDismissed ? "fade-to-lookbook" : ""}>
+        {/* Poster shown until video is ready to play */}
+        {introVideoPoster && !videoReady && (
+          <img
+            src={introVideoPoster}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none saturate-[0.4] brightness-[0.6]"
+          />
+        )}
         <video
           ref={introVideoRef}
           src={introVideo}
+          poster={introVideoPoster || undefined}
           autoPlay
           muted
           loop
           playsInline
+          onCanPlay={() => setVideoReady(true)}
           onLoadedMetadata={() => { if (introVideoRef.current) introVideoRef.current.currentTime = 2; }}
           className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none saturate-[0.4] brightness-[0.6]"
         />
@@ -335,7 +355,10 @@ export default function Home() {
 
         <div className="relative z-[50]">
           <CtaContact onBookCall={() => setBookCallOpen(true)} />
-          <Footer />
+          <Footer
+            onTrackBooking={() => setLookupOpen(true)}
+            onContact={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+          />
         </div>
       </div>
 

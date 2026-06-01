@@ -31,5 +31,17 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    // Reviews — anyone can read/create, only auth can delete
+    match /reviews/{id} {
+      allow read, create: if true;
+      allow delete: if request.auth != null;
+    }
+
+    // Gallery — public read, auth writes
+    match /gallery/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }

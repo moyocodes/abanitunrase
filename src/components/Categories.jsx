@@ -202,7 +202,12 @@ export default function Categories({ onBook }) {
                       {expandedCat === cat.type ? "Close" : "See Rates"}
                       <span className={`transition-transform duration-300 inline-block ${expandedCat === cat.type ? "-rotate-180" : "rotate-0"}`}>↓</span>
                     </button>
-                   
+                    <button
+                      className="flex items-center gap-2 font-['DM_Mono'] text-[8.5px] tracking-[0.18em] uppercase px-5 py-[11px] bg-transparent border border-[#1a1706]/20 text-[#1a1706]/55 cursor-pointer transition-all duration-200 hover:border-[#1a1706]/60 hover:text-[#1a1706]"
+                      onClick={() => goToStories(cat.type)}
+                    >
+                      View {cat.title} Styling →
+                    </button>
                   </motion.div>
                 </div>
               </div>
@@ -288,9 +293,14 @@ export default function Categories({ onBook }) {
                     {/* Travel Notes — travel only */}
                     {cat.type === "travel" && ratesData?.travelNotes && (
                       <div className="mt-8 pt-8 border-t border-[#1a1706]/[0.07]">
-                        <div className="whitespace-pre-wrap font-['Outfit'] text-[13px] md:text-[14px] text-[#1a1706]/70 leading-relaxed space-y-4">
+                        <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mb-5">
+                          Notes
+                        </div>
+                        <div className="space-y-5">
                           {ratesData.travelNotes.split("\n\n").map((paragraph, idx) => (
-                            <div key={idx} className="text-[#1a1706]/70">{paragraph}</div>
+                            <p key={idx} className="font-['Outfit'] text-[15px] md:text-[16px] text-[#1a1706]/65 leading-[1.9] font-light">
+                              {paragraph}
+                            </p>
                           ))}
                         </div>
                       </div>

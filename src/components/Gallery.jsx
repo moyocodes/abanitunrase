@@ -203,10 +203,10 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
         <PanelSaveBtn onClick={handleSave} saving={saving} />
 
         <div className="flex items-center justify-between mt-4 mb-1.5">
-          <span className="font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/55 uppercase tracking-[0.2em]">
+          <span className="font-mono text-[11px] font-semibold text-[#1a1706]/55 uppercase tracking-[0.2em]">
             Items ({items.length})
           </span>
-          <label className="cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/55 border border-[#1a1706]/15 px-[10px] py-1">
+          <label className="cursor-pointer font-mono text-[11px] font-semibold text-[#1a1706]/55 border border-[#1a1706]/15 px-[10px] py-1">
             + Upload
             <input type="file" multiple accept="image/*,video/mp4,video/quicktime,.mov" className="hidden" onChange={e => { handleFiles(e.target.files); e.target.value = ""; }} />
           </label>
@@ -221,10 +221,10 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
                   {item.type === "image" ? (
                     <img src={item.url} alt="" className="w-14 h-14 object-cover shrink-0" />
                   ) : (
-                    <div className="w-14 h-14 bg-[#1a1706]/10 flex items-center justify-center shrink-0 font-['Georgia,serif'] text-[18px] text-[#1a1706]/35">▶</div>
+                    <div className="w-14 h-14 bg-[#1a1706]/10 flex items-center justify-center shrink-0 font-mono text-[18px] text-[#1a1706]/35">▶</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/65 overflow-hidden text-ellipsis whitespace-nowrap">
+                    <p className="font-mono text-[11px] text-[#1a1706]/65 overflow-hidden text-ellipsis whitespace-nowrap">
                       {item.name || item.type}
                     </p>
                     {isUploading && (
@@ -242,7 +242,7 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
                     )}
                   </div>
                   <label
-                    className={`cursor-pointer font-['Georgia,serif'] text-[11px] font-semibold text-[#1a1706]/50 border border-[#1a1706]/15 px-2 py-1 shrink-0 ${isUploading ? "opacity-40 pointer-events-none" : ""}`}
+                    className={`cursor-pointer font-mono text-[11px] font-semibold text-[#1a1706]/50 border border-[#1a1706]/15 px-2 py-1 shrink-0 ${isUploading ? "opacity-40 pointer-events-none" : ""}`}
                     title="Replace"
                   >
                     ↑
@@ -262,7 +262,7 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
                   <button
                     onClick={e => handleDelete(idx, e)}
                     disabled={isUploading}
-                    className={`font-['Georgia,serif'] text-[13px] font-bold text-red-500/60 bg-transparent border-none cursor-pointer px-1.5 py-1 shrink-0 ${isUploading ? "opacity-40 cursor-not-allowed" : ""}`}
+                    className={`font-mono text-[13px] font-bold text-red-500/60 bg-transparent border-none cursor-pointer px-1.5 py-1 shrink-0 ${isUploading ? "opacity-40 cursor-not-allowed" : ""}`}
                     title="Delete"
                   >✕</button>
                 </div>
@@ -270,7 +270,7 @@ export default function Gallery({ items, onAdd, onRemove, onClear, onOpen, dragO
             );
           })}
           {items.length === 0 && (
-            <p className="font-['Georgia,serif'] text-[11px] text-[#1a1706]/30 py-3 text-center">No items yet</p>
+            <p className="font-mono text-[11px] text-[#1a1706]/30 py-3 text-center">No items yet</p>
           )}
         </div>
       </SectionPanel>

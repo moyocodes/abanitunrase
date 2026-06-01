@@ -39,10 +39,6 @@ export default function BookingPolicy() {
           your appointment. The amount varies by consultation type and is
           displayed clearly at checkout.
         </p>
-        <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
-          The consultation fee is credited toward your styling package fee if
-          you proceed to a full engagement within 30 days of your consultation.
-        </p>
 
         {/* Section 2 */}
         <h2 className="font-['Cormorant_Garamond'] italic text-[22px] text-[#1a1706] mt-10 mb-4">
@@ -80,12 +76,6 @@ export default function BookingPolicy() {
           reflects the preparation time, research, and capacity allocation
           committed to your session from the moment of booking.
         </p>
-        <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
-          For full styling packages paid in advance: if you cancel more than 7
-          days before your first session, you are eligible for a 50% refund of
-          the styling package fee (not including the consultation fee).
-          Cancellations within 7 days of the first session are non-refundable.
-        </p>
 
         {/* Section 5 */}
         <h2 className="font-['Cormorant_Garamond'] italic text-[22px] text-[#1a1706] mt-10 mb-4">
@@ -115,10 +105,10 @@ export default function BookingPolicy() {
           7. Styling Package Deposits
         </h2>
         <p className="font-['Outfit'] text-[15px] leading-[1.85] text-[#1a1706]/70 mb-4">
-          Full styling engagements (Bridal, Occasion, or Travel) require a 50%
-          deposit to commence work. The balance is due no later than 24 hours
-          before your first in-person session or wardrobe delivery. Work does
-          not begin until the deposit is received and confirmed.
+          Full styling engagements (Bridal, Occasion, or Travel) require a 80%
+          deposit to commence work. The balance is due no later than a week to
+          the event. Work does not begin until the deposit is received and
+          confirmed.
         </p>
 
         {/* Section 8 */}

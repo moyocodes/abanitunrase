@@ -25,7 +25,7 @@ const STYLING_ITEMS = [
 
 const LINKS = [
   { label: "Styling House", section: "styling-house" },
-  { label: "Lookbook",      section: "lookbook-section" },
+  { label: "Lookbook",      href: "/lookbook" },
   { label: "Rates",         href: "/rates" },
   { label: "Contact",       section: "contact" },
 ];
@@ -99,6 +99,11 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
 
         {/* Desktop Links */}
         <div className="hidden sm:flex items-center gap-5 md:gap-7">
+          {!isHome && (
+            <Link to="/" className={linkCls}>
+              Home
+            </Link>
+          )}
           {LINKS.map(({ label, section, href }) =>
             section ? (
               <button
@@ -195,6 +200,11 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           menuOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
+        {!isHome && (
+          <Link to="/" onClick={() => setMenuOpen(false)} className={mobileLinkCls}>
+            Home
+          </Link>
+        )}
         {LINKS.map(({ label, section, href }) =>
           section ? (
             <button

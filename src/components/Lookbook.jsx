@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useData } from "@/providers";
 import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, PanelImageField } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
 
-const CAT_ROUTE  = ["bridal", "occasion", "travel"];
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 
 const BLANK_ITEM = { title: "", sub: "", cat: "Bridal", catIdx: 0, img: null };
@@ -72,9 +71,8 @@ export default function Lookbook() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
-  const handleViewCategory = (item) => {
-    const cat = CAT_ROUTE[item.catIdx ?? 0] ?? "bridal";
-    navigate(`/stories/${cat}`);
+  const handleViewCategory = () => {
+    navigate("/lookbook");
   };
 
   const activeLook = items[activeIdx] ?? null;
@@ -233,10 +231,10 @@ export default function Lookbook() {
                     )}
                     <div className="w-6 md:w-8 h-px bg-[#1a1706]/20 mb-3 md:mb-6" />
                     <button
-                      onClick={() => handleViewCategory(activeLook)}
+                      onClick={() => handleViewCategory()}
                       className="self-start font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.28em] uppercase text-[#f5f0e6] bg-[#1a1706] hover:bg-black px-4 md:px-6 py-2 md:py-3 border-none cursor-pointer transition-colors duration-200"
                     >
-                      View {activeLook.cat || CAT_LABELS[activeLook.catIdx ?? 0]} Stories →
+                      View Lookbook →
                     </button>
                   </motion.div>
                 )}
@@ -270,12 +268,20 @@ export default function Lookbook() {
 
       {/* Footer stripe */}
       {items.length > 0 && (
-        <div className="px-6 md:px-16 py-4 flex items-center gap-3 border-t border-black/[0.06]">
-          <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-black/50">
-            {count} selected work{count !== 1 ? "s" : ""}
-          </span>
-          <span className="w-4 h-px bg-black/15" />
-          <span className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-black/35">Scroll to browse</span>
+        <div className="px-6 md:px-16 py-4 flex items-center justify-between gap-3 border-t border-black/[0.06]">
+          <div className="flex items-center gap-3">
+            <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-black/50">
+              {count} selected work{count !== 1 ? "s" : ""}
+            </span>
+            <span className="w-4 h-px bg-black/15" />
+            <span className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-black/35">Scroll to browse</span>
+          </div>
+          <Link
+            to="/lookbook"
+            className="font-['DM_Mono'] text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/40 px-4 py-2 transition-all duration-200 no-underline"
+          >
+            View Full Lookbook →
+          </Link>
         </div>
       )}
     </div>

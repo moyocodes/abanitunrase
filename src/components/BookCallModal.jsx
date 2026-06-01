@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaystackPayment from "@/components/forms/PaystackPayment";
-import { saveBooking } from "@/lib/firestore";
+import ConsultationCalendar from "@/components/ConsultationCalendar";
+import { saveBooking, getConsultationSlots } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 
 const consultationOptions = [
@@ -21,6 +22,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
   const [showHoldPrompt,  setShowHoldPrompt]  = useState(false);
   const [holdState,       setHoldState]       = useState("idle");
   const [formError,       setFormError]       = useState("");
+  const [slotsConfig,     setSlotsConfig]     = useState(null);  // null = not loaded yet
 
   const selectedService =
     consultationOptions.find((o) => o.value === service) ?? consultationOptions[0];
@@ -34,6 +36,13 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
       setShowPayment(true);
     }
   }, [open, autoPayment]);
+
+  // Load consultation slot config whenever modal opens
+  useEffect(() => {
+    if (open) {
+      getConsultationSlots().then(setSlotsConfig).catch(() => setSlotsConfig(null));
+    }
+  }, [open]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -88,6 +97,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
       setService("consultation"); setTime("");
       setSubmitting(false); setShowPayment(false); setDone(false);
       setShowHoldPrompt(false); setHoldState("idle"); setFormError("");
+      setSlotsConfig(null);
     }, 400);
   };
 
@@ -259,6 +269,27 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                   )}
                 </div>
 
+              /* ── Consultations closed ── */
+              ) : slotsConfig?.enabled === false ? (
+                <div className="py-10 text-center">
+                  <div className="text-[26px] text-[#1a1706]/20 mb-3">◷</div>
+                  <div className="font-['Cormorant_Garamond'] italic text-[22px] sm:text-[26px] text-[#1a1706] mb-3">
+                    Bookings Paused
+                  </div>
+                  <p className="font-['Outfit'] text-[14px] text-[#1a1706]/55 leading-[1.7] mb-7 max-w-xs mx-auto">
+                    Consultation slots aren&apos;t open right now. Reach us directly on WhatsApp or check back soon.
+                  </p>
+                  <button
+                    className="font-['DM_Mono'] text-[10px] tracking-[0.22em] uppercase
+                               px-6 py-3 border border-[#1a1706]/20 text-[#1a1706]/55
+                               hover:text-[#1a1706] hover:border-[#1a1706]/40
+                               transition-colors cursor-pointer bg-transparent"
+                    onClick={handleClose}
+                  >
+                    Close
+                  </button>
+                </div>
+
               /* ── Form ── */
               ) : (
                 <form className="flex flex-col gap-4 md:gap-5" onSubmit={handleSubmit}>
@@ -294,35 +325,39 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                     />
                   </div>
 
-                  {/* Service + Time */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                    <div className="flex flex-col gap-1.5">
-                      <label className={lblCls} htmlFor="bcm-service">Service</label>
-                      <select
-                        className={fieldBase + " cursor-pointer appearance-none [&>option]:bg-white [&>option]:text-[#1a1706]"}
-                        id="bcm-service" value={service}
-                        onChange={(e) => setService(e.target.value)}
-                      >
-                        {consultationOptions.map((o) => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
-                        ))}
-                      </select>
-                      <p className="font-['DM_Mono'] text-[9px] tracking-[0.12em]
-                                    uppercase text-[#1a1706]/32">
-                        Fee: {fmtCurrency(selectedService.amount)}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className={lblCls} htmlFor="bcm-time">
-                        Preferred Call Time
-                      </label>
-                      {/* native datetime-local — readable on all platforms */}
+                  {/* Service */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className={lblCls} htmlFor="bcm-service">Service</label>
+                    <select
+                      className={fieldBase + " cursor-pointer appearance-none [&>option]:bg-white [&>option]:text-[#1a1706]"}
+                      id="bcm-service" value={service}
+                      onChange={(e) => setService(e.target.value)}
+                    >
+                      {consultationOptions.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                    <p className="font-['DM_Mono'] text-[9px] tracking-[0.12em] uppercase text-[#1a1706]/32">
+                      Fee: {fmtCurrency(selectedService.amount)}
+                    </p>
+                  </div>
+
+                  {/* Preferred time — calendar if slots configured, fallback otherwise */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className={lblCls}>Preferred Call Time</label>
+                    {slotsConfig?.enabled ? (
+                      <ConsultationCalendar
+                        slots={slotsConfig}
+                        value={time}
+                        onChange={setTime}
+                      />
+                    ) : (
                       <input
                         className={fieldBase + " [color-scheme:light]"}
                         id="bcm-time" type="datetime-local"
                         value={time} onChange={(e) => setTime(e.target.value)}
                       />
-                    </div>
+                    )}
                   </div>
 
                   {formError && (

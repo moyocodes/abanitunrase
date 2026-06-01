@@ -3,9 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers";
 
 const NAV = [
-  { label: "Dashboard",  to: "/admin",           icon: "▦" },
-  { label: "Bookings",   to: "/admin/bookings",   icon: "≡" },
-  { label: "Emails",     to: "/admin/emails",     icon: "✉" },
+  { label: "Dashboard",     to: "/admin",                  icon: "▦" },
+  { label: "Bookings",      to: "/admin/bookings",          icon: "≡" },
+  { label: "Emails",        to: "/admin/emails",            icon: "✉" },
+  { label: "Consultations", to: "/admin/consultations",     icon: "◷" },
 ];
 
 function Sidebar({ onClose }) {

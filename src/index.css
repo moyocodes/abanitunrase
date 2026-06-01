@@ -5,7 +5,14 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { overflow-x: hidden; max-width: 100%; -webkit-font-smoothing: antialiased; }
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+  -webkit-font-smoothing: antialiased;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  color: #1a1706;
+}
 
 /* 
 html { scroll-behavior: smooth; scroll-snap-type: y proximity; } */
@@ -84,4 +91,73 @@ html { scroll-behavior: smooth; scroll-snap-type: y proximity; } */
 /* ── Booking Lookup entry visible ── */
 .track-booking-link {
   font-weight: 500;
+}
+
+/* ── Prose story (rich text output) ── */
+.prose-story p { margin-bottom: 1.4em; }
+.prose-story p:last-child { margin-bottom: 0; }
+.prose-story strong { font-weight: 600; color: rgba(26,23,6,0.9); }
+.prose-story em { font-style: italic; }
+.prose-story ul { list-style: disc; padding-left: 1.4em; margin-bottom: 1.4em; }
+.prose-story ol { list-style: decimal; padding-left: 1.4em; margin-bottom: 1.4em; }
+.prose-story li { margin-bottom: 0.4em; }
+.prose-story h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.35em; font-style: italic; color: rgba(26,23,6,0.9); margin: 1.2em 0 0.5em; font-weight: 400; }
+.prose-story h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.15em; font-style: italic; color: rgba(26,23,6,0.85); margin: 1em 0 0.4em; font-weight: 400; }
+
+/* ── Rich text editor (Tiptap) ── */
+.rte-editor .ProseMirror {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  line-height: 1.85;
+  color: rgba(26,23,6,0.8);
+  min-height: 160px;
+  padding: 12px;
+  background: #fafaf8;
+  border: 1px solid rgba(26,23,6,0.08);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.rte-editor .ProseMirror:focus { border-color: rgba(26,23,6,0.25); }
+.rte-editor .ProseMirror p { margin-bottom: 0.9em; }
+.rte-editor .ProseMirror p:last-child { margin-bottom: 0; }
+.rte-editor .ProseMirror h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.3em; font-style: italic; font-weight: 400; margin: 1em 0 0.4em; }
+.rte-editor .ProseMirror h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1em; font-style: italic; font-weight: 400; margin: 0.8em 0 0.3em; }
+.rte-editor .ProseMirror ul { list-style: disc; padding-left: 1.4em; margin-bottom: 0.9em; }
+.rte-editor .ProseMirror ol { list-style: decimal; padding-left: 1.4em; margin-bottom: 0.9em; }
+.rte-editor .ProseMirror li { margin-bottom: 0.3em; }
+.rte-editor .ProseMirror strong { font-weight: 600; }
+.rte-editor .ProseMirror em { font-style: italic; }
+.rte-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(26,23,6,0.25);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ── Dark Tiptap (inside LookSlideshow) ── */
+.rte-editor-dark .ProseMirror {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.72);
+  min-height: 120px;
+  padding: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.rte-editor-dark .ProseMirror:focus { border-color: rgba(255,255,255,0.22); }
+.rte-editor-dark .ProseMirror p { margin-bottom: 0.8em; }
+.rte-editor-dark .ProseMirror p:last-child { margin-bottom: 0; }
+.rte-editor-dark .ProseMirror h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.25em; font-style: italic; font-weight: 400; margin: 0.9em 0 0.35em; color: rgba(255,255,255,0.88); }
+.rte-editor-dark .ProseMirror ul { list-style: disc; padding-left: 1.3em; margin-bottom: 0.8em; }
+.rte-editor-dark .ProseMirror li { margin-bottom: 0.25em; }
+.rte-editor-dark .ProseMirror strong { font-weight: 600; color: rgba(255,255,255,0.88); }
+.rte-editor-dark .ProseMirror em { font-style: italic; }
+.rte-editor-dark .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(255,255,255,0.20);
+  float: left; height: 0; pointer-events: none;
 }

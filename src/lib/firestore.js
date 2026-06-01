@@ -3,6 +3,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   deleteDoc,
@@ -171,4 +172,44 @@ export async function addGalleryItem(item) {
 export async function removeGalleryItem(id) {
   guard();
   await deleteDoc(doc(db, "gallery", id));
+}
+
+export async function getConsultationSlots() {
+  if (!db) return null;
+  try {
+    const d = await getDoc(doc(db, "settings", "consultationSlots"));
+    return d.exists() ? d.data() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveConsultationSlots(data) {
+  guard();
+  await setDoc(doc(db, "settings", "consultationSlots"), data);
+}
+
+export async function saveReview({ lookId, name, rating, comment }) {
+  guard();
+  await addDoc(collection(db, "reviews"), {
+    lookId,
+    name,
+    rating,
+    comment,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function getReviewsForLook(lookId) {
+  if (!db || !lookId) return [];
+  const q = query(collection(db, "reviews"), where("lookId", "==", lookId));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
+}
+
+export async function deleteReview(id) {
+  guard();
+  await deleteDoc(doc(db, "reviews", id));
 }

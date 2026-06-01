@@ -16,6 +16,11 @@ const TYPE_META = {
       "From court vows to white wedding to the after-party — every chapter of your wedding journey dressed with intention. We build a cohesive visual identity that honours your story and holds up across every lens in the room.",
     cta: "Begin Your Bridal Journey",
     formType: "wedding",
+    process: [
+      { n: "01", title: "Consultation", desc: "An in-depth conversation about your wedding vision, aesthetic, and every event on the calendar." },
+      { n: "02", title: "Wardrobe Curation", desc: "We source and build every look — ceremony to after-party — as one cohesive visual story." },
+      { n: "03", title: "Styling Day", desc: "We are with you on the day, handling every detail so you step out fully confident." },
+    ],
   },
   occasion: {
     heading: "Occasion Styling",
@@ -24,6 +29,11 @@ const TYPE_META = {
       "Birthdays, red carpets, family portraits, headshots — the occasions where everyone will be looking. We build looks that make an entrance and reward closer inspection, engineered for the room you're walking into.",
     cta: "Book Occasion Styling",
     formType: "occasion",
+    process: [
+      { n: "01", title: "Style Brief", desc: "Tell us about the event, the room you're walking into, and how you want to feel in it." },
+      { n: "02", title: "Look Building", desc: "We pull together options engineered for that specific room — not just pretty, but strategic." },
+      { n: "03", title: "Event Ready", desc: "Fitted, photographed, confirmed. Zero last-minute chaos on the day." },
+    ],
   },
   travel: {
     heading: "Kájáyelo",
@@ -32,6 +42,11 @@ const TYPE_META = {
       "Destination-based wardrobe curation with a physical Polaroid Guide to your trip. Multiple complete looks, one carry-on, zero compromises. We build wardrobes that travel light and arrive heavy.",
     cta: "Plan Your Travel Wardrobe",
     formType: "travel",
+    process: [
+      { n: "01", title: "Destination Research", desc: "We study your itinerary — climate, culture, activities — and build a wardrobe strategy around all of it." },
+      { n: "02", title: "Capsule Curation", desc: "Multiple complete looks, one carry-on. Every piece earns its place." },
+      { n: "03", title: "Polaroid Guide", desc: "Your physical lookbook is ready before you depart — a reference you hold in your hand on the road." },
+    ],
   },
 };
 
@@ -67,13 +82,17 @@ export default function StylingPage() {
     <div className="min-h-screen bg-[#f8f7f3]">
       {/* Slim top nav */}
       <nav className="sticky top-0 z-50 h-14 bg-[#f8f7f3]/95 backdrop-blur-sm border-b border-[#1a1706]/[0.07] flex items-center justify-between px-4 md:px-20">
-        <Link
-          to="/"
-          className="font-mono text-[7.5px] uppercase text-[#1a1706]/40 hover:text-[#1a1706] transition-colors"
-        >
-          <img src="/logobg.png" alt="logo" className="h-80 w-32 md:w-48 object-contain" />
+        <Link to="/" className="flex items-center">
+          <img src="/logobg.png" alt="Abánitúnrase" className="h-7 md:h-8 object-contain" />
         </Link>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
+          <Link
+            to="/"
+            className="font-mono text-[7.5px] tracking-[0.22em] uppercase text-[#1a1706]/35 hover:text-[#1a1706] transition-colors hidden sm:block"
+          >
+            ← Home
+          </Link>
+          <div className="w-px h-3 bg-[#1a1706]/15 hidden sm:block" />
           {VALID_TYPES.map((t) => (
             <Link
               key={t}
@@ -108,9 +127,15 @@ export default function StylingPage() {
             {meta.heading}
           </h1>
           <div className="w-12 h-px bg-[#f5f0e6]/28 my-5" />
-          <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[#f5f0e6]/60 leading-relaxed font-light max-w-lg">
+          <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[#f5f0e6]/60 leading-relaxed font-light max-w-lg mb-8">
             {meta.description}
           </p>
+          <button
+            onClick={() => setFormOpen(true)}
+            className="font-mono text-[8.5px] tracking-[0.3em] uppercase px-7 py-3.5 border border-[#f5f0e6]/35 text-[#f5f0e6] hover:bg-[#f5f0e6]/10 transition-all duration-200 cursor-pointer bg-transparent"
+          >
+            {meta.cta} →
+          </button>
         </div>
       </div>
 
@@ -126,6 +151,42 @@ export default function StylingPage() {
           {category?.desc ?? meta.description}
         </p>
       </section>
+
+      {/* How It Works */}
+      {meta.process?.length > 0 && (
+        <section className="py-16 md:py-20 px-6 md:px-16 bg-[#0a0a0a]">
+          <div className="max-w-4xl mx-auto">
+            <div className="font-mono text-[7px] tracking-[0.4em] uppercase text-[#f5f0e6]/25 mb-4">
+              The Process
+            </div>
+            <h2 className="font-['Cormorant_Garamond'] italic text-[clamp(28px,3.5vw,44px)] text-[#f5f0e6] leading-tight tracking-tight mb-12">
+              How It Works
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x divide-white/[0.06]">
+              {meta.process.map(({ n, title, desc }) => (
+                <motion.div
+                  key={n}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: Number(n) * 0.08 }}
+                  className="px-0 md:px-8 first:pl-0 last:pr-0 py-6 md:py-0 border-b md:border-b-0 border-white/[0.06] last:border-b-0"
+                >
+                  <div className="font-mono text-[9px] tracking-[0.3em] text-[#f5f0e6]/20 mb-3">
+                    {n}
+                  </div>
+                  <h3 className="font-['Cormorant_Garamond'] italic text-[22px] text-[#f5f0e6] mb-3 leading-tight">
+                    {title}
+                  </h3>
+                  <p className="font-['Outfit'] text-[13px] md:text-[14px] text-[#f5f0e6]/45 leading-relaxed font-light">
+                    {desc}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Pricing grid */}
       {pricing?.length > 0 && (
