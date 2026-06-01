@@ -113,14 +113,17 @@ export default function LookbookPage() {
       />
 
       {/* ── Hero — full screen (Nav is fixed so hero fills full viewport) ── */}
-      <div className="relative overflow-hidden h-screen">
+      <div className="relative overflow-hidden h-screen bg-[#0e0d08]">
         {/* Background — full-cover video */}
         {heroBgVideo ? (
-          <video
-            src={heroBgVideo}
-            autoPlay muted loop playsInline
-            className="absolute top-0 left-0 w-full md:w-[70%] h-full object-cover object-top opacity-90 saturate-[0.7] brightness-[0.82] pointer-events-none select-none"
-          />
+          <div className="absolute inset-[-8%] pointer-events-none">
+            <video
+              src={heroBgVideo}
+              autoPlay muted loop playsInline
+              className="w-full h-full object-cover opacity-90 saturate-[0.7] brightness-[0.82] select-none"
+              style={{ objectPosition: "40% center" }}
+            />
+          </div>
         ) : (
           looks.slice(0, 4).map((l, i) => (
             <div key={i} className="absolute inset-0 pointer-events-none"
