@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const NAV_VARIANTS = {
@@ -17,11 +17,6 @@ const NAV_VARIANTS = {
   },
 };
 
-const STYLING_ITEMS = [
-  { label: "Bridal",    href: "/styling/bridal" },
-  { label: "Occasion",  href: "/styling/occasion" },
-  { label: "Travel",    href: "/styling/travel" },
-];
 
 const LINKS = [
   { label: "Styling House", section: "styling-house" },
@@ -31,12 +26,9 @@ const LINKS = [
 ];
 
 export default function Nav({ onBookCall, hidden, onTrackBooking }) {
-  const [scrolled, setScrolled]     = useState(false);
-  const [menuOpen, setMenuOpen]     = useState(false);
-  const [stylingOpen, setStylingOpen] = useState(false);
-  const [mobileStylingOpen, setMobileStylingOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const navigate    = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const location    = useLocation();
   const isHome      = location.pathname === "/";
 
@@ -120,40 +112,9 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             )
           )}
 
-          {/* Styling dropdown */}
-          <div ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setStylingOpen((o) => !o)}
-              className={`${linkCls} bg-transparent border-none cursor-pointer p-0 flex items-center gap-1`}
-            >
-              Styling
-              <span
-                className={`text-[6px] transition-transform duration-200 ${stylingOpen ? "rotate-180" : "rotate-0"}`}
-              >
-                ▾
-              </span>
-            </button>
-            {stylingOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6 }}
-                transition={{ duration: 0.18 }}
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white border border-black/10 shadow-lg min-w-[140px] py-1"
-              >
-                {STYLING_ITEMS.map(({ label, href }) => (
-                  <Link
-                    key={label}
-                    to={href}
-                    onClick={() => setStylingOpen(false)}
-                    className="block px-4 py-2.5 font-mono text-[8px] tracking-[0.2em] uppercase text-black/55 hover:text-black hover:bg-black/[0.03] transition-colors no-underline"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </motion.div>
-            )}
-          </div>
+          <Link to="/styling/bridal" className={linkCls}>
+            Styling
+          </Link>
         </div>
 
         {/* Desktop CTAs */}
@@ -226,30 +187,9 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           )
         )}
 
-        {/* Styling accordion in mobile menu */}
-        <div>
-          <button
-            onClick={() => setMobileStylingOpen((o) => !o)}
-            className={`${mobileLinkCls} bg-transparent border-none cursor-pointer flex items-center gap-2 w-full`}
-          >
-            Styling
-            <span className={`text-[8px] transition-transform duration-200 ${mobileStylingOpen ? "rotate-180" : "rotate-0"}`}>▾</span>
-          </button>
-          {mobileStylingOpen && (
-            <div className="mt-3 pl-4 flex flex-col gap-3 border-l border-black/10">
-              {STYLING_ITEMS.map(({ label, href }) => (
-                <Link
-                  key={label}
-                  to={href}
-                  onClick={() => { setMenuOpen(false); setMobileStylingOpen(false); }}
-                  className="font-mono text-[10px] tracking-[0.18em] uppercase no-underline text-black/45 hover:text-black transition-colors"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        <Link to="/styling/bridal" onClick={() => setMenuOpen(false)} className={mobileLinkCls}>
+          Styling
+        </Link>
 
         {onTrackBooking && (
           <button

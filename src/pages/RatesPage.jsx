@@ -42,6 +42,12 @@ export default function RatesPage() {
         </Link>
 
         <div className="hidden sm:flex items-center gap-5">
+          <Link
+            to="/"
+            className="font-mono text-[8px] tracking-[0.22em] uppercase text-[#1a1706]/35 hover:text-[#1a1706]/70 no-underline transition-colors"
+          >
+            Home
+          </Link>
           {tabs.map((tab) => (
             <button
               key={tab.key}
