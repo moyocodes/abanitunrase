@@ -183,6 +183,33 @@ export default function Home() {
 
       {/* INTRO */}
       <div id="intro" className={introDismissed ? "fade-to-lookbook" : ""}>
+        {/* Loader shown until video is ready */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center z-10 transition-opacity duration-700"
+          style={{ opacity: videoReady ? 0 : 1, pointerEvents: "none" }}
+        >
+          <img
+            src="/logwhi.png"
+            alt="Abánitúnrase"
+            className="h-10 opacity-0 animate-[fadeIn_0.6s_ease_0.1s_forwards]"
+          />
+          <div className="mt-8 flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="w-1 h-1 rounded-full bg-[#f5f0e6]/30"
+                style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+              />
+            ))}
+          </div>
+          <style>{`
+            @keyframes fadeIn { to { opacity: 1; } }
+            @keyframes pulse {
+              0%, 100% { opacity: 0.2; transform: scale(0.8); }
+              50%       { opacity: 0.9; transform: scale(1.2); }
+            }
+          `}</style>
+        </div>
         {/* Poster shown until video is ready to play */}
         {introVideoPoster && !videoReady && (
           <img
@@ -202,7 +229,8 @@ export default function Home() {
           playsInline
           onCanPlay={() => setVideoReady(true)}
           onLoadedMetadata={() => { if (introVideoRef.current) introVideoRef.current.currentTime = 2; }}
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.78] pointer-events-none select-none saturate-[0.4] brightness-[0.6]"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none saturate-[0.4] brightness-[0.6] transition-opacity duration-700"
+          style={{ opacity: videoReady ? 0.78 : 0 }}
         />
         <div className="absolute top-0 left-0 right-0 flex gap-[3px] px-1.5 h-[3px] z-20">
           {iprFills.map((w, i) => (
