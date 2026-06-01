@@ -67,7 +67,9 @@ const TD = ({ children, className = "" }) => (
 function BookingRow({ booking, idx, onStatusChange, onDelete }) {
   const [open, setOpen] = useState(false);
 
+  const holdExpired = booking.status === "held" && booking.data?.heldUntil && new Date(booking.data.heldUntil) < new Date();
   const meta     = STATUS_META[booking.status] ?? STATUS_META.new;
+  const badgeCls = holdExpired ? "bg-red-50 text-red-700 border-red-200" : meta.badge;
   const typeMeta = TYPE_META[booking.type]     ?? { label: booking.type, cls: "bg-[#1a1706]/5 text-[#1a1706]/50 border-[#1a1706]/10" };
   const d        = booking.data ?? {};
   const name     = d.fullName || d.name || "—";
@@ -113,13 +115,18 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
         <TD className="font-['Outfit'] text-[14px] font-semibold text-[#1a1706] whitespace-nowrap">{name}</TD>
         <TD className="font-mono text-[12px] text-[#1a1706]/60 max-w-[180px] truncate">{email || "—"}</TD>
         <TD className="font-mono text-[12px] text-[#1a1706]/60 whitespace-nowrap">{phone || "—"}</TD>
-        <TD className="font-mono text-[12px] font-semibold text-[#1a1706]/70 whitespace-nowrap">{price}</TD>
+        <TD className="font-mono text-[12px] font-semibold text-[#1a1706]/70 whitespace-nowrap">
+          {price}
+          {booking.status === "held" && !d.paid && price !== "—" && (
+            <span className="ml-1.5 text-[9px] tracking-[0.12em] uppercase text-amber-600 font-semibold">due</span>
+          )}
+        </TD>
         <TD className="font-mono text-[12px] text-[#1a1706]/55 whitespace-nowrap">{preferred}</TD>
         <TD>
           <select
             value={booking.status}
             onChange={e => onStatusChange(booking.id, e.target.value, booking)}
-            className={`font-mono text-[11px] tracking-[0.08em] uppercase py-1.5 px-2.5 border outline-none cursor-pointer transition-colors font-semibold ${meta.badge}`}
+            className={`font-mono text-[11px] tracking-[0.08em] uppercase py-1.5 px-2.5 border outline-none cursor-pointer transition-colors font-semibold ${badgeCls}`}
           >
             {STATUS_OPTIONS.map(s => (
               <option key={s} value={s}>{STATUS_META[s]?.label ?? s}</option>
@@ -312,6 +319,8 @@ export default function AdminBookings() {
   const [contactSearch, setContactSearch]   = useState("");
   const [contactService, setContactService] = useState("all");
   const [tab, setTab]                       = useState("bookings");
+  const [page, setPage]                     = useState(1);
+  const [contactPage, setContactPage]       = useState(1);
   const [paymentBooking, setPaymentBooking] = useState(null);
   const [deleteTarget, setDeleteTarget]     = useState(null);
   const [toast, setToast]                   = useState(null);
@@ -327,6 +336,9 @@ export default function AdminBookings() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { setPage(1); }, [typeFilter, statusFilter, search]);
+  useEffect(() => { setContactPage(1); }, [contactSearch, contactService]);
 
   const handleStatusChange = async (id, status, booking) => {
     if (status === "confirmed" && !booking.data?.paid) {
@@ -421,6 +433,10 @@ export default function AdminBookings() {
     return acc;
   }, {});
 
+  const PER_PAGE = 20;
+  const pageCount = Math.ceil(filtered.length / PER_PAGE);
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
   const contactServices = ["all", ...Array.from(new Set(contacts.map(c => c.service).filter(Boolean)))];
 
   const filteredContacts = contacts.filter(c => {
@@ -435,6 +451,9 @@ export default function AdminBookings() {
     }
     return true;
   });
+
+  const contactPageCount = Math.ceil(filteredContacts.length / PER_PAGE);
+  const paginatedContacts = filteredContacts.slice((contactPage - 1) * PER_PAGE, contactPage * PER_PAGE);
 
   const selectCls = "border border-[#e8e5dc] bg-white px-3 py-2 font-mono text-[11px] tracking-[0.12em] uppercase text-[#1a1706]/70 outline-none focus:border-[#1a1706]/30 cursor-pointer transition-colors font-semibold";
 
@@ -570,24 +589,45 @@ export default function AdminBookings() {
                     <TH>Client</TH>
                     <TH>Email</TH>
                     <TH>Phone</TH>
-                    <TH>Price Paid</TH>
+                    <TH>Price Paid / Due</TH>
                     <TH>Preferred Time</TH>
                     <TH>Status</TH>
                     <TH>Actions</TH>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((b, i) => (
+                  {paginated.map((b, i) => (
                     <BookingRow
                       key={b.id}
                       booking={b}
-                      idx={i}
+                      idx={(page - 1) * PER_PAGE + i}
                       onStatusChange={handleStatusChange}
                       onDelete={(id, name) => setDeleteTarget({ id, name, type: "booking" })}
                     />
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {pageCount > 1 && (
+            <div className="flex items-center justify-between mt-3 px-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
+              >
+                ← Prev
+              </button>
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/40 font-semibold">
+                Page {page} of {pageCount}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                disabled={page === pageCount}
+                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
+              >
+                Next →
+              </button>
             </div>
           )}
         </>
@@ -639,16 +679,37 @@ export default function AdminBookings() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredContacts.map((c, i) => (
+                  {paginatedContacts.map((c, i) => (
                     <ContactRow
                       key={c.id}
                       contact={c}
-                      idx={i}
+                      idx={(contactPage - 1) * PER_PAGE + i}
                       onDelete={(id, name) => setDeleteTarget({ id, name, type: "contact" })}
                     />
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {contactPageCount > 1 && (
+            <div className="flex items-center justify-between mt-3 px-1">
+              <button
+                onClick={() => setContactPage(p => Math.max(1, p - 1))}
+                disabled={contactPage === 1}
+                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
+              >
+                ← Prev
+              </button>
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/40 font-semibold">
+                Page {contactPage} of {contactPageCount}
+              </span>
+              <button
+                onClick={() => setContactPage(p => Math.min(contactPageCount, p + 1))}
+                disabled={contactPage === contactPageCount}
+                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
+              >
+                Next →
+              </button>
             </div>
           )}
         </>

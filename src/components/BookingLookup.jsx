@@ -75,8 +75,7 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
     b.data?.heldUntil &&
     new Date(b.data.heldUntil) < now;
 
-  const active = bookings.filter((b) => !isExpiredHold(b));
-  const expiredCount = bookings.length - active.length;
+  const active = bookings;
 
   const fieldBase =
     "w-full font-['Outfit'] text-base sm:text-[clamp(16px,1.4vw,19px)] text-[#1a1706] bg-transparent border-0 border-b border-[#1a1706]/13 py-[10px] outline-none transition-[border-color] duration-[250ms] placeholder:text-[#1a1706]/25 focus:border-[#1a1706]";
@@ -184,25 +183,18 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                 (active.length === 0 ? (
                   <div className="text-center py-10">
                     <div className="font-['Cormorant_Garamond'] italic text-[clamp(20px,2.4vw,30px)] text-[#1a1706]/45 mb-3">
-                      No active bookings found.
+                      No bookings found.
                     </div>
                     <p className="font-['DM_Mono'] text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/30 leading-[2]">
-                      {expiredCount > 0
-                        ? `${expiredCount} hold${expiredCount > 1 ? "s" : ""} found but expired.`
-                        : "No bookings were found for this email address."}
+                      No bookings were found for this email address.
                     </p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
-                    {expiredCount > 0 && (
-                      <p className="font-['DM_Mono'] text-[7px] tracking-[0.18em] uppercase text-[#1a1706]/30">
-                        {expiredCount} expired hold{expiredCount > 1 ? "s" : ""}{" "}
-                        not shown
-                      </p>
-                    )}
-
                     {active.map((b) => {
-                      const cfg = STATUS_CONFIG[b.status] ?? STATUS_CONFIG.new;
+                      const cfg = isExpiredHold(b)
+                        ? { label: "Hold Expired", cls: "bg-red-50 text-red-700 border-red-200" }
+                        : STATUS_CONFIG[b.status] ?? STATUS_CONFIG.new;
                       const typeLabel = TYPE_LABELS[b.type] ?? b.type;
                       const service = b.data?.service || typeLabel;
                       return (
