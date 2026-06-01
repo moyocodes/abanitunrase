@@ -637,15 +637,17 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
     return { full, curIdx, photos };
   };
 
-  /* Navigate: thumbs first, then next/prev look at the boundary */
+  /* Navigate: thumbs first, then next/prev look, then next category (loops) */
   const goNext = () => {
     const { full, curIdx } = _getMedia();
     if (curIdx < full.length - 1) {
       const next = full[curIdx + 1];
       if (next === "__video__") { setMediaType("video"); }
       else { setCurrentThumb(next); setMediaType("photo"); }
+    } else if (safeIdx < looks.length - 1) {
+      setLookIdx(i => i + 1);
     } else {
-      setLookIdx(i => Math.min(i + 1, looks.length - 1));
+      goNextCat();
     }
   };
 
@@ -663,9 +665,14 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
   /* Derive disabled states */
   const { full: _fullMedia, curIdx: _curIdx } = _getMedia();
   const canGoPrev = _curIdx > 0 || safeIdx > 0;
-  const canGoNext = _curIdx < _fullMedia.length - 1 || safeIdx < looks.length - 1;
+  const canGoNext = true; // always loops into next category
 
   const switchCat = v => { setCatFilter(v); setLookIdx(0); };
+
+  const goNextCat = () => {
+    const idx = CAT_TABS.findIndex(t => t.value === catFilter);
+    switchCat(CAT_TABS[(idx + 1) % CAT_TABS.length].value);
+  };
 
   const handleSaveLook = async payload => {
     await saveLook(payload); refetch?.();
@@ -838,12 +845,13 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
                 })}
               </div>
 
-              <button onClick={() => setLookIdx(i => Math.min(i + 1, looks.length - 1))} disabled={safeIdx >= looks.length - 1}
-                className="flex items-center gap-2 px-3 py-2 group disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer bg-transparent border-none border-l border-white/[0.05] hover:bg-white/[0.04] transition-colors shrink-0">
+              <button
+                onClick={() => { if (safeIdx < looks.length - 1) setLookIdx(i => i + 1); else goNextCat(); }}
+                className="flex items-center gap-2 px-3 py-2 group cursor-pointer bg-transparent border-none border-l border-white/[0.05] hover:bg-white/[0.04] transition-colors shrink-0">
                 <span className="text-white/28 group-hover:text-white/60 transition-colors text-[14px]">›</span>
                 {safeIdx < looks.length - 1 && looks[safeIdx+1]?.img
                   ? <img src={looks[safeIdx+1].img} alt="" className="w-[28px] h-[36px] object-cover saturate-[0.4] opacity-50 group-hover:opacity-75 group-hover:saturate-[0.7] transition-all" />
-                  : <div className="w-[28px] h-[36px]" />
+                  : <div className="w-[28px] h-[36px] flex items-center justify-center text-white/20 text-[8px] font-['DM_Mono'] tracking-wider">↺</div>
                 }
               </button>
             </div>

@@ -2,41 +2,58 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useData } from "@/providers";
-import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn, PanelImageField } from "@/components/AdminBar";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
 
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 
-const BLANK_ITEM = { title: "", sub: "", cat: "Bridal", catIdx: 0, img: null };
-
 export default function Lookbook() {
   const navigate = useNavigate();
-  const { lookbookData, refetch } = useData();
+  const { lookbookData, looks, refetch } = useData();
   const { activePanel, showToast } = useEditMode();
 
   /* ── CMS state ── */
-  const [draft, setDraft]             = useState({});
-  const [itemsDraft, setItemsDraft]   = useState([]);
-  const [saving, setSaving]           = useState(false);
-  const [expandedItem, setExpandedItem] = useState(null);
+  const [draft, setDraft]           = useState({});
+  const [itemsDraft, setItemsDraft] = useState([]);
+  const [saving, setSaving]         = useState(false);
 
   useEffect(() => {
     if (activePanel === "lookbook") {
       setDraft({ heading: lookbookData.heading, season: lookbookData.season, sub: lookbookData.sub });
       setItemsDraft((lookbookData.items ?? []).map(i => ({ ...i })));
-      setExpandedItem(null);
     }
   }, [activePanel, lookbookData]);
 
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
-  const setItem = (idx, field, val) =>
-    setItemsDraft(d => d.map((item, i) => i === idx ? { ...item, [field]: val } : item));
 
-  const addItem = () =>
-    setItemsDraft(d => [...d, { ...BLANK_ITEM }]);
+  const selectedIds = new Set(itemsDraft.map(i => i.lookId).filter(Boolean));
+
+  const toggleLook = (look) => {
+    if (selectedIds.has(look.id)) {
+      setItemsDraft(d => d.filter(i => i.lookId !== look.id));
+    } else {
+      setItemsDraft(d => [...d, {
+        lookId: look.id,
+        title:  look.title,
+        sub:    look.sub ?? "",
+        catIdx: look.catIdx ?? 0,
+        cat:    CAT_LABELS[look.catIdx ?? 0],
+        img:    look.img,
+      }]);
+    }
+  };
 
   const removeItem = (idx) =>
     setItemsDraft(d => d.filter((_, i) => i !== idx));
+
+  const moveItem = (idx, dir) =>
+    setItemsDraft(d => {
+      const next = [...d];
+      const swap = idx + dir;
+      if (swap < 0 || swap >= next.length) return d;
+      [next[idx], next[swap]] = [next[swap], next[idx]];
+      return next;
+    });
 
   const handleSave = async () => {
     setSaving(true);
@@ -88,64 +105,55 @@ export default function Lookbook() {
         <PanelField label="Season tag" value={draft.season ?? ""} onChange={v => set("season", v)} />
         <PanelField label="Description" value={draft.sub ?? ""} onChange={v => set("sub", v)} multiline />
 
-        {/* Works CRUD */}
+        {/* Selected works — ordered list */}
         <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-4">Selected Works</p>
-        <p className="font-mono text-[6.5px] tracking-[0.15em] text-[#1a1706]/35 mb-2">Separate from Stories. Each work links to its category page.</p>
-        <div className="flex flex-col gap-2">
-          {itemsDraft.map((item, idx) => (
-            <div key={idx} className="border border-[#1a1706]/12 overflow-hidden">
-              <div className="flex items-center gap-2 p-2">
-                {item.img && (
-                  <img src={item.img} alt={item.title} className="w-10 h-12 object-cover shrink-0" />
-                )}
-                <button
-                  onClick={() => setExpandedItem(expandedItem === idx ? null : idx)}
-                  className="flex-1 text-left font-body text-[#1a1706] text-[10px] truncate bg-transparent border-none cursor-pointer"
-                >
-                  {item.title || `Work ${idx + 1}`}
-                  <span className="text-[#1a1706]/40 ml-1">· {CAT_LABELS[item.catIdx ?? 0]}</span>
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); removeItem(idx); }}
-                  className="font-mono text-[9px] text-red-500/60 hover:text-red-600 bg-transparent border-none cursor-pointer px-1 flex-shrink-0"
-                  title="Remove"
-                >
-                  ✕
-                </button>
-                <span className="font-mono text-[10px] text-[#1a1706]/35 shrink-0">{expandedItem === idx ? "▴" : "▾"}</span>
-              </div>
-              {expandedItem === idx && (
-                <div className="px-2 pb-3 flex flex-col gap-2 border-t border-[#1a1706]/8">
-                  <PanelField label="Title" value={item.title ?? ""} onChange={v => setItem(idx, "title", v)} />
-                  <PanelField label="Sub-line" value={item.sub ?? ""} onChange={v => setItem(idx, "sub", v)} />
-                  <div>
-                    <label className="block font-mono text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/40 mb-1.5">Category</label>
-                    <select
-                      value={item.catIdx ?? 0}
-                      onChange={e => {
-                        const ci = Number(e.target.value);
-                        setItem(idx, "catIdx", ci);
-                        setItem(idx, "cat", CAT_LABELS[ci]);
-                      }}
-                      className="w-full bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 text-sm outline-none"
-                    >
-                      <option value={0}>Bridal</option>
-                      <option value={1}>Occasion</option>
-                      <option value={2}>Travel</option>
-                    </select>
-                  </div>
-                  <PanelImageField label="Image" value={item.img ?? ""} onChange={v => setItem(idx, "img", v)} />
+        {itemsDraft.length === 0 ? (
+          <p className="font-mono text-[6.5px] tracking-[0.15em] text-[#1a1706]/30 mt-1 mb-2">None selected — pick from looks below.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5 mt-1.5 mb-2">
+            {itemsDraft.map((item, idx) => (
+              <div key={item.lookId ?? idx} className="flex items-center gap-2 border border-[#1a1706]/10 p-1.5">
+                {item.img && <img src={item.img} alt={item.title} className="w-8 h-10 object-cover shrink-0" />}
+                <div className="flex-1 min-w-0">
+                  <div className="font-body text-[#1a1706] text-[10px] truncate">{item.title}</div>
+                  <div className="font-mono text-[6px] tracking-[0.2em] uppercase text-[#1a1706]/35">{CAT_LABELS[item.catIdx ?? 0]}</div>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={addItem}
-          className="mt-2 w-full font-mono text-[7.5px] tracking-[0.22em] uppercase border border-dashed border-[#1a1706]/20 text-[#1a1706]/45 hover:border-[#1a1706]/40 hover:text-[#1a1706]/70 py-2 bg-transparent cursor-pointer transition-colors"
-        >
-          + Add Work
-        </button>
+                <div className="flex flex-col gap-0.5">
+                  <button onClick={() => moveItem(idx, -1)} disabled={idx === 0}
+                    className="font-mono text-[8px] text-[#1a1706]/30 hover:text-[#1a1706]/70 bg-transparent border-none cursor-pointer disabled:opacity-20 leading-none px-1">▴</button>
+                  <button onClick={() => moveItem(idx, 1)} disabled={idx === itemsDraft.length - 1}
+                    className="font-mono text-[8px] text-[#1a1706]/30 hover:text-[#1a1706]/70 bg-transparent border-none cursor-pointer disabled:opacity-20 leading-none px-1">▾</button>
+                </div>
+                <button onClick={() => removeItem(idx)}
+                  className="font-mono text-[9px] text-red-500/50 hover:text-red-600 bg-transparent border-none cursor-pointer px-1 shrink-0">✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Look picker */}
+        <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-4">All Looks — tap to add / remove</p>
+        {looks.length === 0 ? (
+          <p className="font-mono text-[6.5px] tracking-[0.15em] text-[#1a1706]/30 mt-1">No looks yet. Add them in the Lookbook slideshow.</p>
+        ) : (
+          <div className="flex flex-col gap-1 mt-1.5">
+            {looks.map(look => {
+              const active = selectedIds.has(look.id);
+              return (
+                <button key={look.id} onClick={() => toggleLook(look)}
+                  className={`flex items-center gap-2 p-1.5 border text-left cursor-pointer bg-transparent transition-colors ${active ? "border-[#1a1706]/40 bg-[#1a1706]/5" : "border-[#1a1706]/10 hover:border-[#1a1706]/25"}`}>
+                  {look.img && <img src={look.img} alt={look.title} className="w-8 h-10 object-cover shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-body text-[#1a1706] text-[10px] truncate">{look.title}</div>
+                    <div className="font-mono text-[6px] tracking-[0.2em] uppercase text-[#1a1706]/35">{CAT_LABELS[look.catIdx ?? 0]}</div>
+                  </div>
+                  <span className={`font-mono text-[8px] shrink-0 px-1 ${active ? "text-[#1a1706]/70" : "text-[#1a1706]/25"}`}>{active ? "✓" : "+"}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <PanelSaveBtn onClick={handleSave} saving={saving} />
       </SectionPanel>
 
