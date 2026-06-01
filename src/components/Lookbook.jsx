@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useData } from "@/providers";
 import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
+import LookCarousel from "@/components/LookCarousel";
 
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 
@@ -68,37 +69,9 @@ export default function Lookbook() {
     } finally { setSaving(false); }
   };
 
-  /* ── Scroll-stack state ── */
-  const containerRef = useRef(null);
-  const [activeIdx, setActiveIdx] = useState(0);
-
   const items = (lookbookData.items ?? [])
     .map(i => i.lookId ? looks.find(l => l.id === i.lookId) : null)
     .filter(Boolean);
-  const count = items.length;
-
-  const onScroll = useCallback(() => {
-    if (!containerRef.current || count === 0) return;
-    const rect  = containerRef.current.getBoundingClientRect();
-    const total = containerRef.current.offsetHeight - window.innerHeight;
-    if (total > 0) {
-      const prog   = Math.max(0, Math.min(1, -rect.top / total));
-      const newIdx = Math.min(count - 1, Math.floor(prog * count));
-      setActiveIdx(prev => prev === newIdx ? prev : newIdx);
-    }
-  }, [count]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [onScroll]);
-
-  const handleViewCategory = () => {
-    navigate("/lookbook");
-  };
-
-  const activeLook = items[activeIdx] ?? null;
 
   return (
     <div id="lookbook-section" className="bg-[#f0efeb] border-t border-black/[0.05] relative">
@@ -186,97 +159,18 @@ export default function Lookbook() {
         )}
       </div>
 
-      {/* Scroll-stack */}
+      {/* Carousel */}
       {items.length === 0 ? (
         <div className="px-6 md:px-16 py-24 text-center">
           <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/45 text-2xl">No works added yet.</div>
           <p className="font-mono text-[7.5px] tracking-[0.3em] uppercase text-[#1a1706]/35 mt-3">Add works via the edit panel →</p>
         </div>
       ) : (
-        <div ref={containerRef} style={{ height: `${count * 100}vh` }}>
-          <div className="sticky top-0 h-screen overflow-hidden flex flex-col md:flex-row">
-
-            {/* Left — text panel */}
-            <div className="w-full md:w-[52%] order-2 md:order-1 flex flex-col justify-center px-5 md:px-16 py-5 md:py-10 relative bg-[#f0efeb]">
-              {/* Dot navigation — in-flow below panel when panel open, absolute at top otherwise */}
-              <div className={activePanel === "lookbook" ? "flex gap-2 mb-6" : "absolute top-8 left-6 md:left-16 flex gap-2"}>
-                {items.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      if (!containerRef.current) return;
-                      const rect  = containerRef.current.getBoundingClientRect();
-                      const total = containerRef.current.offsetHeight - window.innerHeight;
-                      window.scrollTo({ top: window.scrollY + rect.top + (i / count) * total, behavior: "smooth" });
-                    }}
-                    className={`w-[5px] h-[5px] rounded-full transition-all duration-300 border-none cursor-pointer p-0 ${
-                      activeIdx === i ? "bg-[#1a1706] scale-125" : "bg-[#1a1706]/25"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Counter */}
-              <div className="font-['DM_Mono'] text-[6px] md:text-[8px] tracking-[0.35em] uppercase text-[#1a1706]/50 mb-4 md:mb-8">
-                {String(activeIdx + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
-              </div>
-
-              <AnimatePresence mode="popLayout">
-                {activeLook && (
-                  <motion.div
-                    key={activeIdx}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex flex-col"
-                  >
-                    <div className="font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.32em] uppercase text-[#1a1706]/60 mb-2 md:mb-3 flex items-center gap-2">
-                      <span className="w-3 md:w-4 h-px bg-[#1a1706]/30 inline-block" />
-                      {activeLook.cat}
-                    </div>
-                    <h3 className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[clamp(24px,4vw,60px)] leading-[1.05] tracking-tight font-normal mb-2 md:mb-3">
-                      {activeLook.title}
-                    </h3>
-                    {activeLook.sub && (
-                      <div className="font-['Outfit'] text-[#1a1706]/70 text-[clamp(11px,1.3vw,17px)] leading-[1.7] font-light mb-4 md:mb-8 max-w-sm">
-                        {activeLook.sub}
-                      </div>
-                    )}
-                    <div className="w-6 md:w-8 h-px bg-[#1a1706]/20 mb-3 md:mb-6" />
-                    <button
-                      onClick={() => handleViewCategory()}
-                      className="self-start font-['DM_Mono'] text-[6px] md:text-[7.5px] tracking-[0.28em] uppercase text-[#f5f0e6] bg-[#1a1706] hover:bg-black px-4 md:px-6 py-2 md:py-3 border-none cursor-pointer transition-colors duration-200"
-                    >
-                      View Lookbook →
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Right — image panel */}
-            <div className="h-[72vh] shrink-0 md:h-auto md:flex-1 order-1 md:order-2 relative overflow-hidden bg-[#f0efeb]">
-              <AnimatePresence mode="popLayout">
-                {activeLook?.img && (
-                  <motion.img
-                    key={`img-${activeIdx}`}
-                    src={activeLook.img}
-                    alt={activeLook.title}
-                    className="absolute inset-0 w-full h-full object-contain object-top"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                  />
-                )}
-              </AnimatePresence>
-              {/* Image caption */}
-           
-            </div>
-
-
-          </div>
+        <div className="py-8">
+          <LookCarousel
+            looks={items}
+            onOpen={() => navigate("/lookbook")}
+          />
         </div>
       )}
 
@@ -285,10 +179,10 @@ export default function Lookbook() {
         <div className="px-6 md:px-16 py-4 flex items-center justify-between gap-3 border-t border-black/[0.06]">
           <div className="flex items-center gap-3">
             <span className="font-['DM_Mono'] text-[7px] tracking-[0.3em] uppercase text-black/50">
-              {count} selected work{count !== 1 ? "s" : ""}
+              {items.length} selected work{items.length !== 1 ? "s" : ""}
             </span>
             <span className="w-4 h-px bg-black/15" />
-            <span className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-black/35">Scroll to browse</span>
+            <span className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-black/35">Use arrows to browse</span>
           </div>
           <Link
             to="/lookbook"
