@@ -51,6 +51,19 @@ function formatDateTime(ts) {
   return `${date}, ${time}`;
 }
 
+function formatPreferredTime(val) {
+  if (!val || val === "—") return val;
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  const day = d.toLocaleDateString("en-NG", { weekday: "long" });
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const period = h >= 12 ? "pm" : "am";
+  const h12 = h % 12 || 12;
+  const time = m === 0 ? `${h12}${period}` : `${h12}:${String(m).padStart(2, "0")}${period}`;
+  return `${day} ${time}`;
+}
+
 const TH = ({ children, className = "" }) => (
   <th className={`px-3 py-3 text-left font-mono text-[11px] tracking-[0.18em] uppercase font-bold text-[#1a1706]/55 bg-[#f0ede6] border-b border-r border-[#e8e5dc] last:border-r-0 whitespace-nowrap ${className}`}>
     {children}
@@ -75,7 +88,7 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
   const name     = d.fullName || d.name || "—";
   const email    = d.email    || "";
   const phone    = d.phone    || "";
-  const preferred = d.preferredTime || d.eventDate || "—";
+  const preferred = formatPreferredTime(d.preferredTime || d.eventDate || "—");
   const price    = d.amount ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—";
 
   const SKIP = new Set(["fullName", "name", "email", "phone", "preferredTime", "eventDate", "amount", "amountLabel", "paid", "paymentReference", "heldUntil", "createdAt"]);
@@ -88,9 +101,7 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
 
   function fmtPreferred(val) {
     if (!val || val === "—") return null;
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) return formatDateTime(d);
-    return val;
+    return formatPreferredTime(val) ?? val;
   }
 
   // Core detail fields shown in drawer
@@ -105,7 +116,7 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
 
   return (
     <>
-      <tr className={`transition-colors ${open ? "bg-[#f4f2ed]" : idx % 2 === 0 ? "bg-white hover:bg-[#faf9f6]" : "bg-[#faf9f5] hover:bg-[#f5f3ee]"}`}>
+      <tr onClick={() => setOpen(v => !v)} className={`cursor-pointer transition-colors ${open ? "bg-[#f4f2ed]" : idx % 2 === 0 ? "bg-white hover:bg-[#faf9f6]" : "bg-[#faf9f5] hover:bg-[#f5f3ee]"}`}>
         <TD className="font-mono text-[12px] text-[#1a1706]/35 w-8 text-center">{idx + 1}</TD>
         <TD>
           <span className={`font-mono text-[11px] tracking-[0.1em] uppercase border px-2.5 py-1 font-semibold ${typeMeta.cls}`}>
@@ -125,7 +136,8 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
         <TD>
           <select
             value={booking.status}
-            onChange={e => onStatusChange(booking.id, e.target.value, booking)}
+            onClick={e => e.stopPropagation()}
+            onChange={e => { e.stopPropagation(); onStatusChange(booking.id, e.target.value, booking); }}
             className={`font-mono text-[11px] tracking-[0.08em] uppercase py-1.5 px-2.5 border outline-none cursor-pointer transition-colors font-semibold ${badgeCls}`}
           >
             {STATUS_OPTIONS.map(s => (
@@ -133,7 +145,7 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
             ))}
           </select>
         </TD>
-        <TD>
+        <TD onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => onDelete(booking.id, name)}
