@@ -28,6 +28,7 @@ import AdminEmails from "@/pages/admin/AdminEmails";
 import AdminConsultations from "@/pages/admin/AdminConsultations";
 import ContactPage from "@/pages/ContactPage";
 import LookbookPage from "@/pages/LookbookPage";
+import LookPage from "@/pages/LookPage";
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/booking-policy" element={<BookingPolicy />} />
           <Route path="/faqs" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/lookbook/:pos" element={<LookPage />} />
           <Route path="/lookbook" element={<LookbookPage />} />
 
           {/* Admin */}

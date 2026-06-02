@@ -1,12 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useData } from "@/providers";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import BookCallModal from "@/components/BookCallModal";
 import BookingLookup from "@/components/BookingLookup";
-import LookSlideshow from "@/components/LookSlideshow";
+import { lookToPos } from "@/pages/LookPage";
 
 const CATS = [
   { idx: 0, label: "Bridal",   yoruba: "Ìgbéyàwó" },
@@ -70,13 +69,10 @@ function CarouselCard({ look, onOpen }) {
 
 /* ── Page ───────────────────────────────────────────────────────────────────── */
 export default function LookbookPage() {
-  const { looks: allLooks, refetch } = useData();
+  const { looks: allLooks } = useData();
   const navigate = useNavigate();
   const [bookCallOpen, setBookCallOpen] = useState(false);
   const [lookupOpen,   setLookupOpen]   = useState(false);
-
-  /* slideshow: { lookId, catIdx } or null */
-  const [slideshow, setSlideshow] = useState(null);
 
   const looks = allLooks ?? [];
   const handleContact = () => navigate("/", { state: { scrollTo: "contact" } });
@@ -86,25 +82,20 @@ export default function LookbookPage() {
     l => l.video && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(l.video)
   )?.video ?? null;
 
-  const openSlideshow = (lookId, catIdx = null) =>
-    setSlideshow({ lookId, catIdx });
+  const firstCategoryLook = CATS.reduce((found, cat) => {
+    if (found) return found;
+    return looks.find(l => (l.catIdx ?? 0) === cat.idx) ?? null;
+  }, null);
+
+  const openSlideshow = (lookId) => {
+    const pos = lookToPos(looks, lookId);
+    if (pos) navigate(`/lookbook/${pos}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#0e0d08] flex flex-col">
       <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
       <BookingLookup open={lookupOpen}   onClose={() => setLookupOpen(false)} />
-
-      {/* Slideshow overlay */}
-      {slideshow && (
-        <LookSlideshow
-          allLooks={looks}
-          startLookId={slideshow.lookId}
-          startCatIdx={slideshow.catIdx}
-          onClose={() => setSlideshow(null)}
-          onBookCall={() => { setSlideshow(null); setBookCallOpen(true); }}
-          refetch={refetch}
-        />
-      )}
 
       <Nav
         hidden={false}
@@ -162,8 +153,8 @@ export default function LookbookPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => openSlideshow(looks[0]?.id ?? null, null)}
-                disabled={looks.length === 0}
+                onClick={() => openSlideshow(firstCategoryLook?.id)}
+                disabled={!firstCategoryLook}
                 className="group flex items-center gap-3 font-['DM_Mono'] text-[8px] tracking-[0.3em] uppercase px-7 py-3.5 bg-white/12 backdrop-blur-md border border-white/40 text-white hover:bg-white hover:text-[#1a1706] hover:border-white cursor-pointer transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <span className="w-5 h-5 rounded-full border border-white/50 group-hover:border-[#1a1706]/30 flex items-center justify-center text-[9px] pl-[1px] shrink-0 transition-colors">▶</span>
@@ -257,7 +248,7 @@ export default function LookbookPage() {
               Book a Consultation →
             </button>
             <button
-              onClick={() => openSlideshow(looks[0]?.id ?? null, null)}
+              onClick={() => openSlideshow(firstCategoryLook?.id)}
               className="font-['DM_Mono'] text-[7.5px] tracking-[0.3em] uppercase text-[#f5f0e6]/50 hover:text-[#f5f0e6] border-b border-[#f5f0e6]/20 hover:border-[#f5f0e6]/55 pb-px bg-transparent cursor-pointer border-x-0 border-t-0 transition-all"
             >
               Browse the lookbook ↑

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { lookToPos } from "@/pages/LookPage";
 import { motion } from "framer-motion";
 import { useData } from "@/providers";
 import Footer from "@/components/Footer";
@@ -75,8 +76,9 @@ export default function StylingPage() {
   // Hero image — use the category image (synced with Categories section), fall back to first look
   const heroImg = category?.img ?? categoryLooks[0]?.img ?? "";
 
-  const handleStoryClick = (lookIdx) => {
-    navigate("/", { state: { openStoryIdx: lookIdx } });
+  const handleStoryClick = (look) => {
+    const pos = lookToPos(looks ?? [], look.id);
+    if (pos) navigate(`/lookbook/${pos}`);
   };
 
   return (
@@ -171,7 +173,7 @@ export default function StylingPage() {
           </div>
           <LookCarousel
             looks={categoryLooks}
-            onOpen={(look) => handleStoryClick(looks.indexOf(look))}
+            onOpen={(look) => handleStoryClick(look)}
           />
         </section>
       )}

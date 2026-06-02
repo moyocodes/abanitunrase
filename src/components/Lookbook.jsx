@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useData } from "@/providers";
+import { lookToPos } from "@/pages/LookPage";
 import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
 import { saveSettings } from "@/lib/firestore";
 
@@ -95,7 +96,8 @@ export default function Lookbook() {
   }, [onScroll]);
 
   const handleViewCategory = () => {
-    navigate("/lookbook");
+    const pos = activeLook?.id ? lookToPos(looks, activeLook.id) : null;
+    navigate(pos ? `/lookbook/${pos}` : "/lookbook");
   };
 
   const activeLook = items[activeIdx] ?? null;

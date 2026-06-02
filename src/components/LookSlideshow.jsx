@@ -11,6 +11,8 @@ import StarterKit from "@tiptap/starter-kit";
 import { useAuth } from "@/providers";
 import { saveLook, deleteLook, saveReview, getReviewsForLook, deleteReview } from "@/lib/firestore";
 import { ytEmbedUrl } from "@/data";
+import { lookToPos } from "@/pages/LookPage";
+import { pickFeminineVoice, VOICE_RATE, VOICE_PITCH, VOICE_LANG } from "@/lib/voice";
 
 const CAT_LABELS = ["Bridal", "Occasion", "Travel"];
 const CAT_TABS   = [{ label: "All", value: null }, ...CAT_LABELS.map((l, i) => ({ label: l, value: i }))];
@@ -410,9 +412,8 @@ function VoiceCompact({ text }) {
     const clean = text.replace(/<[^>]+>/g, " ").trim();
     if (!clean) return;
     const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate = 0.88; utt.lang = "en-GB";
-    const voices = window.speechSynthesis.getVoices();
-    const pref = voices.find(v => v.name.includes("Google UK English Female")) || voices.find(v => v.lang === "en-GB") || null;
+    utt.rate = VOICE_RATE; utt.pitch = VOICE_PITCH; utt.lang = VOICE_LANG;
+    const pref = pickFeminineVoice();
     if (pref) utt.voice = pref;
     utt.onstart = () => { setPlaying(true); setPaused(false); };
     utt.onend = utt.onerror = () => { setPlaying(false); setPaused(false); };
@@ -456,9 +457,8 @@ function VoiceCompactLight({ text }) {
     const clean = text.replace(/<[^>]+>/g, " ").trim();
     if (!clean) return;
     const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate = 0.88; utt.lang = "en-GB";
-    const voices = window.speechSynthesis.getVoices();
-    const pref = voices.find(v => v.name.includes("Google UK English Female")) || voices.find(v => v.lang === "en-GB") || null;
+    utt.rate = VOICE_RATE; utt.pitch = VOICE_PITCH; utt.lang = VOICE_LANG;
+    const pref = pickFeminineVoice();
     if (pref) utt.voice = pref;
     const est = (clean.length / 14) * 1000;
     let start = Date.now();
@@ -521,9 +521,8 @@ function VoiceBar({ text }) {
     const clean = text.replace(/<[^>]+>/g, " ").trim();
     if (!clean) return;
     const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate = 0.88; utt.pitch = 1.0; utt.lang = "en-GB";
-    const voices = window.speechSynthesis.getVoices();
-    const pref = voices.find(v=>v.name.includes("Google UK English Female")) || voices.find(v=>v.lang==="en-GB") || voices.find(v=>v.lang.startsWith("en")) || null;
+    utt.rate = VOICE_RATE; utt.pitch = VOICE_PITCH; utt.lang = VOICE_LANG;
+    const pref = pickFeminineVoice();
     if (pref) utt.voice = pref;
     const est = (clean.length / 14) * 1000;
     let start = Date.now();
@@ -577,7 +576,7 @@ function ConfirmDelete({ message, onConfirm, onCancel }) {
 /* ══════════════════════════════════════════════════════════════════════════════
    Main LookSlideshow component
 ══════════════════════════════════════════════════════════════════════════════ */
-export default function LookSlideshow({ allLooks = [], startLookId = null, startCatIdx = null, onClose, onBookCall, refetch }) {
+export default function LookSlideshow({ allLooks = [], startLookId = null, startCatIdx = null, onClose, onBookCall, onLookChange, refetch }) {
   const { user } = useAuth();
 
   const [catFilter,    setCatFilter]    = useState(startCatIdx);
@@ -590,6 +589,8 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
 
   const safeIdx = Math.min(lookIdx, Math.max(0, looks.length - 1));
   const look    = looks[safeIdx] ?? null;
+
+  useEffect(() => { if (look?.id) onLookChange?.(look.id); }, [look?.id]);
 
   const [currentThumb, setCurrentThumb] = useState(look?.img ?? "");
   const [mediaType,    setMediaType]    = useState("photo");
@@ -686,7 +687,10 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
     setLookIdx(i => Math.max(0, i - 1));
   };
   const share = () => {
-    const url = window.location.origin + "/lookbook";
+    const pos = lookToPos(allLooks, look?.id);
+    const url = pos
+      ? window.location.origin + "/lookbook/" + pos
+      : window.location.origin + "/lookbook";
     if (navigator.share) navigator.share({ title: look?.title + " — Lookbook", url });
     else navigator.clipboard.writeText(url).then(() => fireToast("Link copied ✓"));
   };
@@ -868,7 +872,7 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
                 <motion.div key={look?.id ?? safeIdx} initial={{opacity:0,x:10}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-10}} transition={{duration:0.25}}>
                   {/* Meta */}
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="font-['DM_Mono'] text-[6.5px] tracking-[0.3em] uppercase text-[#1a1706]/28">{look?.cat ?? CAT_LABELS[look?.catIdx ?? 0]}</span>
+                    <span className="font-['DM_Mono'] text-[6.5px] tracking-[0.3em] uppercase text-[#1a1706]/28">{CAT_LABELS[look?.catIdx ?? 0]}</span>
                     {looks.length > 1 && <>
                       <span className="w-2 h-px bg-[#1a1706]/15 inline-block"/>
                       <span className="font-['DM_Mono'] text-[6.5px] tracking-[0.3em] uppercase text-[#1a1706]/22">{String(safeIdx+1).padStart(2,"0")} / {String(looks.length).padStart(2,"0")}</span>

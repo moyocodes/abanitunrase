@@ -98,7 +98,7 @@ export async function deleteContact(id) {
 export async function getLooks() {
   if (!db) return [];
   const snap = await getDocs(collection(db, "looks"));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
 export async function saveLook(look) {

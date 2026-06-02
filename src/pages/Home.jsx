@@ -232,7 +232,10 @@ export default function Home() {
           className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none saturate-[0.4] brightness-[0.6] transition-opacity duration-700"
           style={{ opacity: videoReady ? 0.78 : 0 }}
         />
-        <div className="absolute top-0 left-0 right-0 flex gap-[3px] px-1.5 h-[3px] z-20">
+        <div
+          className="absolute top-0 left-0 right-0 flex gap-[3px] px-1.5 h-[3px] z-20 transition-opacity duration-500"
+          style={{ opacity: videoReady ? 1 : 0, transitionDelay: videoReady ? "400ms" : "0ms" }}
+        >
           {iprFills.map((w, i) => (
             <div
               key={i}
@@ -249,7 +252,10 @@ export default function Home() {
         <div className="absolute top-5 right-6 w-3.5 h-3.5 border-t border-r border-[#f5f0e6]/20" />
         <div className="absolute bottom-5 left-6 w-3.5 h-3.5 border-b border-l border-[#f5f0e6]/20" />
         <div className="absolute bottom-5 right-6 w-3.5 h-3.5 border-b border-r border-[#f5f0e6]/20" />
-        <div className="relative text-center px-6 w-[min(96vw,1040px)] z-20 h-[340px]">
+        <div
+          className="relative text-center px-6 w-[min(96vw,1040px)] z-20 h-[340px] transition-opacity duration-500"
+          style={{ opacity: videoReady ? 1 : 0, transitionDelay: videoReady ? "400ms" : "0ms" }}
+        >
           {[
             {
               big: (

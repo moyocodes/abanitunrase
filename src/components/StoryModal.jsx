@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ytEmbedUrl } from "../data.js";
+import { pickFeminineVoice, VOICE_RATE, VOICE_PITCH, VOICE_LANG } from "@/lib/voice";
 export default function StoryModal({ open, onClose, looks, initialLookIdx, onBook, onBookCall }) {
   const [curLook, setCurLook] = useState(initialLookIdx || 0);
   const [curActiveCatIdx, setCurActiveCatIdx] = useState(0);
@@ -63,16 +64,8 @@ export default function StoryModal({ open, onClose, looks, initialLookIdx, onBoo
     if (voiceTimerRef.current) { clearInterval(voiceTimerRef.current); voiceTimerRef.current = null; }
     const text = looks[curLook].story;
     const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 0.88; utt.pitch = 1.0; utt.lang = "en-GB";
-    const voices = window.speechSynthesis.getVoices();
-    const pref =
-      voices.find(v => v.name.includes("Google UK English Female")) ||
-      voices.find(v => v.name.includes("Serena") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Daniel") && v.lang.startsWith("en")) ||
-      voices.find(v => v.name.includes("Samantha") && v.lang.startsWith("en")) ||
-      voices.find(v => v.lang === "en-GB") ||
-      voices.find(v => v.lang.startsWith("en")) ||
-      null;
+    utt.rate = VOICE_RATE; utt.pitch = VOICE_PITCH; utt.lang = VOICE_LANG;
+    const pref = pickFeminineVoice();
     if (pref) utt.voice = pref;
     const estDuration = (text.length / 14) * 1000;
     let startTime = Date.now();
