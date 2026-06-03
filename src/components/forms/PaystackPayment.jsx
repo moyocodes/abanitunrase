@@ -27,7 +27,7 @@ const formNames = {
 function paymentReference(formType) {
   const service = formType || "consultation";
   const random = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `ABN-${service}-${Date.now()}-${random}`;
+  return `AB-${service}-${Date.now()}-${random}`;
 }
 
 export default function PaystackPayment({
@@ -60,7 +60,7 @@ export default function PaystackPayment({
     document.head.appendChild(script);
   }, []);
 
-  const chargeAmount = Math.round(amount * 1.02);
+  const chargeAmount = Math.round(amount * 1.015);
 
   const handlePay = () => {
     setError("");
@@ -87,29 +87,45 @@ export default function PaystackPayment({
         ],
       },
       callback: (response) => {
-        setLoading(false);
         const resolvedReference = response.reference || reference;
 
-        // Fire-and-forget the async work — don't make callback itself async
-        sendBookingEmails({
-          name,
-          email: email.trim(),
-          phone,
-          preferredTime,
-          formType,
-          serviceName,
-          amount,
-          amountLabel: formatAmount(amount),
-          reference: resolvedReference,
-        }).catch((err) => {
-          console.error("Failed to send booking emails:", err);
-        });
+        const finish = () => {
+          sendBookingEmails({
+            name,
+            email: email.trim(),
+            phone,
+            preferredTime,
+            formType,
+            serviceName,
+            amount,
+            amountLabel: formatAmount(amount),
+            reference: resolvedReference,
+          }).catch((err) => {
+            console.error("Failed to send booking emails:", err);
+          });
 
-        setSuccess(true);
-        setTimeout(
-          () => onSuccess({ ...response, reference: resolvedReference }),
-          1500,
-        );
+          setLoading(false);
+          setSuccess(true);
+          setTimeout(
+            () => onSuccess({ ...response, reference: resolvedReference }),
+            1500,
+          );
+        };
+
+        fetch(`/api/verify-payment?reference=${encodeURIComponent(resolvedReference)}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.verified) {
+              finish();
+            } else {
+              setLoading(false);
+              setError("Payment could not be verified. Please contact us with your reference: " + resolvedReference);
+            }
+          })
+          .catch(() => {
+            setLoading(false);
+            setError("Could not verify payment. Please contact us with your reference: " + resolvedReference);
+          });
       },
       onClose: () => {
         setLoading(false);
@@ -151,13 +167,8 @@ export default function PaystackPayment({
         <p className="font-['DM_Mono'] text-[10px] tracking-[0.3em] uppercase text-[#1a1706]/38 mb-4">
           Payment Summary
         </p>
-        <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-1">
+        <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-4xl mb-8">
           {formatAmount(chargeAmount)}
-        </div>
-        <div className="flex items-center gap-3 mb-8">
-          <span className="text-[#1a1706]/35 text-xs font-['DM_Mono'] tracking-wide">{formatAmount(amount)}</span>
-          <span className="text-[#1a1706]/25 text-xs font-['DM_Mono']">+</span>
-          <span className="text-[#1a1706]/35 text-xs font-['DM_Mono'] tracking-wide">2% processing fee</span>
         </div>
 
         {error && (

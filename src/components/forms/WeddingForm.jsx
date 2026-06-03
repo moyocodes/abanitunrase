@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
+import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
 import FormField from "./fields/FormField";
 import TextInput from "./fields/TextInput";
@@ -76,7 +77,9 @@ const emptyState = {
   confirmFees: false,
 };
 
-export default function WeddingForm({ onComplete }) {
+export default function WeddingForm({ onComplete, amount: amountProp }) {
+  const { bridal } = useData();
+  const packageAmount = (bridal?.find(p => p.featured) ?? bridal?.[0])?.price ?? 0;
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -175,7 +178,7 @@ export default function WeddingForm({ onComplete }) {
         email={data.email}
         phone={data.phone}
         preferredTime={data.attireTimeline}
-        amount={5000000}
+        amount={(amountProp ?? packageAmount) * 100}
         onSuccess={handlePaymentSuccess}
         onClose={() => { setShowPayment(false); setShowHoldPrompt(true); }}
         formType="wedding"
@@ -538,13 +541,12 @@ export default function WeddingForm({ onComplete }) {
               { key: "confirmTimeline", label: "I understand ABÁNITÚNRASE recommends a 3–6 month styling timeline" },
               { key: "confirmFees", label: "I understand styling fees do not include garment purchases or tailoring" },
             ].map(({ key, label }) => (
-              <label key={key} className="flex items-start gap-3 cursor-pointer group">
+              <div key={key} className="flex items-start gap-3 cursor-pointer group" onClick={() => set(key, !data[key])}>
                 <div
                   className={cn(
                     "mt-0.5 w-4 h-4 border flex items-center justify-center flex-shrink-0 transition-colors",
                     data[key] ? "border-[#1a1706] bg-[#1a1706]" : "border-[#1a1706]/30 group-hover:border-[#1a1706]/60"
                   )}
-                  onClick={() => set(key, !data[key])}
                 >
                   {data[key] && (
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -552,13 +554,10 @@ export default function WeddingForm({ onComplete }) {
                     </svg>
                   )}
                 </div>
-                <span
-                  className="text-sm text-[#1a1706]/75 group-hover:text-[#1a1706] transition-colors"
-                  onClick={() => set(key, !data[key])}
-                >
+                <span className="text-sm text-[#1a1706]/75 group-hover:text-[#1a1706] transition-colors">
                   {label}
                 </span>
-              </label>
+              </div>
             ))}
           </div>
         </div>

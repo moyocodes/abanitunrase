@@ -61,6 +61,7 @@ export default function StylingPage() {
   const navigate = useNavigate();
   const { categories, looks } = useData();
   const [formType, setFormType] = useState(null);
+  const [formPrice, setFormPrice] = useState(null);
   const [bookCallOpen, setBookCallOpen] = useState(false);
   const [ratesTab, setRatesTab] = useState(type);
 
@@ -157,7 +158,7 @@ export default function StylingPage() {
         activeTab={ratesTab}
         setActiveTab={setRatesTab}
         onBookCall={() => setBookCallOpen(true)}
-        onBook={(t) => setFormType(t)}
+        onBook={(t, price) => { setFormType(t); setFormPrice(price ?? null); }}
       />
 
       {/* Selected looks — shared carousel */}
@@ -202,9 +203,9 @@ export default function StylingPage() {
         onClose={() => setFormType(null)}
         title={formType === "wedding" ? "Wedding Styling Intake" : formType === "occasion" ? "Occasion Styling" : "Kájáyelo Travel Styling"}
       >
-        {formType === "wedding"  && <WeddingForm  onComplete={() => setFormType(null)} />}
-        {formType === "occasion" && <OccasionForm onComplete={() => setFormType(null)} />}
-        {formType === "travel"   && <TravelForm   onComplete={() => setFormType(null)} />}
+        {formType === "wedding"  && <WeddingForm  onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "occasion" && <OccasionForm onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "travel"   && <TravelForm   onComplete={() => setFormType(null)} amount={formPrice} />}
       </FormModal>
 
       <Footer />

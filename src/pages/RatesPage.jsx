@@ -20,6 +20,7 @@ export default function RatesPage() {
   const [activeTab, setActiveTab] = useState("bridal");
   const [bookCallOpen, setBookCallOpen] = useState(false);
   const [formType, setFormType] = useState(null);
+  const [formPrice, setFormPrice] = useState(null);
 
   useEffect(() => {
     document.body.style.overflow =
@@ -99,7 +100,7 @@ export default function RatesPage() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onBookCall={() => setBookCallOpen(true)}
-          onBook={(type) => setFormType(type)}
+          onBook={(type, price) => { setFormType(type); setFormPrice(price ?? null); }}
         />
       </main>
 
@@ -122,13 +123,13 @@ export default function RatesPage() {
         }
       >
         {formType === "wedding" && (
-          <WeddingForm onComplete={() => setFormType(null)} />
+          <WeddingForm onComplete={() => setFormType(null)} amount={formPrice} />
         )}
         {formType === "occasion" && (
-          <OccasionForm onComplete={() => setFormType(null)} />
+          <OccasionForm onComplete={() => setFormType(null)} amount={formPrice} />
         )}
         {formType === "travel" && (
-          <TravelForm onComplete={() => setFormType(null)} />
+          <TravelForm onComplete={() => setFormType(null)} amount={formPrice} />
         )}
       </FormModal>
     </div>

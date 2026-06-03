@@ -4,17 +4,28 @@ import PaystackPayment from "@/components/forms/PaystackPayment";
 import ConsultationCalendar from "@/components/ConsultationCalendar";
 import { saveBooking, getConsultationSlots } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
+import { useData } from "@/providers";
 
-const consultationOptions = [
-  { value: "consultation",       label: "General Consultation",  amount: 10000000 },
-  { value: "coupleConsultation", label: "Couple's Consultation", amount: 15000000 },
-];
+function priceToKobo(priceStr) {
+  const n = parseInt(String(priceStr ?? "").replace(/[^0-9]/g, ""), 10) || 0;
+  return n * 100;
+}
 
 export default function BookCallModal({ open, onClose, onTrackBooking, prefill, autoPayment }) {
+  const { ratesData } = useData();
+
+  const consultationOptions = (ratesData.consultations ?? []).map((c) => ({
+    value: c.label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""),
+    label: c.label,
+    amount: priceToKobo(c.price),
+  }));
+
+  const defaultService = consultationOptions[0]?.value ?? "";
+
   const [name,            setName]            = useState(prefill?.name    ?? "");
   const [email,           setEmail]           = useState(prefill?.email   ?? "");
   const [phone,           setPhone]           = useState(prefill?.phone   ?? "");
-  const [service,         setService]         = useState(prefill?.service ?? "consultation");
+  const [service,         setService]         = useState(prefill?.service ?? defaultService);
   const [time,            setTime]            = useState(prefill?.time    ?? "");
   const [submitting,      setSubmitting]      = useState(false);
   const [showPayment,     setShowPayment]     = useState(false);
@@ -36,6 +47,13 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
       setShowPayment(true);
     }
   }, [open, autoPayment]);
+
+  // Sync default service once consultationOptions are available
+  useEffect(() => {
+    if (!prefill?.service && consultationOptions.length > 0 && !service) {
+      setService(consultationOptions[0].value);
+    }
+  }, [consultationOptions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load consultation slot config whenever modal opens
   useEffect(() => {
@@ -288,6 +306,15 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                   >
                     Close
                   </button>
+                </div>
+
+              /* ── No consultations configured ── */
+              ) : consultationOptions.length === 0 ? (
+                <div className="py-10 text-center">
+                  <p className="font-['Outfit'] text-[15px] text-[#1a1706]/55 leading-[1.7]">
+                    No consultation services are configured yet. Reach us via WhatsApp.
+                  </p>
+                  <button className="mt-6 font-['DM_Mono'] text-[10px] tracking-[0.22em] uppercase px-6 py-3 border border-[#1a1706]/20 text-[#1a1706]/55 hover:text-[#1a1706] hover:border-[#1a1706]/40 transition-colors cursor-pointer bg-transparent" onClick={handleClose}>Close</button>
                 </div>
 
               /* ── Form ── */

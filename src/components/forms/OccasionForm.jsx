@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
+import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
 import FormField from "./fields/FormField";
 import TextInput from "./fields/TextInput";
@@ -58,7 +59,9 @@ const emptyState = {
   confirmFees: false,
 };
 
-export default function OccasionForm({ onComplete }) {
+export default function OccasionForm({ onComplete, amount: amountProp }) {
+  const { occasion } = useData();
+  const packageAmount = (occasion?.find(p => p.featured) ?? occasion?.[0])?.price ?? 0;
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -147,7 +150,7 @@ export default function OccasionForm({ onComplete }) {
         email={data.email}
         phone={data.phone}
         preferredTime={data.stylingStart}
-        amount={3000000}
+        amount={(amountProp ?? packageAmount) * 100}
         onSuccess={handlePaymentSuccess}
         onClose={() => { setShowPayment(false); setShowHoldPrompt(true); }}
         formType="occasion"

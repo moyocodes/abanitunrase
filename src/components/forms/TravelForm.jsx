@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
+import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
 import FormField from "./fields/FormField";
 import TextInput from "./fields/TextInput";
@@ -47,7 +48,9 @@ const emptyState = {
   acknowledge: false,
 };
 
-export default function TravelForm({ onComplete }) {
+export default function TravelForm({ onComplete, amount: amountProp }) {
+  const { travel } = useData();
+  const packageAmount = (travel?.find(p => p.featured) ?? travel?.[0])?.price ?? 0;
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -134,7 +137,7 @@ export default function TravelForm({ onComplete }) {
         email={data.email}
         phone={data.phone}
         preferredTime={data.travelDates}
-        amount={5000000}
+        amount={(amountProp ?? packageAmount) * 100}
         onSuccess={handlePaymentSuccess}
         onClose={() => { setShowPayment(false); setShowHoldPrompt(true); }}
         formType="travel"

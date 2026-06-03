@@ -65,13 +65,13 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const tabIntervalRef = useRef(null);
   const { bridal, occasion, travel, ratesData, refetch } = useData();
   const { editMode, activePanel, showToast } = useEditMode();
-  const [draft, setDraft] = useState({ 
-    heading: "", 
-    sectionLabel: "", 
-    note: "", 
+  const [draft, setDraft] = useState({
+    heading: "",
+    sectionLabel: "",
+    note: "",
     travelNotes: "",
-    consultations: [], 
-    packages: { bridal: [], occasion: [], travel: [] } 
+    consultations: [],
+    packages: { bridal: [], occasion: [], travel: [] }
   });
   const [saving, setSaving] = useState(false);
 
@@ -123,13 +123,13 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveSettings("rates", { 
-        ...ratesData, 
-        heading: draft.heading, 
-        sectionLabel: draft.sectionLabel, 
+      await saveSettings("rates", {
+        ...ratesData,
+        heading: draft.heading,
+        sectionLabel: draft.sectionLabel,
         note: draft.note,
         travelNotes: draft.travelNotes,
-        consultations: draft.consultations 
+        consultations: draft.consultations,
       });
       await savePricing("bridal", draft.packages.bridal);
       await savePricing("occasion", draft.packages.occasion);
@@ -360,7 +360,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 onClick={e => {
                   e.stopPropagation();
                   onBook
-                    ? onBook(activeTab === "bridal" ? "wedding" : activeTab)
+                    ? onBook(activeTab === "bridal" ? "wedding" : activeTab, r.price)
                     : onBookCall?.();
                 }}
                 className={`mt-3 md:mt-4 pt-3 md:pt-4 border-t font-['Outfit'] font-medium text-[9px] md:text-sm uppercase tracking-wider text-left flex items-center justify-between transition-colors duration-200 w-full bg-transparent border-l-0 border-r-0 border-b-0 cursor-pointer group/book ${
@@ -454,7 +454,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
                         <button
-                          onClick={() => onBook ? onBook("wedding") : onBookCall?.()}
+                          onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()}
                           className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
                         >
                           Book →
@@ -476,7 +476,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
                         <button
-                          onClick={() => onBook ? onBook("wedding") : onBookCall?.()}
+                          onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()}
                           className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
                         >
                           Book →
