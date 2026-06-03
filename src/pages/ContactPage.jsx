@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useModals } from "@/providers";
 import Footer from "@/components/Footer";
-import BookCallModal from "@/components/BookCallModal";
-import BookingLookup from "@/components/BookingLookup";
 
 export default function ContactPage() {
-  const [bookOpen,   setBookOpen]   = useState(false);
-  const [lookupOpen, setLookupOpen] = useState(false);
+  const { openBookCall } = useModals();
   const [toast,      setToast]      = useState(null);
   const [loading,    setLoading]    = useState(false);
   const [form,       setForm]       = useState({
@@ -68,7 +66,7 @@ export default function ContactPage() {
             ← Home
           </Link>
           <button
-            onClick={() => setBookOpen(true)}
+            onClick={openBookCall}
             className="font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2.5 border border-[#1a1706]/20 bg-[#1a1706]/[0.05] text-[#1a1706] hover:bg-[#1a1706]/[0.1] transition-all cursor-pointer"
           >
             Book a Session
@@ -140,7 +138,7 @@ export default function ContactPage() {
               Start with a consultation call — we&apos;ll walk through your vision and figure out the right approach.
             </p>
             <button
-              onClick={() => setBookOpen(true)}
+              onClick={openBookCall}
               className="font-['DM_Mono'] text-[8.5px] tracking-[0.24em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer hover:bg-black transition-colors"
             >
               Book a Consultation →
@@ -235,10 +233,8 @@ export default function ContactPage() {
         )}
       </AnimatePresence>
 
-      <Footer onTrackBooking={() => setLookupOpen(true)} />
+      <Footer />
 
-      <BookCallModal open={bookOpen} onClose={() => setBookOpen(false)} onTrackBooking={() => { setBookOpen(false); setLookupOpen(true); }} />
-      <BookingLookup open={lookupOpen} onClose={() => setLookupOpen(false)} />
     </div>
   );
 }

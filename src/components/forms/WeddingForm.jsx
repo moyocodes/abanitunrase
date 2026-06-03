@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
-import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
+import { saveBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
@@ -84,9 +84,6 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
   const [error, setError] = useState("");
-  const [bookingId, setBookingId] = useState(null);
-  const [holdState, setHoldState] = useState("idle");
-  const [showHoldPrompt, setShowHoldPrompt] = useState(false);
 
   const set = (field, value) => setData((d) => ({ ...d, [field]: value }));
 
@@ -124,7 +121,6 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
-    saveBooking("wedding", data).then(id => setBookingId(id));
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
@@ -146,29 +142,16 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = () => {
-    if (bookingId) updateBookingStatus(bookingId, "confirmed").catch(console.error);
+  const handlePaymentSuccess = (response) => {
+    const amt = (amountProp ?? packageAmount) * 100;
+    saveBooking("wedding", {
+      ...data,
+      preferredTime: data.weddingDate,
+      paid: true,
+      paymentReference: response?.reference || "",
+      amount: amt,
+    }, "confirmed").catch(console.error);
     onComplete();
-  };
-
-  const handleHold = async () => {
-    if (!data.email.trim()) return;
-    setHoldState("submitting");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const heldUntil = expiresAt.toLocaleString("en-NG", { dateStyle: "long", timeStyle: "short" });
-    if (bookingId) {
-      await updateBooking(bookingId, { status: "held", "data.heldUntil": expiresAt.toISOString() });
-    } else {
-      await saveBooking("wedding", { ...data, heldUntil: expiresAt.toISOString() }, "held");
-    }
-    sendBookingEmails({
-      kind: "hold",
-      email: data.email,
-      name: data.fullName,
-      serviceName: "Wedding Styling",
-      heldUntil,
-    }).catch(console.error);
-    setHoldState("done");
   };
 
   if (showPayment) {
@@ -177,57 +160,12 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
         name={data.fullName}
         email={data.email}
         phone={data.phone}
-        preferredTime={data.attireTimeline}
+        preferredTime={data.weddingDate}
         amount={(amountProp ?? packageAmount) * 100}
         onSuccess={handlePaymentSuccess}
-        onClose={() => { setShowPayment(false); setShowHoldPrompt(true); }}
+        onClose={() => setShowPayment(false)}
         formType="wedding"
       />
-    );
-  }
-
-  if (showHoldPrompt) {
-    return (
-      <div className="py-10 text-center">
-        {holdState === "done" ? (
-          <>
-            <div className="text-[32px] text-[#1a1706]/30 mb-4">&#10003;</div>
-            <div className="font-heading italic text-[clamp(22px,2.6vw,34px)] text-[#1a1706] mb-3">Spot Reserved</div>
-            <p className="font-mono text-[8px] tracking-[0.22em] uppercase text-[#1a1706]/45 mb-7">Check your email. Your hold expires in 24 hours.</p>
-            <button onClick={onComplete} className="font-mono text-[8px] tracking-[0.2em] uppercase px-6 py-3 border border-[#1a1706]/20 text-[#1a1706]/55 hover:text-[#1a1706] hover:border-[#1a1706]/40 transition-colors cursor-pointer bg-transparent">
-              Close
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="font-heading italic text-[clamp(22px,2.6vw,34px)] text-[#1a1706] mb-3">Still interested?</div>
-            <p className="font-mono text-[8px] tracking-[0.22em] uppercase text-[#1a1706]/40 mb-8 max-w-xs mx-auto leading-[2]">
-              Reserve your spot for 24 hours — we&apos;ll hold it while you decide.
-            </p>
-            <div className="flex flex-col gap-3 max-w-xs mx-auto">
-              <button
-                onClick={() => { setShowHoldPrompt(false); setShowPayment(true); }}
-                className="font-mono text-[8px] tracking-[0.22em] uppercase py-3 px-6 bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors cursor-pointer"
-              >
-                Complete Payment →
-              </button>
-              <button
-                onClick={handleHold}
-                disabled={holdState === "submitting"}
-                className="font-mono text-[8px] tracking-[0.22em] uppercase py-3 px-6 border border-[#1a1706]/25 text-[#1a1706]/70 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors cursor-pointer bg-transparent disabled:opacity-40"
-              >
-                {holdState === "submitting" ? "Reserving…" : "Hold for 24 hours →"}
-              </button>
-              <button
-                onClick={onComplete}
-                className="font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/35 hover:text-[#1a1706]/60 transition-colors bg-transparent border-none cursor-pointer py-1"
-              >
-                Cancel
-              </button>
-            </div>
-          </>
-        )}
-      </div>
     );
   }
 

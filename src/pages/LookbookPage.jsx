@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useData } from "@/providers";
+import { useData, useModals } from "@/providers";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import BookCallModal from "@/components/BookCallModal";
-import BookingLookup from "@/components/BookingLookup";
 import { lookToPos } from "@/pages/LookPage";
 
 const CATS = [
@@ -71,8 +69,7 @@ function CarouselCard({ look, onOpen }) {
 export default function LookbookPage() {
   const { looks: allLooks } = useData();
   const navigate = useNavigate();
-  const [bookCallOpen, setBookCallOpen] = useState(false);
-  const [lookupOpen,   setLookupOpen]   = useState(false);
+  const { openBookCall, openLookup } = useModals();
 
   const looks = allLooks ?? [];
   const handleContact = () => navigate("/", { state: { scrollTo: "contact" } });
@@ -94,13 +91,12 @@ export default function LookbookPage() {
 
   return (
     <div className="min-h-screen bg-[#0e0d08] flex flex-col">
-      <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
-      <BookingLookup open={lookupOpen}   onClose={() => setLookupOpen(false)} />
+
 
       <Nav
         hidden={false}
-        onBookCall={() => setBookCallOpen(true)}
-        onTrackBooking={() => setLookupOpen(true)}
+        onBookCall={openBookCall}
+        onTrackBooking={openLookup}
       />
 
       {/* ── Hero — full screen (Nav is fixed so hero fills full viewport) ── */}
@@ -263,7 +259,7 @@ export default function LookbookPage() {
           </h3>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
             <button
-              onClick={() => setBookCallOpen(true)}
+              onClick={openBookCall}
               className="font-['DM_Mono'] text-[8.5px] tracking-[0.3em] uppercase px-10 py-[14px] bg-[#f5f0e6] text-[#1a1706] hover:bg-white border-none cursor-pointer transition-colors"
             >
               Book a Consultation →
@@ -278,7 +274,7 @@ export default function LookbookPage() {
         </div>
       )}
 
-      <Footer onTrackBooking={() => setLookupOpen(true)} onContact={handleContact} />
+      <Footer onTrackBooking={openLookup} onContact={handleContact} />
     </div>
   );
 }

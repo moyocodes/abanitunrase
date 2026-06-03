@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
-import { AuthProvider, DataProvider, useData } from "./providers";
+import { AuthProvider, DataProvider, ModalsProvider, useData } from "./providers";
 import PageLoader from "./components/PageLoader.jsx";
 
 function AppShell() {
@@ -17,9 +17,11 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
         <DataProvider>
-          <Suspense fallback={<PageLoader />}>
-            <AppShell />
-          </Suspense>
+          <ModalsProvider>
+            <Suspense fallback={<PageLoader />}>
+              <AppShell />
+            </Suspense>
+          </ModalsProvider>
         </DataProvider>
       </AuthProvider>
     </BrowserRouter>

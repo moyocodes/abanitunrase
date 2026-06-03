@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useData } from "@/providers";
+import { useData, useModals } from "@/providers";
 import LookSlideshow from "@/components/LookSlideshow";
-import BookCallModal from "@/components/BookCallModal";
 import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 
 export const sortedLooks = (allLooks) =>
@@ -17,7 +16,7 @@ export default function LookPage() {
   const { pos } = useParams();
   const navigate = useNavigate();
   const { looks: allLooks, refetch } = useData();
-  const [bookCallOpen, setBookCallOpen] = useState(false);
+  const { openBookCall } = useModals();
   const [formType, setFormType] = useState(null);
   const [formPrice, setFormPrice] = useState(null);
 
@@ -31,14 +30,13 @@ export default function LookPage() {
 
   return (
     <div className="min-h-screen bg-[#0e0d08]">
-      <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
       <LookSlideshow
         allLooks={allLooks ?? []}
         startLookId={startLook?.id ?? null}
         startCatIdx={null}
         onClose={() => navigate("/lookbook")}
         onBook={(type, price) => { setFormType(type); setFormPrice(price ?? null); }}
-        onBookCall={() => setBookCallOpen(true)}
+        onBookCall={openBookCall}
         onLookChange={handleLookChange}
         refetch={refetch}
       />

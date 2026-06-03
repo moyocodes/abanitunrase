@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import BookingLookup from "@/components/BookingLookup";
+import { useModals } from "@/providers";
 
 const SHOP_LINKS = [
   { label: "Occasion", href: "/styling/occasion" },
@@ -19,15 +18,13 @@ const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
 export default function Footer({ onTrackBooking, onContact }) {
   const navigate = useNavigate();
-  const [lookupOpen, setLookupOpen] = useState(false);
+  const { openLookup } = useModals();
 
   const handleContact = onContact ?? (() => navigate("/contact"));
-  const handleTrackBooking = onTrackBooking ?? (() => setLookupOpen(true));
+  const handleTrackBooking = onTrackBooking ?? openLookup;
 
   return (
     <>
-      <BookingLookup open={lookupOpen} onClose={() => setLookupOpen(false)} />
-
       <footer className="bg-[#0e0d08] border-t border-white/10">
         <div className="px-5 sm:px-10 md:px-16 py-12 md:py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-10">

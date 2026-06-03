@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import BookCallModal from "@/components/BookCallModal";
+import { useModals } from "@/providers";
 import Footer from "@/components/Footer";
 import Rates from "@/components/Rates";
 import {
@@ -18,18 +18,14 @@ const tabs = [
 
 export default function RatesPage() {
   const [activeTab, setActiveTab] = useState("bridal");
-  const [bookCallOpen, setBookCallOpen] = useState(false);
+  const { openBookCall } = useModals();
   const [formType, setFormType] = useState(null);
   const [formPrice, setFormPrice] = useState(null);
 
   useEffect(() => {
-    document.body.style.overflow =
-      bookCallOpen || formType !== null ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [bookCallOpen, formType]);
+    document.body.style.overflow = formType !== null ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [formType]);
 
   return (
     <div className="min-h-screen bg-[#f8f7f3] text-[#1a1706]">
@@ -70,7 +66,7 @@ export default function RatesPage() {
         </div>
 
         <button
-          onClick={() => setBookCallOpen(true)}
+          onClick={openBookCall}
           className="font-mono text-[8px] md:text-[8.5px] tracking-[0.18em] uppercase px-4 py-2.5 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer"
         >
           Book a Session
@@ -99,17 +95,12 @@ export default function RatesPage() {
         <Rates
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onBookCall={() => setBookCallOpen(true)}
+          onBookCall={openBookCall}
           onBook={(type, price) => { setFormType(type); setFormPrice(price ?? null); }}
         />
       </main>
 
       <Footer />
-
-      <BookCallModal
-        open={bookCallOpen}
-        onClose={() => setBookCallOpen(false)}
-      />
 
       <FormModal
         open={formType !== null}

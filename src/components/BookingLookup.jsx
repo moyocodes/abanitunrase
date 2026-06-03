@@ -19,10 +19,11 @@ const STATUS_CONFIG = {
 };
 
 const TYPE_LABELS = {
-  wedding: "Wedding Styling",
-  occasion: "Occasion Styling",
-  travel: "Kájáyelo Travel",
-  consultation: "Consultation",
+  wedding:            "Wedding Styling",
+  occasion:           "Occasion Styling",
+  travel:             "Kájáyelo Travel",
+  consultation:       "Consultation",
+  coupleConsultation: "Couple's Consultation",
 };
 
 function formatDate(ts) {

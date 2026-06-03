@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { lookToPos } from "@/pages/LookPage";
 import { motion } from "framer-motion";
-import { useData } from "@/providers";
+import { useData, useModals } from "@/providers";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
-import BookCallModal from "@/components/BookCallModal";
 import LookCarousel from "@/components/LookCarousel";
 import Rates from "@/components/Rates";
 import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
@@ -60,9 +59,9 @@ export default function StylingPage() {
   const { type } = useParams();
   const navigate = useNavigate();
   const { categories, looks } = useData();
+  const { openBookCall } = useModals();
   const [formType, setFormType] = useState(null);
   const [formPrice, setFormPrice] = useState(null);
-  const [bookCallOpen, setBookCallOpen] = useState(false);
   const [ratesTab, setRatesTab] = useState(type);
 
   useEffect(() => { setRatesTab(type); }, [type]);
@@ -84,8 +83,7 @@ export default function StylingPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f3]">
-      <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
-      <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} />
+      <Nav hidden={false} onBookCall={openBookCall} />
 
       {/* Hero — full viewport */}
       <div className="relative h-[100dvh] w-full overflow-hidden bg-[#0a0a0a]">
@@ -186,7 +184,7 @@ export default function StylingPage() {
       <Rates
         activeTab={ratesTab}
         setActiveTab={setRatesTab}
-        onBookCall={() => setBookCallOpen(true)}
+        onBookCall={openBookCall}
         onBook={(t, price) => { setFormType(t); setFormPrice(price ?? null); }}
       />
 

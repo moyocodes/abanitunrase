@@ -43,6 +43,138 @@ const EMAIL_KIND = {
   completed: "completed",
 };
 
+const STYLING_TYPES = new Set(["wedding", "occasion", "travel"]);
+const CONSULT_TYPES = new Set(["consultation", "coupleConsultation"]);
+
+const FIELD_LABELS = {
+  fullName: "Full Name",
+  email: "Email",
+  phone: "Phone",
+  contactMethod: "Preferred Contact Method",
+  // occasion
+  stylingTypes: "Type of Styling Required",
+  eventDate: "Event / Shoot Date",
+  eventLocation: "Event / Shoot Location",
+  duration: "Duration",
+  stylingStart: "When would you like styling to begin?",
+  dateConfirmed: "Is your date confirmed?",
+  numberOfLooks: "Estimated Number of Looks Required",
+  onDayStyling: "Will you require on-the-day styling support?",
+  outfitChanges: "Will there be outfit changes?",
+  personalStyle: "How would you describe your personal style?",
+  designerRefs: "Designers, aesthetics, or references you love",
+  avoidStyles: "Styles, colours, or silhouettes to avoid",
+  comfortableFees: "Comfortable with professional styling fees?",
+  pricingExpectations: "Expectations around pricing",
+  workStyle: "How do you prefer to work with a stylist?",
+  creativeImportance: "How important is creative trust?",
+  communicationStyle: "How would you describe your communication style?",
+  collaborators: "Currently working with",
+  otherDetails: "Anything else we should be aware of?",
+  // wedding
+  age: "Age",
+  gender: "Gender",
+  genderOther: "Gender (Other)",
+  weddingStyle: "Overall style vision for your wedding",
+  colourPalette: "Specific themes or colour palettes",
+  hasNecklinePreference: "Has preference for sleeve length / neckline?",
+  necklinePreference: "Neckline / sleeve preference (details)",
+  silhouette: "Silhouette for wedding gown",
+  necklineDetail: "Sleeve length / neckline details",
+  fabricPreference: "Preferred or disliked fabrics",
+  comfortRequirements: "Comfort requirements for attire",
+  heelPreference: "Heel preference",
+  accessories: "Accessories being considered",
+  noAccessories: "Accessories definitely NOT wanted",
+  venueAndSeason: "Wedding venue and season",
+  climateConsiderations: "Climate considerations for attire",
+  budgetRange: "Budget range for wedding dress and accessories",
+  alterationsIncluded: "Alterations and customisation in budget?",
+  bodyDescription: "Body shape description",
+  elementsPreference: "Specific elements preferred or disliked",
+  skinTone: "Skin Tone",
+  measurements: "Current and preferred measurements",
+  hasMoodBoard: "Has mood board or photos?",
+  moodBoardLink: "Mood board link",
+  hasCelebInspo: "Celebrity wedding style inspiration?",
+  celebInspoLink: "Celebrity inspiration link",
+  weddingDate: "Wedding date",
+  attireTimeline: "Preferred timeline for selecting bridal attire",
+  dresscode: "Specific dress code for bridal party?",
+  coordinateParty: "Coordinate attire with bridesmaids / groomsmen?",
+  culturalRequirements: "Cultural or traditional requirements?",
+  culturalDetails: "Cultural requirements (details)",
+  hasSymbols: "Traditions or symbols to incorporate?",
+  symbolImages: "Symbol images link",
+  fittingsCount: "Fittings comfortable attending",
+  additionalDetails: "Additional details or concerns",
+  // travel
+  destinations: "Destination(s)",
+  travelDates: "Departure Date",
+  travelDateReturn: "Return Date",
+  lengthOfStay: "Length of Stay",
+  tripNature: "Nature of Trip",
+  plannedActivities: "Planned Activities",
+  inPersonStyling: "Require in-person styling?",
+  stylistWorkStyle: "How you like to work with a stylist",
+  // consultation
+  service: "Service",
+  preferredTime: "Event / Appointment Date",
+};
+
+const SKIP_DOWNLOAD = new Set([
+  "paid", "amount", "amountLabel", "paymentReference", "heldUntil", "createdAt",
+  "confirmTimeline", "confirmRushFees", "confirmFees", "confirmAccurate", "acknowledge",
+]);
+
+function downloadFormData(booking) {
+  const d = booking.data ?? {};
+  const name = d.fullName || d.name || "client";
+  const typeMeta = TYPE_META[booking.type] ?? { label: booking.type };
+  const rawDate = booking.createdAt?.seconds
+    ? new Date(booking.createdAt.seconds * 1000)
+    : new Date();
+  const dateStr = rawDate.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" });
+
+  const lines = [
+    `ABÁNITÚNRASE — ${typeMeta.label} Form`,
+    `Submitted: ${dateStr}`,
+    `Status: ${booking.status}`,
+    `Payment Reference: ${d.paymentReference || "—"}`,
+    `Amount Paid: ${d.amount ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—"}`,
+    ``,
+    `─── CLIENT DETAILS ───`,
+    `Full Name: ${d.fullName || d.name || "—"}`,
+    `Email: ${d.email || "—"}`,
+    `Phone: ${d.phone || "—"}`,
+    ``,
+    `─── FORM RESPONSES ───`,
+  ];
+
+  const skipKeys = new Set([...SKIP_DOWNLOAD, "fullName", "name", "email", "phone"]);
+
+  Object.entries(d).forEach(([key, value]) => {
+    if (skipKeys.has(key)) return;
+    if (typeof value === "boolean") return;
+    if (value === "" || value === null || value === undefined) return;
+    if (Array.isArray(value) && value.length === 0) return;
+    const label = FIELD_LABELS[key] || key.replace(/([A-Z])/g, " $1").trim();
+    const formatted = Array.isArray(value) ? value.join(", ") : String(value);
+    lines.push(`${label}: ${formatted}`);
+  });
+
+  const content = lines.join("\n");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name.replace(/\s+/g, "-")}-${booking.type}-${dateStr.replace(/\s/g, "-")}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function formatDateTime(ts) {
   if (!ts) return "—";
   const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
@@ -77,7 +209,7 @@ const TD = ({ children, className = "" }) => (
 );
 
 /* ── Booking row + inline drawer ──────────────────────────────────────────── */
-function BookingRow({ booking, idx, onStatusChange, onDelete }) {
+function BookingRow({ booking, idx, onStatusChange, onDelete, onDownload, onCollectPayment }) {
   const [open, setOpen] = useState(false);
 
   const holdExpired = booking.status === "held" && booking.data?.heldUntil && new Date(booking.data.heldUntil) < new Date();
@@ -146,7 +278,16 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
           </select>
         </TD>
         <TD onClick={e => e.stopPropagation()}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {!d.paid && (
+              <button
+                onClick={() => onCollectPayment(booking)}
+                className="font-mono text-[9px] tracking-[0.12em] uppercase px-2.5 py-1.5 bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors cursor-pointer border-none whitespace-nowrap"
+                title="Collect payment"
+              >
+                Collect Pay
+              </button>
+            )}
             <button
               onClick={() => onDelete(booking.id, name)}
               className="text-[18px] text-red-300 hover:text-red-600 bg-transparent border-none cursor-pointer transition-colors leading-none"
@@ -186,20 +327,24 @@ function BookingRow({ booking, idx, onStatusChange, onDelete }) {
                 ))}
               </div>
             )}
-            {(email || phone) && (
-              <div className="flex gap-3 pt-4 mt-2 border-t border-[#e8e5dc]/60">
-                {email && (
-                  <a href={`mailto:${email}`} className="font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold">
-                    ✉ Email
-                  </a>
-                )}
-                {phone && (
-                  <a href={`https://wa.me/${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold">
-                    ↗ WhatsApp
-                  </a>
-                )}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-3 pt-4 mt-2 border-t border-[#e8e5dc]/60">
+              {email && (
+                <a href={`mailto:${email}`} className="font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold">
+                  ✉ Email
+                </a>
+              )}
+              {phone && (
+                <a href={`https://wa.me/${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold">
+                  ↗ WhatsApp
+                </a>
+              )}
+              <button
+                onClick={() => onDownload(booking)}
+                className="font-mono text-[10px] tracking-[0.16em] uppercase px-4 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold bg-transparent cursor-pointer"
+              >
+                ↓ Download Form
+              </button>
+            </div>
           </td>
         </tr>
       )}
@@ -424,9 +569,13 @@ export default function AdminBookings() {
     setDeleteTarget(null);
   };
 
-  const TYPE_OPTIONS = ["all", "wedding", "occasion", "travel", "consultation", "coupleConsultation"];
+  const STYLING_TYPE_OPTIONS = ["all", "wedding", "occasion", "travel"];
+  const CONSULT_TYPE_OPTIONS = ["all", "consultation", "coupleConsultation"];
+  const TYPE_OPTIONS = tab === "consultations" ? CONSULT_TYPE_OPTIONS : STYLING_TYPE_OPTIONS;
 
   const filtered = bookings.filter(b => {
+    if (tab === "bookings"      && !STYLING_TYPES.has(b.type)) return false;
+    if (tab === "consultations" && !CONSULT_TYPES.has(b.type)) return false;
     if (typeFilter !== "all" && b.type !== typeFilter) return false;
     if (statusFilter !== "all" && b.status !== statusFilter) return false;
     if (search) {
@@ -440,8 +589,14 @@ export default function AdminBookings() {
     return true;
   });
 
+  const stylingCount  = bookings.filter(b => STYLING_TYPES.has(b.type)).length;
+  const consultCount  = bookings.filter(b => CONSULT_TYPES.has(b.type)).length;
+
+  const tabBookings = bookings.filter(b =>
+    tab === "consultations" ? CONSULT_TYPES.has(b.type) : STYLING_TYPES.has(b.type)
+  );
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
-    acc[s] = bookings.filter(b => b.status === s).length;
+    acc[s] = tabBookings.filter(b => b.status === s).length;
     return acc;
   }, {});
 
@@ -450,7 +605,6 @@ export default function AdminBookings() {
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const contactServices = ["all", ...Array.from(new Set(contacts.map(c => c.service).filter(Boolean)))];
-
   const filteredContacts = contacts.filter(c => {
     if (contactService !== "all" && c.service !== contactService) return false;
     if (contactSearch) {
@@ -463,7 +617,6 @@ export default function AdminBookings() {
     }
     return true;
   });
-
   const contactPageCount = Math.ceil(filteredContacts.length / PER_PAGE);
   const paginatedContacts = filteredContacts.slice((contactPage - 1) * PER_PAGE, contactPage * PER_PAGE);
 
@@ -518,23 +671,86 @@ export default function AdminBookings() {
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 mb-5 border-b border-[#e8e5dc]">
-        {["bookings", "enquiries"].map(t => (
+        {[
+          { key: "bookings",      label: "Styling Bookings", count: stylingCount },
+          { key: "consultations", label: "Consultations",    count: consultCount },
+          { key: "enquiries",     label: "Enquiries",        count: contacts.length },
+        ].map(({ key, label, count }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={key}
+            onClick={() => { setTab(key); setTypeFilter("all"); setStatusFilter("all"); setSearch(""); setPage(1); }}
             className={`font-mono text-[12px] tracking-[0.18em] uppercase pb-3 px-1 mr-5 border-b-2 font-semibold transition-colors ${
-              tab === t ? "border-[#1a1706] text-[#1a1706]" : "border-transparent text-[#1a1706]/40 hover:text-[#1a1706]/70"
+              tab === key ? "border-[#1a1706] text-[#1a1706]" : "border-transparent text-[#1a1706]/40 hover:text-[#1a1706]/70"
             }`}
           >
-            {t}
-            <span className="ml-1.5 opacity-40">({t === "bookings" ? bookings.length : contacts.length})</span>
+            {label}
+            <span className="ml-1.5 opacity-40">({count})</span>
           </button>
         ))}
       </div>
 
       {loading ? (
         <p className="font-mono text-[12px] tracking-[0.28em] uppercase text-[#1a1706]/40 py-10 font-semibold">Loading…</p>
-      ) : tab === "bookings" ? (
+      ) : tab === "enquiries" ? (
+        <>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <input
+              type="text"
+              value={contactSearch}
+              onChange={e => setContactSearch(e.target.value)}
+              placeholder="Search name, email or phone…"
+              className="border border-[#e8e5dc] bg-white px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors w-60"
+            />
+            <select value={contactService} onChange={e => setContactService(e.target.value)} className={selectCls}>
+              <option value="all">All Services</option>
+              {contactServices.filter(s => s !== "all").map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            {(contactSearch || contactService !== "all") && (
+              <button
+                onClick={() => { setContactSearch(""); setContactService("all"); }}
+                className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/75 transition-colors border border-[#e8e5dc] px-3 py-2 font-semibold"
+              >
+                Clear
+              </button>
+            )}
+            <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/35 font-semibold ml-auto">
+              {filteredContacts.length} enquir{filteredContacts.length !== 1 ? "ies" : "y"}
+            </span>
+          </div>
+          {filteredContacts.length === 0 ? (
+            <div className="border border-[#e8e5dc] bg-white py-14 text-center">
+              <p className="font-mono text-[12px] tracking-[0.22em] uppercase text-[#1a1706]/35 font-semibold">No enquiries found</p>
+            </div>
+          ) : (
+            <div className="border border-[#e8e5dc]">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr><TH>#</TH><TH>Name</TH><TH>Email</TH><TH>Phone</TH><TH>Service</TH><TH>Actions</TH></tr>
+                </thead>
+                <tbody>
+                  {paginatedContacts.map((c, i) => (
+                    <ContactRow
+                      key={c.id}
+                      contact={c}
+                      idx={(contactPage - 1) * PER_PAGE + i}
+                      onDelete={(id, name) => setDeleteTarget({ id, name, type: "contact" })}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {contactPageCount > 1 && (
+            <div className="flex items-center justify-between mt-3 px-1">
+              <button onClick={() => setContactPage(p => Math.max(1, p - 1))} disabled={contactPage === 1} className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer">← Prev</button>
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/40 font-semibold">Page {contactPage} of {contactPageCount}</span>
+              <button onClick={() => setContactPage(p => Math.min(contactPageCount, p + 1))} disabled={contactPage === contactPageCount} className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer">Next →</button>
+            </div>
+          )}
+        </>
+      ) : (
         <>
           {/* Summary pills */}
           <div className="flex items-center gap-2 mb-5 flex-wrap">
@@ -548,7 +764,7 @@ export default function AdminBookings() {
               );
             })}
             <div className="font-mono text-[11px] tracking-[0.12em] uppercase border border-[#1a1706]/15 px-3 py-1.5 text-[#1a1706]/55 font-semibold">
-              <span>{bookings.length}</span>
+              <span>{filtered.length}</span>
               <span className="ml-1.5 opacity-60">Total</span>
             </div>
           </div>
@@ -562,12 +778,14 @@ export default function AdminBookings() {
               placeholder="Search name, email or phone…"
               className="border border-[#e8e5dc] bg-white px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors w-60"
             />
-            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className={selectCls}>
-              <option value="all">All Types</option>
-              {TYPE_OPTIONS.filter(t => t !== "all").map(t => (
-                <option key={t} value={t}>{TYPE_META[t]?.label ?? t}</option>
-              ))}
-            </select>
+            {tab === "bookings" && (
+              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className={selectCls}>
+                <option value="all">All Types</option>
+                {TYPE_OPTIONS.filter(t => t !== "all").map(t => (
+                  <option key={t} value={t}>{TYPE_META[t]?.label ?? t}</option>
+                ))}
+              </select>
+            )}
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className={selectCls}>
               <option value="all">All Statuses</option>
               {STATUS_OPTIONS.map(s => (
@@ -615,6 +833,8 @@ export default function AdminBookings() {
                       idx={(page - 1) * PER_PAGE + i}
                       onStatusChange={handleStatusChange}
                       onDelete={(id, name) => setDeleteTarget({ id, name, type: "booking" })}
+                      onDownload={downloadFormData}
+                      onCollectPayment={setPaymentBooking}
                     />
                   ))}
                 </tbody>
@@ -636,88 +856,6 @@ export default function AdminBookings() {
               <button
                 onClick={() => setPage(p => Math.min(pageCount, p + 1))}
                 disabled={page === pageCount}
-                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
-              >
-                Next →
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          {/* Enquiries toolbar */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <input
-              type="text"
-              value={contactSearch}
-              onChange={e => setContactSearch(e.target.value)}
-              placeholder="Search name, email or phone…"
-              className="border border-[#e8e5dc] bg-white px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors w-60"
-            />
-            <select value={contactService} onChange={e => setContactService(e.target.value)} className={selectCls}>
-              <option value="all">All Services</option>
-              {contactServices.filter(s => s !== "all").map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            {(contactSearch || contactService !== "all") && (
-              <button
-                onClick={() => { setContactSearch(""); setContactService("all"); }}
-                className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#1a1706]/45 hover:text-[#1a1706]/75 transition-colors border border-[#e8e5dc] px-3 py-2 font-semibold"
-              >
-                Clear
-              </button>
-            )}
-            <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/35 font-semibold ml-auto">
-              {filteredContacts.length} enquir{filteredContacts.length !== 1 ? "ies" : "y"}
-            </span>
-          </div>
-
-          {filteredContacts.length === 0 ? (
-            <div className="border border-[#e8e5dc] bg-white py-14 text-center">
-              <p className="font-mono text-[12px] tracking-[0.22em] uppercase text-[#1a1706]/35 font-semibold">No enquiries found</p>
-            </div>
-          ) : (
-            <div className="border border-[#e8e5dc]">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <TH>#</TH>
-                    <TH>Name</TH>
-                    <TH>Email</TH>
-                    <TH>Phone</TH>
-                    <TH>Service</TH>
-                    <TH>Actions</TH>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedContacts.map((c, i) => (
-                    <ContactRow
-                      key={c.id}
-                      contact={c}
-                      idx={(contactPage - 1) * PER_PAGE + i}
-                      onDelete={(id, name) => setDeleteTarget({ id, name, type: "contact" })}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {contactPageCount > 1 && (
-            <div className="flex items-center justify-between mt-3 px-1">
-              <button
-                onClick={() => setContactPage(p => Math.max(1, p - 1))}
-                disabled={contactPage === 1}
-                className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
-              >
-                ← Prev
-              </button>
-              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[#1a1706]/40 font-semibold">
-                Page {contactPage} of {contactPageCount}
-              </span>
-              <button
-                onClick={() => setContactPage(p => Math.min(contactPageCount, p + 1))}
-                disabled={contactPage === contactPageCount}
                 className="font-mono text-[11px] tracking-[0.14em] uppercase px-4 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 hover:text-[#1a1706]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-semibold bg-white cursor-pointer"
               >
                 Next →

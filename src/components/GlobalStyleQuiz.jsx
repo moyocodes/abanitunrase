@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useDragControls } from "framer-motion";
-import BookCallModal from "@/components/BookCallModal";
+import { useModals } from "@/providers";
 import StyleQuiz from "@/components/StyleQuiz";
 import {
   FormModal,
@@ -15,9 +15,9 @@ export function openStyleQuiz() {
 }
 
 export default function GlobalStyleQuiz() {
-  const [quizOpen, setQuizOpen]     = useState(false);
-  const [bookCallOpen, setBookCallOpen] = useState(false);
-  const [formType, setFormType]     = useState(null);
+  const { openBookCall, bookCallOpen } = useModals();
+  const [quizOpen, setQuizOpen]   = useState(false);
+  const [formType, setFormType]   = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const dragControls  = useDragControls();
@@ -103,12 +103,7 @@ export default function GlobalStyleQuiz() {
         open={quizOpen}
         onClose={() => setQuizOpen(false)}
         onBook={(type) => setFormType(type)}
-        onBookCall={() => setBookCallOpen(true)}
-      />
-
-      <BookCallModal
-        open={bookCallOpen}
-        onClose={() => setBookCallOpen(false)}
+        onBookCall={openBookCall}
       />
 
       <FormModal

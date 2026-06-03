@@ -4,12 +4,9 @@ import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { motion, AnimatePresence } from "framer-motion";
-import { useData } from "@/providers";
-import { useAuth } from "@/providers";
+import { useData, useAuth, useModals } from "@/providers";
 import { saveLook, deleteLook, saveReview, getReviewsForLook, deleteReview } from "@/lib/firestore";
 import { ytEmbedUrl } from "@/data";
-import BookCallModal from "@/components/BookCallModal";
-import BookingLookup from "@/components/BookingLookup";
 import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 import Footer from "@/components/Footer";
 
@@ -631,8 +628,7 @@ export default function StoriesPage() {
   const { looks, refetch } = useData();
   const { user } = useAuth();
 
-  const [bookCallOpen, setBookCallOpen] = useState(false);
-  const [lookupOpen, setLookupOpen] = useState(false);
+  const { openBookCall, openLookup } = useModals();
   const [formType, setFormType] = useState(null);
   const [formPrice, setFormPrice] = useState(null);
   const openBookingForm = (look) => {
@@ -834,15 +830,14 @@ export default function StoriesPage() {
           ))}
         </div>
         <button
-          onClick={() => setBookCallOpen(true)}
+          onClick={openBookCall}
           className="hidden md:block font-mono text-[7.5px] tracking-[0.2em] uppercase px-4 py-2 border border-[#1a1706]/18 bg-transparent text-[#1a1706]/55 hover:bg-[#1a1706] hover:text-[#f5f0e6] hover:border-[#1a1706] cursor-pointer transition-all duration-200"
         >
           Book a Session
         </button>
       </nav>
 
-      <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
-      <BookingLookup open={lookupOpen} onClose={() => setLookupOpen(false)} />
+
 
       <div className="flex flex-col md:flex-row flex-1 h-[100dvh] md:h-screen overflow-hidden">
 
@@ -1188,7 +1183,7 @@ export default function StoriesPage() {
       </div>
 
       <Footer
-        onTrackBooking={() => setLookupOpen(true)}
+        onTrackBooking={openLookup}
         onContact={handleContact}
       />
 

@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { useData } from "@/providers";
+import { useData, useModals } from "@/providers";
 import { INTRO_STEPS, INTRO_TRIGGER } from "@/data";
 import Nav from "@/components/Nav";
-import BookCallModal from "@/components/BookCallModal";
-import BookingLookup from "@/components/BookingLookup";
 import Hero from "@/components/Hero";
 import Atelier from "@/components/Atelier";
 import Categories from "@/components/Categories";
@@ -37,10 +35,9 @@ export default function Home() {
     clearGallery,
   } = useData();
 
+  const { openBookCall, openLookup, bookCallOpen, lookupOpen } = useModals();
+
   /* ── Modals ── */
-  const [bookCallOpen, setBookCallOpen] = useState(false);
-  const [lookupOpen, setLookupOpen] = useState(false);
-  const [continuePay, setContinuePay] = useState(null); // { prefill, autoPayment }
   const [formType, setFormType] = useState(null);
   const [storyOpen, setStoryOpen] = useState(false);
   const [storyLookIdx, setStoryLookIdx] = useState(0);
@@ -151,7 +148,6 @@ export default function Home() {
           setLbIdx((i) => (i - 1 + LOOKS.length) % LOOKS.length);
       }
       if (storyOpen && e.key === "Escape") setStoryOpen(false);
-      if (bookCallOpen && e.key === "Escape") setBookCallOpen(false);
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -324,22 +320,8 @@ export default function Home() {
 
       <Nav
         hidden={false}
-        onBookCall={() => setBookCallOpen(true)}
-        onTrackBooking={() => setLookupOpen(true)}
-      />
-
-      <BookCallModal
-        open={bookCallOpen || continuePay !== null}
-        onClose={() => {
-          setBookCallOpen(false);
-          setContinuePay(null);
-        }}
-        onTrackBooking={() => {
-          setBookCallOpen(false);
-          setLookupOpen(true);
-        }}
-        prefill={continuePay?.prefill}
-        autoPayment={continuePay?.autoPayment}
+        onBookCall={openBookCall}
+        onTrackBooking={openLookup}
       />
 
       <div
@@ -350,7 +332,7 @@ export default function Home() {
       >
         <Hero
           onOpenStory={openStory}
-          onBookCall={() => setBookCallOpen(true)}
+          onBookCall={openBookCall}
           onQuiz={openStyleQuiz}
         />
 
@@ -366,7 +348,7 @@ export default function Home() {
 
         <div className="relative z-[30]">
           <Rates
-            onBookCall={() => setBookCallOpen(true)}
+            onBookCall={openBookCall}
             onBook={(type) => setFormType(type)}
             activeTab={ratesTab}
             setActiveTab={setRatesTab}
@@ -388,9 +370,9 @@ export default function Home() {
         </div>
 
         <div className="relative z-[50]">
-          <CtaContact onBookCall={() => setBookCallOpen(true)} />
+          <CtaContact onBookCall={openBookCall} />
           <Footer
-            onTrackBooking={() => setLookupOpen(true)}
+            onTrackBooking={openLookup}
             onContact={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
           />
         </div>
@@ -424,7 +406,7 @@ export default function Home() {
         looks={LOOKS}
         initialLookIdx={storyLookIdx}
         onBook={(type) => setFormType(type)}
-        onBookCall={() => setBookCallOpen(true)}
+        onBookCall={openBookCall}
       />
       <Lightbox
         open={lbOpen}
@@ -445,25 +427,6 @@ export default function Home() {
         setActiveTab={setRatesTab}
       />
 
-      <BookingLookup
-        open={lookupOpen}
-        onClose={() => setLookupOpen(false)}
-        onContinuePayment={(booking) => {
-          setLookupOpen(false);
-          setContinuePay({
-            prefill: {
-              name: booking.data?.fullName ?? "",
-              email: booking.data?.email ?? "",
-              phone: booking.data?.phone ?? "",
-              service:
-                booking.type === "coupleConsultation"
-                  ? "coupleConsultation"
-                  : "consultation",
-            },
-            autoPayment: true,
-          });
-        }}
-      />
     </>
   );
 }
