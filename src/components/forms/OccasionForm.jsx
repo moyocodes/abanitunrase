@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
-import { saveBooking } from "@/lib/firestore";
+import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
@@ -30,6 +30,7 @@ const emptyState = {
   contactMethod: "",
   // Step 1
   stylingTypes: [],
+  stylingTypesOther: "",
   eventDate: "",
   eventLocation: "",
   duration: "",
@@ -66,6 +67,7 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
   const [error, setError] = useState("");
+  const bookingIdRef = useRef(null);
 
   const set = (field, value) => setData((d) => ({ ...d, [field]: value }));
 
@@ -84,6 +86,9 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
     if (!data.confirmRushFees) { setError("Please acknowledge rush fees policy."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
+    saveBooking("occasion", { ...data, preferredTime: data.eventDate })
+      .then(id => { bookingIdRef.current = id; })
+      .catch(console.error);
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
@@ -107,13 +112,23 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
 
   const handlePaymentSuccess = (response) => {
     const amt = (amountProp ?? packageAmount) * 100;
-    saveBooking("occasion", {
-      ...data,
-      preferredTime: data.eventDate,
-      paid: true,
-      paymentReference: response?.reference || "",
-      amount: amt,
-    }, "confirmed").catch(console.error);
+    const id = bookingIdRef.current;
+    if (id) {
+      updateBookingStatus(id, "confirmed").catch(console.error);
+      updateBooking(id, {
+        "data.paid": true,
+        "data.paymentReference": response?.reference || "",
+        "data.amount": amt,
+      }).catch(console.error);
+    } else {
+      saveBooking("occasion", {
+        ...data,
+        preferredTime: data.eventDate,
+        paid: true,
+        paymentReference: response?.reference || "",
+        amount: amt,
+      }, "confirmed").catch(console.error);
+    }
     onComplete();
   };
 
@@ -182,6 +197,11 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
               values={data.stylingTypes}
               onChange={(v) => set("stylingTypes", v)}
             />
+            {data.stylingTypes.includes("Other") && (
+              <div className="mt-3">
+                <TextInput value={data.stylingTypesOther} onChange={(e) => set("stylingTypesOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Event / Shoot Date">
             <TextInput type="date" value={data.eventDate} onChange={(e) => set("eventDate", e.target.value)} placeholder="DD / MM / YYYY" />

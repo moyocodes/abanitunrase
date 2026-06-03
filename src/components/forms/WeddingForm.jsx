@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
-import { saveBooking } from "@/lib/firestore";
+import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
@@ -38,12 +38,14 @@ const emptyState = {
   necklinePreference: "",
   // Step 2
   silhouette: "",
+  silhouetteOther: "",
   necklineDetail: "",
   fabricPreference: "",
   comfortRequirements: "",
   heelPreference: "",
   // Step 3
   accessories: [],
+  accessoriesOther: "",
   noAccessories: "",
   venueAndSeason: "",
   climateConsiderations: "",
@@ -54,6 +56,7 @@ const emptyState = {
   bodyDescription: "",
   elementsPreference: "",
   skinTone: "",
+  skinToneOther: "",
   measurements: "",
   // Step 6
   hasMoodBoard: "",
@@ -64,6 +67,7 @@ const emptyState = {
   weddingDate: "",
   attireTimeline: "",
   dresscode: "",
+  drescodeOther: "",
   coordinateParty: "",
   // Step 8
   culturalRequirements: "",
@@ -84,6 +88,7 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
   const [error, setError] = useState("");
+  const bookingIdRef = useRef(null);
 
   const set = (field, value) => setData((d) => ({ ...d, [field]: value }));
 
@@ -121,6 +126,9 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
+    saveBooking("wedding", { ...data, preferredTime: data.weddingDate })
+      .then(id => { bookingIdRef.current = id; })
+      .catch(console.error);
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
@@ -144,13 +152,23 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
 
   const handlePaymentSuccess = (response) => {
     const amt = (amountProp ?? packageAmount) * 100;
-    saveBooking("wedding", {
-      ...data,
-      preferredTime: data.weddingDate,
-      paid: true,
-      paymentReference: response?.reference || "",
-      amount: amt,
-    }, "confirmed").catch(console.error);
+    const id = bookingIdRef.current;
+    if (id) {
+      updateBookingStatus(id, "confirmed").catch(console.error);
+      updateBooking(id, {
+        "data.paid": true,
+        "data.paymentReference": response?.reference || "",
+        "data.amount": amt,
+      }).catch(console.error);
+    } else {
+      saveBooking("wedding", {
+        ...data,
+        preferredTime: data.weddingDate,
+        paid: true,
+        paymentReference: response?.reference || "",
+        amount: amt,
+      }, "confirmed").catch(console.error);
+    }
     onComplete();
   };
 
@@ -254,6 +272,11 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
               onChange={(e) => set("silhouette", e.target.value)}
               placeholder="Select a silhouette"
             />
+            {data.silhouette === "Other" && (
+              <div className="mt-3">
+                <TextInput value={data.silhouetteOther} onChange={(e) => set("silhouetteOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Do you have a preference for sleeve length or neckline style?">
             <TextArea value={data.necklineDetail} onChange={(e) => set("necklineDetail", e.target.value)} placeholder="Describe your preferences..." rows={3} />
@@ -288,6 +311,11 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
               values={data.accessories}
               onChange={(v) => set("accessories", v)}
             />
+            {data.accessories.includes("Other") && (
+              <div className="mt-3">
+                <TextInput value={data.accessoriesOther} onChange={(e) => set("accessoriesOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Are there any accessories you definitely do NOT want?">
             <TextArea value={data.noAccessories} onChange={(e) => set("noAccessories", e.target.value)} placeholder="Accessories to avoid..." rows={3} />
@@ -350,6 +378,11 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
               value={data.skinTone}
               onChange={(v) => set("skinTone", v)}
             />
+            {data.skinTone === "Other" && (
+              <div className="mt-3">
+                <TextInput value={data.skinToneOther} onChange={(e) => set("skinToneOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Can you provide your current and preferred measurements for the dress fitting?">
             <TextArea value={data.measurements} onChange={(e) => set("measurements", e.target.value)} placeholder="Measurements, sizing notes..." rows={3} />
@@ -414,6 +447,11 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
               value={data.dresscode}
               onChange={(v) => set("dresscode", v)}
             />
+            {data.dresscode === "Other" && (
+              <div className="mt-3">
+                <TextInput value={data.drescodeOther} onChange={(e) => set("drescodeOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Are you interested in coordinating the style of your attire with the bridesmaids and groomsmen?">
             <RadioGroup

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { submitToGoogleForm } from "@/lib/googleForm";
-import { saveBooking } from "@/lib/firestore";
+import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
@@ -34,6 +34,7 @@ const emptyState = {
   lengthOfStay: "",
   // Step 2
   tripNature: [],
+  tripNatureOther: "",
   plannedActivities: "",
   // Step 3
   numberOfLooks: "",
@@ -55,6 +56,7 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
   const [error, setError] = useState("");
+  const bookingIdRef = useRef(null);
 
   const set = (field, value) => setData((d) => ({ ...d, [field]: value }));
 
@@ -80,6 +82,9 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
   const handleSubmit = () => {
     if (!data.acknowledge) { setError("Please acknowledge the terms before submitting."); return; }
     setError("");
+    saveBooking("travel", { ...data, preferredTime: data.travelDates })
+      .then(id => { bookingIdRef.current = id; })
+      .catch(console.error);
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
@@ -103,13 +108,23 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
 
   const handlePaymentSuccess = (response) => {
     const amt = (amountProp ?? packageAmount) * 100;
-    saveBooking("travel", {
-      ...data,
-      preferredTime: data.travelDates,
-      paid: true,
-      paymentReference: response?.reference || "",
-      amount: amt,
-    }, "confirmed").catch(console.error);
+    const id = bookingIdRef.current;
+    if (id) {
+      updateBookingStatus(id, "confirmed").catch(console.error);
+      updateBooking(id, {
+        "data.paid": true,
+        "data.paymentReference": response?.reference || "",
+        "data.amount": amt,
+      }).catch(console.error);
+    } else {
+      saveBooking("travel", {
+        ...data,
+        preferredTime: data.travelDates,
+        paid: true,
+        paymentReference: response?.reference || "",
+        amount: amt,
+      }, "confirmed").catch(console.error);
+    }
     onComplete();
   };
 
@@ -187,6 +202,11 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
               values={data.tripNature}
               onChange={(v) => set("tripNature", v)}
             />
+            {data.tripNature.includes("Other") && (
+              <div className="mt-3">
+                <TextInput value={data.tripNatureOther} onChange={(e) => set("tripNatureOther", e.target.value)} placeholder="Please specify" />
+              </div>
+            )}
           </FormField>
           <FormField label="Planned Activities" hint="Dinners, excursions, events, etc.">
             <TextArea value={data.plannedActivities} onChange={(e) => set("plannedActivities", e.target.value)} placeholder="Describe your planned activities..." rows={4} />
