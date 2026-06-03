@@ -10,6 +10,7 @@ import { saveLook, deleteLook, saveReview, getReviewsForLook, deleteReview } fro
 import { ytEmbedUrl } from "@/data";
 import BookCallModal from "@/components/BookCallModal";
 import BookingLookup from "@/components/BookingLookup";
+import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 import Footer from "@/components/Footer";
 
 const VALID_TYPES = ["bridal", "occasion", "travel"];
@@ -182,21 +183,24 @@ function ReviewsSection({ lookId, isAdmin }) {
 
   return (
     <div className="mt-10 pt-8 border-t border-[#1a1706]/8">
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-7">
         <div>
-          <div className="font-mono text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/35 mb-1.5">
+          <div className="font-['DM_Mono'] text-[7px] tracking-[0.38em] uppercase text-[#1a1706]/30 mb-2">
             Client Testimonials
           </div>
           {avgRating ? (
             <div className="flex items-center gap-2.5">
               <StarRating value={Math.round(parseFloat(avgRating))} readonly size="sm" />
-              <span className="font-['DM_Mono'] text-[10px] text-[#1a1706]/50">
-                {avgRating} · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+              <span className="font-['Cormorant_Garamond'] italic text-[16px] text-[#1a1706]/55">
+                {avgRating}
+              </span>
+              <span className="font-['DM_Mono'] text-[9px] text-[#1a1706]/30 tracking-wide">
+                {reviews.length} review{reviews.length !== 1 ? "s" : ""}
               </span>
             </div>
           ) : (
-            <div className="font-['Outfit'] text-[12px] text-[#1a1706]/30 italic">
+            <div className="font-['Cormorant_Garamond'] italic text-[15px] text-[#1a1706]/35">
               No reviews yet — be the first.
             </div>
           )}
@@ -204,92 +208,80 @@ function ReviewsSection({ lookId, isAdmin }) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="font-['Outfit'] text-[11px] tracking-[0.06em] uppercase font-semibold px-4 py-2 bg-transparent border border-[#1a1706]/18 text-[#1a1706]/55 hover:bg-[#1a1706] hover:text-[#f5f0e6] hover:border-[#1a1706] cursor-pointer transition-all duration-200 whitespace-nowrap"
+            className="font-['DM_Mono'] text-[7.5px] tracking-[0.22em] uppercase px-4 py-2.5 border border-[#1a1706]/18 text-[#1a1706]/45 hover:border-[#1a1706]/50 hover:text-[#1a1706] bg-transparent cursor-pointer transition-all duration-200 whitespace-nowrap"
           >
             + Write a Review
           </button>
         )}
       </div>
 
-      {/* Success message */}
+      {/* Success */}
       <AnimatePresence>
         {submitted && (
           <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="flex items-center gap-2.5 px-4 py-3 bg-[#f0faf4] border border-[#b8e0cb] mb-5"
+            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="flex items-center gap-3 px-5 py-3.5 border-l-2 border-[#1a4a2e] bg-[#f0faf4] mb-6"
           >
-            <span className="text-emerald-600 text-[14px]">✓</span>
-            <span className="font-['Outfit'] text-[12px] text-emerald-800">
-              Thank you — your review has been shared!
+            <span className="text-[#1a4a2e]/70 text-sm">✓</span>
+            <span className="font-['Outfit'] text-[13px] text-[#1a4a2e]/80">
+              Thank you — your review has been shared.
             </span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Review form */}
+      {/* Form */}
       <AnimatePresence>
         {showForm && (
           <motion.form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-8 p-5 bg-[#faf9f7] border border-[#1a1706]/8"
+            className="mb-8"
           >
-            <div className="font-mono text-[7px] tracking-[0.32em] uppercase text-[#1a1706]/35 mb-5">
-              Share Your Experience
+            <div className="font-['Cormorant_Garamond'] italic text-[#1a1706] text-[22px] mb-6 leading-tight">
+              Share your experience
             </div>
             {error && (
-              <div className="font-['Outfit'] text-[11.5px] text-red-600/80 mb-4 pl-3 border-l-2 border-red-400">
+              <p className="font-['DM_Mono'] text-[8px] tracking-[0.16em] uppercase text-red-500/80 mb-5 border-l-2 border-red-400 pl-3">
                 {error}
-              </div>
+              </p>
             )}
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="block font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/35 mb-1.5">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <label className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/38">
                   Your Name
                 </label>
                 <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={name} onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Adaeze O."
-                  className="w-full font-['Outfit'] text-[13px] text-[#1a1706] bg-transparent border-b border-[#1a1706]/15 py-1.5 outline-none focus:border-[#1a1706]/45 placeholder:text-[#1a1706]/25 transition-colors"
+                  className="font-['Outfit'] text-[15px] text-[#1a1706] bg-transparent border-0 border-b border-[#1a1706]/13 py-2 outline-none focus:border-[#1a1706] placeholder:text-[#1a1706]/22 transition-colors duration-200"
                 />
               </div>
-              <div>
-                <label className="block font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/35 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/38">
                   Rating
                 </label>
                 <StarRating value={rating} onChange={setRating} />
               </div>
-              <div>
-                <label className="block font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/35 mb-1.5">
+              <div className="flex flex-col gap-1">
+                <label className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/38">
                   Your Review
                 </label>
                 <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Share your experience with this look…"
+                  value={comment} onChange={(e) => setComment(e.target.value)}
+                  placeholder="What was the experience like…"
                   rows={4}
-                  className="w-full font-['Outfit'] text-[13px] text-[#1a1706]/80 leading-[1.8] bg-white border border-[#1a1706]/10 p-3 outline-none focus:border-[#1a1706]/25 resize-y placeholder:text-[#1a1706]/25 transition-colors"
+                  className="font-['Outfit'] text-[14px] text-[#1a1706]/80 leading-[1.9] bg-transparent border-b border-[#1a1706]/13 py-2 outline-none focus:border-[#1a1706] resize-none placeholder:text-[#1a1706]/22 transition-colors duration-200"
                 />
               </div>
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="font-['Outfit'] text-[12px] font-semibold tracking-[0.06em] uppercase px-5 py-2.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40 hover:bg-black transition-colors"
-                >
-                  {submitting ? "Submitting…" : "Submit Review"}
+              <div className="flex items-center gap-3 pt-1">
+                <button type="submit" disabled={submitting}
+                  className="font-['DM_Mono'] text-[8px] tracking-[0.22em] uppercase px-6 py-3 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40 hover:bg-black transition-colors">
+                  {submitting ? "Submitting…" : "Submit →"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowForm(false); setError(""); }}
-                  className="font-['Outfit'] text-[12px] font-medium tracking-[0.04em] uppercase px-4 py-2.5 text-[#1a1706]/45 bg-transparent border border-[#1a1706]/12 cursor-pointer hover:text-[#1a1706]/70 transition-colors"
-                >
+                <button type="button" onClick={() => { setShowForm(false); setError(""); }}
+                  className="font-['DM_Mono'] text-[7.5px] tracking-[0.2em] uppercase text-[#1a1706]/35 hover:text-[#1a1706]/65 bg-transparent border-none cursor-pointer transition-colors py-2">
                   Cancel
                 </button>
               </div>
@@ -298,55 +290,55 @@ function ReviewsSection({ lookId, isAdmin }) {
         )}
       </AnimatePresence>
 
-      {/* Reviews list */}
+      {/* List */}
       {loading ? (
-        <div className="font-mono text-[7.5px] tracking-[0.25em] uppercase text-[#1a1706]/30 py-4 animate-pulse">
-          Loading reviews…
+        <div className="font-['DM_Mono'] text-[7px] tracking-[0.28em] uppercase text-[#1a1706]/25 py-6 animate-pulse">
+          Loading…
         </div>
       ) : reviews.length === 0 && !showForm ? (
-        <div className="py-8 text-center border border-dashed border-[#1a1706]/10">
-          <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/30 text-[20px] mb-1">
+        <div className="py-10 text-center">
+          <div className="font-['Cormorant_Garamond'] italic text-[#1a1706]/25 text-[24px]">
             No reviews yet.
-          </div>
-          <div className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/25">
-            Share your experience above.
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-0">
+        <div className="flex flex-col">
           {reviews.map((review, i) => (
             <motion.div
               key={review.id ?? i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col gap-2.5 py-5 border-b border-[#1a1706]/6 last:border-0"
+              className="py-6 border-b border-[#1a1706]/6 last:border-0"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-col gap-1">
-                  <StarRating value={review.rating ?? 0} readonly size="sm" />
-                  <div className="font-['Outfit'] text-[13px] font-semibold text-[#1a1706]">
-                    {review.name}
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1a1706]/8 flex items-center justify-center flex-shrink-0">
+                    <span className="font-['Cormorant_Garamond'] italic text-[#1a1706]/55 text-[15px] leading-none">
+                      {review.name?.[0]?.toUpperCase() ?? "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-['Outfit'] text-[13px] font-medium text-[#1a1706] leading-tight">
+                      {review.name}
+                    </div>
+                    <StarRating value={review.rating ?? 0} readonly size="sm" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 mt-0.5">
+                <div className="flex items-center gap-2 shrink-0 pt-0.5">
                   {review.createdAt && (
-                    <div className="font-mono text-[6.5px] tracking-[0.2em] uppercase text-[#1a1706]/28 pt-0.5">
+                    <div className="font-['DM_Mono'] text-[6.5px] tracking-[0.18em] uppercase text-[#1a1706]/25">
                       {formatDate(review.createdAt)}
                     </div>
                   )}
                   {isAdmin && (
-                    <button
-                      onClick={() => handleDeleteReview(review.id)}
-                      disabled={deletingId === review.id}
-                      className="font-mono text-[7px] tracking-[0.15em] uppercase text-red-400/60 hover:text-red-500 bg-transparent border border-red-200/60 hover:border-red-400 px-2 py-0.5 cursor-pointer transition-colors disabled:opacity-40"
-                    >
-                      {deletingId === review.id ? "…" : "Delete"}
+                    <button onClick={() => handleDeleteReview(review.id)} disabled={deletingId === review.id}
+                      className="font-['DM_Mono'] text-[7px] tracking-[0.15em] uppercase text-red-400/50 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors disabled:opacity-40 pl-1">
+                      {deletingId === review.id ? "…" : "✕"}
                     </button>
                   )}
                 </div>
               </div>
-              <p className="font-['Outfit'] text-[13.5px] text-[#1a1706]/65 leading-[1.8] font-light">
+              <p className="font-['Cormorant_Garamond'] italic text-[17px] text-[#1a1706]/60 leading-[1.7] pl-11">
                 "{review.comment}"
               </p>
             </motion.div>
@@ -641,6 +633,13 @@ export default function StoriesPage() {
 
   const [bookCallOpen, setBookCallOpen] = useState(false);
   const [lookupOpen, setLookupOpen] = useState(false);
+  const [formType, setFormType] = useState(null);
+  const [formPrice, setFormPrice] = useState(null);
+  const openBookingForm = (look) => {
+    const type = look?.catIdx === 1 ? "occasion" : look?.catIdx === 2 ? "travel" : "wedding";
+    setFormType(type);
+    setFormPrice(null);
+  };
 
   const [activeCatIdx, setActiveCatIdx] = useState(
     category === "occasion" ? 1 : category === "travel" ? 2 : 0,
@@ -1139,7 +1138,7 @@ export default function StoriesPage() {
                     {/* Actions */}
                     <div className="flex gap-2.5 flex-wrap pt-[18px] border-t border-[#1a1706]/7">
                       <button
-                        onClick={() => setBookCallOpen(true)}
+                        onClick={() => openBookingForm(look)}
                         className="font-['Outfit'] text-[clamp(12px,1.1vw,14px)] tracking-[0.08em] uppercase px-6 py-3.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer transition-colors duration-200 font-semibold hover:bg-black"
                       >
                         Book This Look →
@@ -1192,6 +1191,16 @@ export default function StoriesPage() {
         onTrackBooking={() => setLookupOpen(true)}
         onContact={handleContact}
       />
+
+      <FormModal
+        open={formType !== null}
+        onClose={() => setFormType(null)}
+        title={formType === "wedding" ? "Wedding Styling Intake" : formType === "occasion" ? "Occasion Styling" : "Kájáyelo Travel Styling"}
+      >
+        {formType === "wedding"  && <WeddingForm  onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "occasion" && <OccasionForm onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "travel"   && <TravelForm   onComplete={() => setFormType(null)} amount={formPrice} />}
+      </FormModal>
     </div>
   );
 }

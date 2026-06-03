@@ -420,7 +420,7 @@ export default function CtaContact({ onBookCall }) {
                     onChange={(e) =>
                       setFormState((s) => ({ ...s, name: e.target.value }))
                     }
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/55 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Phone */}
@@ -435,7 +435,7 @@ export default function CtaContact({ onBookCall }) {
                     onChange={(e) =>
                       setFormState((s) => ({ ...s, phone: e.target.value }))
                     }
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/55 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Email */}
@@ -450,7 +450,7 @@ export default function CtaContact({ onBookCall }) {
                     onChange={(e) =>
                       setFormState((s) => ({ ...s, email: e.target.value }))
                     }
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/55 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {/* Service */}
@@ -492,7 +492,7 @@ export default function CtaContact({ onBookCall }) {
                     onChange={(e) =>
                       setFormState((s) => ({ ...s, date: e.target.value }))
                     }
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/55 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:hover:opacity-100"
                   />
                 </div>
                 {/* Message */}
@@ -507,7 +507,7 @@ export default function CtaContact({ onBookCall }) {
                     onChange={(e) =>
                       setFormState((s) => ({ ...s, message: e.target.value }))
                     }
-                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/30 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
+                    className="bg-white/[0.06] border border-white/15 px-4 py-3 text-[#f5f0e6] text-base placeholder:text-white/55 outline-none focus:bg-white/10 focus:border-white/40 transition-colors font-['Outfit'] font-light w-full"
                   />
                 </div>
                 {formError && (

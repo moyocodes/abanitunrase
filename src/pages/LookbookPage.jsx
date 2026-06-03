@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useData } from "@/providers";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -60,7 +60,7 @@ function CarouselCard({ look, onOpen }) {
 
         <div className="absolute bottom-0 left-0 right-0 p-3.5">
           <div className="font-['Cormorant_Garamond'] italic text-white/90 text-[17px] leading-tight">{look.title}</div>
-          {look.sub && <div className="font-['DM_Mono'] text-[6px] tracking-[0.22em] uppercase text-white/38 mt-0.5">{look.sub}</div>}
+          {look.sub && <div className="font-['Outfit'] font-light text-[11px] tracking-[0.01em] text-white/55 mt-1.5 leading-snug">{look.sub}</div>}
         </div>
       </div>
     </div>
@@ -228,6 +228,27 @@ export default function LookbookPage() {
           })
         )}
       </div>
+
+      {/* ── View Rates ── */}
+      {looks.length > 0 && (
+        <div className="bg-[#0a0a0a] border-t border-white/[0.06] px-6 md:px-16 py-14 md:py-20 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div>
+            <div className="font-['DM_Mono'] text-[7px] tracking-[0.45em] uppercase text-[#f5f0e6]/30 mb-3 flex items-center gap-2">
+              <span className="w-4 h-px bg-[#f5f0e6]/18 inline-block" />
+              Investment
+            </div>
+            <h3 className="font-['Cormorant_Garamond'] italic text-[clamp(28px,3.5vw,48px)] text-[#f5f0e6] leading-none tracking-tight">
+              See what each look costs
+            </h3>
+          </div>
+          <Link
+            to="/rates"
+            className="flex-shrink-0 font-['DM_Mono'] text-[8.5px] tracking-[0.28em] uppercase px-8 py-[14px] bg-[#f5f0e6] text-[#1a1706] hover:bg-white no-underline transition-colors"
+          >
+            View Full Rates →
+          </Link>
+        </div>
+      )}
 
       {/* ── Outro CTA ── */}
       {looks.length > 0 && (

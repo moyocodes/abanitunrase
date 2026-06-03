@@ -34,6 +34,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
   const [holdState,       setHoldState]       = useState("idle");
   const [formError,       setFormError]       = useState("");
   const [slotsConfig,     setSlotsConfig]     = useState(null);  // null = not loaded yet
+  const [closedToast,     setClosedToast]     = useState(false);
 
   const selectedService =
     consultationOptions.find((o) => o.value === service) ?? consultationOptions[0];
@@ -55,12 +56,19 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
     }
   }, [consultationOptions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load consultation slot config whenever modal opens
+  // Pre-fetch slot config once at mount so the check is instant on click
   useEffect(() => {
-    if (open) {
-      getConsultationSlots().then(setSlotsConfig).catch(() => setSlotsConfig(null));
+    getConsultationSlots().then(setSlotsConfig).catch(() => setSlotsConfig(null));
+  }, []);
+
+  // Gate: if slots are disabled when the modal tries to open, close immediately + toast
+  useEffect(() => {
+    if (open && slotsConfig?.enabled === false) {
+      onClose();
+      setClosedToast(true);
+      setTimeout(() => setClosedToast(false), 3500);
     }
-  }, [open]);
+  }, [open, slotsConfig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -115,7 +123,6 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
       setService("consultation"); setTime("");
       setSubmitting(false); setShowPayment(false); setDone(false);
       setShowHoldPrompt(false); setHoldState("idle"); setFormError("");
-      setSlotsConfig(null);
     }, 400);
   };
 
@@ -133,6 +140,23 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
     }).format(kobo / 100);
 
   return (
+    <>
+    <AnimatePresence>
+      {closedToast && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[900] flex items-center gap-3 px-5 py-3.5 bg-[#1a1706] text-[#f5f0e6] shadow-xl whitespace-nowrap"
+        >
+          <span className="text-[#f5f0e6]/40 text-base">◷</span>
+          <span className="font-['DM_Mono'] text-[8px] tracking-[0.2em] uppercase">
+            Consultation bookings aren't open yet — check back soon.
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
     <AnimatePresence>
       {open && (
         <>
@@ -426,5 +450,6 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
         </>
       )}
     </AnimatePresence>
+    </>
   );
 }

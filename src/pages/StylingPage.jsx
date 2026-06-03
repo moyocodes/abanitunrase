@@ -87,34 +87,63 @@ export default function StylingPage() {
       <BookCallModal open={bookCallOpen} onClose={() => setBookCallOpen(false)} />
       <Nav hidden={false} onBookCall={() => setBookCallOpen(true)} />
 
-      {/* Hero — 80vh */}
-      <div className="relative h-[80vh] overflow-hidden bg-[#0a0a0a]">
+      {/* Hero — full viewport */}
+      <div className="relative h-[100dvh] w-full overflow-hidden bg-[#0a0a0a]">
         {heroImg && (
-          <img
+          <motion.img
             src={heroImg}
             alt={meta.heading}
-            className="absolute inset-0 w-full h-full object-cover opacity-70 saturate-[0.85]"
+            className="absolute inset-0 w-full h-full object-cover saturate-[0.85]"
+            style={{ opacity: 0.72 }}
+            initial={{ scale: 1.06 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-black/25 pointer-events-none" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <div className="font-mono text-[7px] md:text-[8px] tracking-[0.5em] uppercase text-[#f5f0e6]/55 mb-4">
-            {meta.yoruba}
-          </div>
-          <h1 className="font-['Cormorant_Garamond'] italic text-[clamp(48px,8vw,104px)] text-[#f5f0e6] leading-[1.02] tracking-[-0.02em] drop-shadow-lg">
-            {meta.heading}
-          </h1>
-          <div className="w-12 h-px bg-[#f5f0e6]/28 my-5" />
-          <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[#f5f0e6]/60 leading-relaxed font-light max-w-lg mb-8">
-            {meta.description}
-          </p>
-          <button
-            onClick={() => setFormType(meta.formType)}
-            className="font-mono text-[8.5px] tracking-[0.3em] uppercase px-7 py-3.5 border border-[#f5f0e6]/35 text-[#f5f0e6] hover:bg-[#f5f0e6]/10 transition-all duration-200 cursor-pointer bg-transparent"
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
           >
-            {meta.cta} →
-          </button>
+            <div className="font-mono text-[7px] md:text-[8px] tracking-[0.5em] uppercase text-[#f5f0e6]/55 mb-4">
+              {meta.yoruba}
+            </div>
+            <h1 className="font-['Cormorant_Garamond'] italic text-[clamp(52px,9vw,112px)] text-[#f5f0e6] leading-[1.02] tracking-[-0.02em] drop-shadow-lg">
+              {meta.heading}
+            </h1>
+            <div className="w-12 h-px bg-[#f5f0e6]/28 my-5 mx-auto" />
+            <p className="font-['Outfit'] text-[clamp(13px,1.2vw,16px)] text-[#f5f0e6]/60 leading-relaxed font-light max-w-lg mb-8 mx-auto">
+              {meta.description}
+            </p>
+            <button
+              onClick={() => setFormType(meta.formType)}
+              className="font-mono text-[8.5px] tracking-[0.3em] uppercase px-7 py-3.5 border border-[#f5f0e6]/35 text-[#f5f0e6] hover:bg-[#f5f0e6]/10 transition-all duration-200 cursor-pointer bg-transparent"
+            >
+              {meta.cta} →
+            </button>
+          </motion.div>
         </div>
+
+        {/* Scroll blinker */}
+        <motion.div
+          className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2.5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+        >
+          <span className="font-['DM_Mono'] text-[6px] tracking-[0.35em] uppercase text-white/30">Scroll</span>
+          <div className="relative w-px h-10 overflow-hidden">
+            <div className="absolute inset-0 bg-white/15" />
+            <motion.div
+              className="absolute top-0 left-0 right-0 bg-white/70"
+              animate={{ y: ["-100%", "100%"] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: "linear", repeatDelay: 0.3 }}
+              style={{ height: "50%" }}
+            />
+          </div>
+        </motion.div>
       </div>
 
       {/* How It Works */}

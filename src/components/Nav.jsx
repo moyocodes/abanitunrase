@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const NAV_VARIANTS = {
@@ -25,9 +25,18 @@ const LINKS = [
   { label: "Contact",       section: "contact" },
 ];
 
+const STYLING_LINKS = [
+  { label: "Bridal",   href: "/styling/bridal" },
+  { label: "Occasion", href: "/styling/occasion" },
+  { label: "Travel",   href: "/styling/travel" },
+];
+
 export default function Nav({ onBookCall, hidden, onTrackBooking }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled,     setScrolled]     = useState(false);
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [stylingOpen,  setStylingOpen]  = useState(false);
+  const [mobileStyleOpen, setMobileStyleOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location    = useLocation();
   const isHome      = location.pathname === "/";
@@ -112,9 +121,38 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             )
           )}
 
-          <Link to="/styling/bridal" className={linkCls}>
-            Styling
-          </Link>
+          {/* Styling dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setStylingOpen(o => !o)}
+              className={`${linkCls} bg-transparent border-none cursor-pointer p-0 flex items-center gap-1`}
+            >
+              Styling
+              <span className={`text-[8px] transition-transform duration-200 ${stylingOpen ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            <AnimatePresence>
+              {stylingOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white border border-black/8 shadow-lg min-w-[130px] py-1 z-10"
+                >
+                  {STYLING_LINKS.map(({ label, href }) => (
+                    <Link
+                      key={href}
+                      to={href}
+                      onClick={() => setStylingOpen(false)}
+                      className="block px-4 py-2.5 font-mono text-[8px] tracking-[0.18em] uppercase text-black/55 hover:text-black hover:bg-black/[0.03] no-underline transition-colors"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Desktop CTAs */}
@@ -187,9 +225,38 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
           )
         )}
 
-        <Link to="/styling/bridal" onClick={() => setMenuOpen(false)} className={mobileLinkCls}>
-          Styling
-        </Link>
+        {/* Styling expandable */}
+        <div>
+          <button
+            onClick={() => setMobileStyleOpen(o => !o)}
+            className={`${mobileLinkCls} bg-transparent border-none cursor-pointer text-left flex items-center gap-1.5 w-full`}
+          >
+            Styling
+            <span className={`text-[10px] transition-transform duration-200 ${mobileStyleOpen ? "rotate-180" : ""}`}>▾</span>
+          </button>
+          <AnimatePresence>
+            {mobileStyleOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden pl-4 flex flex-col gap-3 pt-2"
+              >
+                {STYLING_LINKS.map(({ label, href }) => (
+                  <Link
+                    key={href}
+                    to={href}
+                    onClick={() => { setMenuOpen(false); setMobileStyleOpen(false); }}
+                    className="font-mono text-[10px] tracking-[0.18em] uppercase no-underline text-black/40 hover:text-black transition-colors"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {onTrackBooking && (
           <button

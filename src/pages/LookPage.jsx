@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useData } from "@/providers";
 import LookSlideshow from "@/components/LookSlideshow";
 import BookCallModal from "@/components/BookCallModal";
+import { FormModal, WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 
 export const sortedLooks = (allLooks) =>
   [...allLooks].sort((a, b) => (a.catIdx ?? 0) - (b.catIdx ?? 0));
@@ -17,6 +18,8 @@ export default function LookPage() {
   const navigate = useNavigate();
   const { looks: allLooks, refetch } = useData();
   const [bookCallOpen, setBookCallOpen] = useState(false);
+  const [formType, setFormType] = useState(null);
+  const [formPrice, setFormPrice] = useState(null);
 
   const sorted = sortedLooks(allLooks ?? []);
   const startLook = sorted[parseInt(pos, 10) - 1] ?? null;
@@ -34,10 +37,20 @@ export default function LookPage() {
         startLookId={startLook?.id ?? null}
         startCatIdx={null}
         onClose={() => navigate("/lookbook")}
+        onBook={(type, price) => { setFormType(type); setFormPrice(price ?? null); }}
         onBookCall={() => setBookCallOpen(true)}
         onLookChange={handleLookChange}
         refetch={refetch}
       />
+      <FormModal
+        open={formType !== null}
+        onClose={() => setFormType(null)}
+        title={formType === "wedding" ? "Wedding Styling Intake" : formType === "occasion" ? "Occasion Styling" : "Kájáyelo Travel Styling"}
+      >
+        {formType === "wedding"  && <WeddingForm  onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "occasion" && <OccasionForm onComplete={() => setFormType(null)} amount={formPrice} />}
+        {formType === "travel"   && <TravelForm   onComplete={() => setFormType(null)} amount={formPrice} />}
+      </FormModal>
     </div>
   );
 }

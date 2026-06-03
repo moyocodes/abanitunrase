@@ -576,7 +576,9 @@ function ConfirmDelete({ message, onConfirm, onCancel }) {
 /* ══════════════════════════════════════════════════════════════════════════════
    Main LookSlideshow component
 ══════════════════════════════════════════════════════════════════════════════ */
-export default function LookSlideshow({ allLooks = [], startLookId = null, startCatIdx = null, onClose, onBookCall, onLookChange, refetch }) {
+const catIdxToType = (idx) => idx === 1 ? "occasion" : idx === 2 ? "travel" : "wedding";
+
+export default function LookSlideshow({ allLooks = [], startLookId = null, startCatIdx = null, onClose, onBook, onBookCall, onLookChange, refetch }) {
   const { user } = useAuth();
 
   const [catFilter,    setCatFilter]    = useState(startCatIdx);
@@ -705,8 +707,8 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
   const catLooks = allLooks.filter(l => (l.catIdx ?? 0) === (look?.catIdx ?? 0));
   const catPos   = catLooks.findIndex(l => l.id === look?.id);
 
-  return createPortal(
-    <div className="fixed inset-0 z-[9000] bg-[#f4f3f0] flex flex-col overflow-hidden">
+  return (
+    <div className="relative min-h-screen bg-[#f4f3f0] flex flex-col overflow-hidden">
 
       {/* Confirm delete */}
       {confirmDel && <ConfirmDelete message="Delete this look? Cannot be undone." onConfirm={doDelete} onCancel={() => setConfirmDel(null)} />}
@@ -881,7 +883,7 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
 
                   {/* Title */}
                   <h2 className="font-['Cormorant_Garamond'] italic font-normal text-[clamp(26px,3vw,44px)] text-[#1a1706] leading-[1.05] mb-1.5">{look?.title}</h2>
-                  {look?.sub && <p className="font-['DM_Mono'] text-[7.5px] tracking-[0.28em] uppercase text-[#1a1706]/30 mb-6">{look.sub}</p>}
+                  {look?.sub && <p className="font-['Outfit'] font-light text-[12px] tracking-[0.01em] text-[#1a1706]/45 mb-6 leading-snug">{look.sub}</p>}
 
                   {/* Voice bar — above story */}
                   {look?.story && (
@@ -898,7 +900,8 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-2 pt-5 mt-2 border-t border-[#1a1706]/7">
-                    <button onClick={() => onBookCall?.()}
+                    <button
+                      onClick={() => onBook ? onBook(catIdxToType(look?.catIdx)) : onBookCall?.()}
                       className="font-['DM_Mono'] text-[7.5px] tracking-[0.2em] uppercase px-5 py-2.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer hover:bg-black transition-colors">
                       Book This Look →
                     </button>
@@ -924,7 +927,6 @@ export default function LookSlideshow({ allLooks = [], startLookId = null, start
           </div>
         </div>
       )}
-    </div>,
-    document.body
+    </div>
   );
 }

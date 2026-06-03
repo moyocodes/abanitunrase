@@ -288,7 +288,13 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: i * 0.09 }}
           >
             <div
-              onClick={() => !editMode && setSpotlightIdx(i)}
+              onClick={() => {
+                if (editMode) return;
+                setSpotlightIdx(i);
+                onBook
+                  ? onBook(activeTab === "bridal" ? "wedding" : activeTab, r.price)
+                  : onBookCall?.();
+              }}
               className={`relative p-3 md:p-7 cursor-pointer flex flex-col overflow-hidden h-full transition-all duration-500 ${
                 r.featured ? "bg-[#1a1706]" : "bg-white"
               } ${!editMode && i === spotlightIdx ? "opacity-100 md:scale-[1.01] md:shadow-lg z-10" : editMode ? "opacity-100" : "opacity-60"}`}
@@ -356,22 +362,16 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 </div>
               </div>
 
-              <button
-                onClick={e => {
-                  e.stopPropagation();
-                  onBook
-                    ? onBook(activeTab === "bridal" ? "wedding" : activeTab, r.price)
-                    : onBookCall?.();
-                }}
-                className={`mt-3 md:mt-4 pt-3 md:pt-4 border-t font-['Outfit'] font-medium text-[9px] md:text-sm uppercase tracking-wider text-left flex items-center justify-between transition-colors duration-200 w-full bg-transparent border-l-0 border-r-0 border-b-0 cursor-pointer group/book ${
+              <div
+                className={`mt-3 md:mt-4 pt-3 md:pt-4 border-t font-['Outfit'] font-medium text-[9px] md:text-sm uppercase tracking-wider flex items-center justify-between pointer-events-none ${
                   r.featured
-                    ? "text-[#f5f0e6]/40 border-white/10 hover:text-[#f5f0e6]"
-                    : "text-[#1a1706]/45 border-black/10 hover:text-[#1a1706]"
+                    ? "text-[#f5f0e6]/40 border-white/10"
+                    : "text-[#1a1706]/45 border-black/10"
                 }`}
               >
                 <span>Book<span className="hidden md:inline"> this package</span></span>
-                <span className="transition-transform duration-200 group-hover/book:translate-x-0.5">→</span>
-              </button>
+                <span>→</span>
+              </div>
 
               {!editMode && i === spotlightIdx && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden">
@@ -449,16 +449,13 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Individual Styling</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.singlePackages.map((pkg, i) => (
-                    <div key={i} className="flex items-center justify-between py-3.5 gap-4">
-                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80">{pkg.service}</span>
+                    <div key={i} onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()} className="flex items-center justify-between py-3.5 gap-4 cursor-pointer group hover:bg-black/[0.02] -mx-2 px-2 transition-colors">
+                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80 group-hover:text-[#1a1706] transition-colors">{pkg.service}</span>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
-                        <button
-                          onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()}
-                          className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
-                        >
+                        <span className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 group-hover:border-[#1a1706]/60 group-hover:text-[#1a1706] transition-colors">
                           Book →
-                        </button>
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -471,16 +468,13 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Bridal Party</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.otherPackages.map((pkg, i) => (
-                    <div key={i} className="flex items-center justify-between py-3.5 gap-4">
-                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80">{pkg.service}</span>
+                    <div key={i} onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()} className="flex items-center justify-between py-3.5 gap-4 cursor-pointer group hover:bg-black/[0.02] -mx-2 px-2 transition-colors">
+                      <span className="font-['Outfit'] text-[14px] md:text-[15px] font-light text-[#1a1706]/80 group-hover:text-[#1a1706] transition-colors">{pkg.service}</span>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-['Cormorant_Garamond'] text-[18px] md:text-[22px] text-[#1a1706] tracking-tight">{fmt(pkg.price)}</span>
-                        <button
-                          onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()}
-                          className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors bg-transparent cursor-pointer"
-                        >
+                        <span className="font-mono text-[7px] tracking-[0.22em] uppercase px-3 py-1.5 border border-[#1a1706]/20 text-[#1a1706]/50 group-hover:border-[#1a1706]/60 group-hover:text-[#1a1706] transition-colors">
                           Book →
-                        </button>
+                        </span>
                       </div>
                     </div>
                   ))}
