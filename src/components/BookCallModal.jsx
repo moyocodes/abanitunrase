@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaystackPayment from "@/components/forms/PaystackPayment";
 import ConsultationCalendar from "@/components/ConsultationCalendar";
-import { saveBooking, getConsultationSlots } from "@/lib/firestore";
+import { saveBooking, getConsultationSlots, getBookedConsultationTimes } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 
@@ -34,6 +34,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
   const [holdState,       setHoldState]       = useState("idle");
   const [formError,       setFormError]       = useState("");
   const [slotsConfig,     setSlotsConfig]     = useState(null);  // null = not loaded yet
+  const [bookedTimes,     setBookedTimes]     = useState([]);
   const [closedToast,     setClosedToast]     = useState(false);
 
   const selectedService =
@@ -56,9 +57,10 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
     }
   }, [consultationOptions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pre-fetch slot config once at mount so the check is instant on click
+  // Pre-fetch slot config and booked times once at mount
   useEffect(() => {
     getConsultationSlots().then(setSlotsConfig).catch(() => setSlotsConfig(null));
+    getBookedConsultationTimes().then(setBookedTimes).catch(() => setBookedTimes([]));
   }, []);
 
   // Gate: if slots are disabled when the modal tries to open, close immediately + toast
@@ -401,6 +403,7 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
                         slots={slotsConfig}
                         value={time}
                         onChange={setTime}
+                        bookedTimes={bookedTimes}
                       />
                     ) : (
                       <input

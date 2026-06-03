@@ -45,7 +45,7 @@ function getWeekEnd(ref = new Date()) {
   return end;
 }
 
-export default function ConsultationCalendar({ slots, value, onChange }) {
+export default function ConsultationCalendar({ slots, value, onChange, bookedTimes = [] }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -117,6 +117,14 @@ export default function ConsultationCalendar({ slots, value, onChange }) {
     const d = new Date(viewYear, viewMonth, day);
     d.setHours(0, 0, 0, 0);
     return d < today;
+  };
+
+  const isTimeBooked = (t) => {
+    if (!selDate || !bookedTimes.length) return false;
+    const y  = selDate.getFullYear();
+    const mo = String(selDate.getMonth() + 1).padStart(2, "0");
+    const d  = String(selDate.getDate()).padStart(2, "0");
+    return bookedTimes.includes(`${y}-${mo}-${d}T${t}`);
   };
 
   const selectDay = (day) => {
@@ -264,21 +272,28 @@ export default function ConsultationCalendar({ slots, value, onChange }) {
               {selDisplay} — pick a time
             </div>
             <div className="flex flex-wrap gap-2">
-              {timeSlots.map(t => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => selectTime(t)}
-                  className={[
-                    "font-['Outfit'] text-[13px] px-4 py-2 border rounded transition-all duration-100 cursor-pointer",
-                    selTime === t
-                      ? "bg-[#1a1706] text-[#f5f0e6] border-[#1a1706] font-medium"
-                      : "border-[#1a1706]/15 text-[#1a1706]/65 hover:border-[#1a1706]/50 hover:text-[#1a1706] hover:bg-[#1a1706]/4 bg-white",
-                  ].join(" ")}
-                >
-                  {to12h(t)}
-                </button>
-              ))}
+              {timeSlots.map(t => {
+                const booked = isTimeBooked(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => !booked && selectTime(t)}
+                    disabled={booked}
+                    title={booked ? "This slot is already booked" : undefined}
+                    className={[
+                      "font-['Outfit'] text-[13px] px-4 py-2 border rounded transition-all duration-100",
+                      booked
+                        ? "opacity-35 line-through cursor-not-allowed border-[#1a1706]/8 text-[#1a1706]/40 bg-[#f5f3ef] select-none blur-[0.6px]"
+                        : selTime === t
+                          ? "bg-[#1a1706] text-[#f5f0e6] border-[#1a1706] font-medium cursor-pointer"
+                          : "border-[#1a1706]/15 text-[#1a1706]/65 hover:border-[#1a1706]/50 hover:text-[#1a1706] hover:bg-[#1a1706]/4 bg-white cursor-pointer",
+                    ].join(" ")}
+                  >
+                    {to12h(t)}
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
         )}

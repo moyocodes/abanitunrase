@@ -174,6 +174,26 @@ export async function removeGalleryItem(id) {
   await deleteDoc(doc(db, "gallery", id));
 }
 
+export async function getBookedConsultationTimes() {
+  if (!db) return [];
+  try {
+    const now = new Date().toISOString();
+    const q = query(collection(db, "bookings"), where("type", "==", "consultation"));
+    const snap = await getDocs(q);
+    return snap.docs
+      .map((d) => d.data())
+      .filter((b) => {
+        if (b.status === "confirmed") return true;
+        if (b.status === "held" && b.data?.heldUntil > now) return true;
+        return false;
+      })
+      .map((b) => b.data?.preferredTime)
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export async function getConsultationSlots() {
   if (!db) return null;
   try {

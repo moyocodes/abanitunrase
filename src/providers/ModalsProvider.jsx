@@ -41,6 +41,7 @@ export function ModalsProvider({ children }) {
         open={lookupOpen}
         onClose={closeLookup}
         onContinuePayment={handleContinuePayment}
+        onRebook={() => { closeLookup(); setBookCallOpen(true); }}
       />
     </ModalsCtx.Provider>
   );

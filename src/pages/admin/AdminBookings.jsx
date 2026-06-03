@@ -271,17 +271,33 @@ function BookingRow({ booking, idx, onStatusChange, onDelete, onDownload, onColl
           )}
         </TD>
         <TD className="font-mono text-[12px] text-[#1a1706]/55 whitespace-nowrap">{preferred}</TD>
-        <TD>
-          <select
-            value={booking.status}
-            onClick={e => e.stopPropagation()}
-            onChange={e => { e.stopPropagation(); onStatusChange(booking.id, e.target.value, booking); }}
-            className={`font-mono text-[11px] tracking-[0.08em] uppercase py-1.5 px-2.5 border outline-none cursor-pointer transition-colors font-semibold ${badgeCls}`}
-          >
-            {STATUS_OPTIONS.map(s => (
-              <option key={s} value={s}>{STATUS_META[s]?.label ?? s}</option>
-            ))}
-          </select>
+        <TD onClick={e => e.stopPropagation()}>
+          {holdExpired ? (
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-[11px] tracking-[0.08em] uppercase py-1 px-2.5 border font-semibold bg-red-50 text-red-700 border-red-200 whitespace-nowrap">
+                Hold Expired
+              </span>
+              <select
+                value={booking.status}
+                onChange={e => onStatusChange(booking.id, e.target.value, booking)}
+                className="font-mono text-[10px] tracking-[0.08em] uppercase py-1 px-2 border outline-none cursor-pointer font-semibold bg-white text-[#1a1706]/50 border-[#e8e5dc]"
+              >
+                {STATUS_OPTIONS.map(s => (
+                  <option key={s} value={s}>{STATUS_META[s]?.label ?? s}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <select
+              value={booking.status}
+              onChange={e => onStatusChange(booking.id, e.target.value, booking)}
+              className={`font-mono text-[11px] tracking-[0.08em] uppercase py-1.5 px-2.5 border outline-none cursor-pointer transition-colors font-semibold ${badgeCls}`}
+            >
+              {STATUS_OPTIONS.map(s => (
+                <option key={s} value={s}>{STATUS_META[s]?.label ?? s}</option>
+              ))}
+            </select>
+          )}
         </TD>
         <TD onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">

@@ -36,7 +36,7 @@ function formatDate(ts) {
   });
 }
 
-export default function BookingLookup({ open, onClose, onContinuePayment }) {
+export default function BookingLookup({ open, onClose, onContinuePayment, onRebook }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -219,26 +219,42 @@ export default function BookingLookup({ open, onClose, onContinuePayment }) {
                             </span>
                           </div>
 
-                          {b.status === "held" &&
-                            !isExpiredHold(b) &&
-                            onContinuePayment && (
-                              <div className="mt-3 pt-3 border-t border-[#1a1706]/8">
+                          {b.status === "held" && (
+                            <div className="mt-3 pt-3 border-t border-[#1a1706]/8 flex flex-col gap-2.5">
+                              {b.data?.heldUntil && (
+                                <div className="font-['DM_Mono'] text-[7.5px] tracking-[0.15em] uppercase text-[#1a1706]/40">
+                                  {isExpiredHold(b)
+                                    ? `Expired ${new Date(b.data.heldUntil).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}`
+                                    : `Hold expires ${new Date(b.data.heldUntil).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}`}
+                                </div>
+                              )}
+                              {isExpiredHold(b) ? (
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <button
+                                    disabled
+                                    className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border-none bg-[#1a1706]/8 text-[#1a1706]/30 cursor-not-allowed"
+                                  >
+                                    Hold Expired
+                                  </button>
+                                  {onRebook && (
+                                    <button
+                                      onClick={() => { handleClose(); onRebook(); }}
+                                      className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border border-[#1a1706]/25 text-[#1a1706]/70 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors cursor-pointer bg-transparent"
+                                    >
+                                      Book Again →
+                                    </button>
+                                  )}
+                                </div>
+                              ) : onContinuePayment && (
                                 <button
-                                  onClick={() => {
-                                    handleClose();
-                                    onContinuePayment(b);
-                                  }}
-                                  className="
-                                  font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase
-                                  w-full sm:w-auto px-5 py-3
-                                  bg-[#1a1706] text-[#f5f0e6]
-                                  hover:bg-black transition-colors cursor-pointer border-none
-                                "
+                                  onClick={() => { handleClose(); onContinuePayment(b); }}
+                                  className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border-none bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors cursor-pointer"
                                 >
                                   Complete Payment →
                                 </button>
-                              </div>
-                            )}
+                              )}
+                            </div>
+                          )}
 
                           {b.data?.preferredTime && (
                             <div className="font-['DM_Mono'] text-[7.5px] tracking-[0.15em] uppercase text-[#1a1706]/40">
