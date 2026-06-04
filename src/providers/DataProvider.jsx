@@ -123,29 +123,30 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
-    try {
-      const [looksData, pricingData, settingsData, galleryData] = await Promise.all([
-        getLooks(),
-        getPricing(),
-        getSettings(),
-        getGallery(),
-      ]);
+    const [looksRes, pricingRes, settingsRes, galleryRes] = await Promise.allSettled([
+      getLooks(),
+      getPricing(),
+      getSettings(),
+      getGallery(),
+    ]);
 
-      if (looksData.length > 0) setLooks(looksData);
+    const looksData    = looksRes.status    === "fulfilled" ? looksRes.value    : [];
+    const pricingData  = pricingRes.status  === "fulfilled" ? pricingRes.value  : {};
+    const settingsData = settingsRes.status === "fulfilled" ? settingsRes.value : {};
+    const galleryData  = galleryRes.status  === "fulfilled" ? galleryRes.value  : [];
 
-      setPricing({
-        bridal:  pricingData.bridal?.length  ? pricingData.bridal  : DEFAULT_BRIDAL,
-        occasion: pricingData.occasion?.length ? pricingData.occasion : DEFAULT_OCCASION,
-        travel:  pricingData.travel?.length  ? pricingData.travel  : DEFAULT_TRAVEL,
-      });
+    if (looksData.length > 0) setLooks(looksData);
 
-      if (Object.keys(settingsData).length > 0) setSettings(settingsData);
-      if (galleryData.length > 0) setGalleryItems(galleryData);
-    } catch {
-      // keep empty defaults
-    } finally {
-      setLoading(false);
-    }
+    setPricing({
+      bridal:   pricingData.bridal?.length   ? pricingData.bridal   : DEFAULT_BRIDAL,
+      occasion: pricingData.occasion?.length ? pricingData.occasion : DEFAULT_OCCASION,
+      travel:   pricingData.travel?.length   ? pricingData.travel   : DEFAULT_TRAVEL,
+    });
+
+    if (Object.keys(settingsData).length > 0) setSettings(settingsData);
+    if (galleryData.length > 0) setGalleryItems(galleryData);
+
+    setLoading(false);
   };
 
   useEffect(() => { fetchAll(); }, []);

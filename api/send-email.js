@@ -279,9 +279,11 @@ export default async function handler(req, res) {
     reference,
     phone,
     preferredTime,
-    amountLabel,
     heldUntil,
   } = body;
+
+  const amountLabel = body.amountLabel
+    || (body.amount > 0 ? `₦${(body.amount / 100).toLocaleString("en-NG")}` : undefined);
 
   const details = {
     Service: serviceName,

@@ -10,6 +10,7 @@ import {
 } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "@/components/forms/PaystackPayment";
+import { useData } from "@/providers";
 
 const STATUS_OPTIONS = ["new", "held", "confirmed", "completed"];
 
@@ -28,13 +29,18 @@ const TYPE_META = {
   coupleConsultation: { label: "Couple",   cls: "bg-orange-50 text-orange-700 border-orange-200" },
 };
 
-const TYPE_AMOUNT = {
-  wedding:            5000000,
-  occasion:           3000000,
-  travel:             5000000,
-  consultation:       10000000,
-  coupleConsultation: 15000000,
-};
+function getFallbackAmount(type, pricing, ratesData) {
+  if (type === "wedding")   return ((pricing?.bridal?.find(p => p.featured)   ?? pricing?.bridal?.[0])?.price   ?? 0) * 100;
+  if (type === "occasion")  return ((pricing?.occasion?.find(p => p.featured) ?? pricing?.occasion?.[0])?.price ?? 0) * 100;
+  if (type === "travel")    return ((pricing?.travel?.find(p => p.featured)   ?? pricing?.travel?.[0])?.price   ?? 0) * 100;
+  if (type === "consultation" || type === "coupleConsultation") {
+    const c = ratesData?.consultations?.find(c =>
+      type === "coupleConsultation" ? /couple/i.test(c.label) : !/couple/i.test(c.label)
+    ) ?? ratesData?.consultations?.[0];
+    return c ? parseInt(String(c.price ?? "0").replace(/[^0-9]/g, ""), 10) * 100 : 0;
+  }
+  return 0;
+}
 
 const EMAIL_KIND = {
   new:       "form_submitted",
@@ -147,7 +153,7 @@ function downloadFormData(booking) {
     `Submitted: ${dateStr}`,
     `Status: ${booking.status}`,
     `Payment Reference: ${d.paymentReference || "—"}`,
-    `Amount Paid: ${d.amount ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—"}`,
+    `${d.paid ? "Amount Paid" : "Amount Due"}: ${d.amount > 0 ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—"}`,
     ``,
     `─── CLIENT DETAILS ───`,
     `Full Name: ${d.fullName || d.name || "—"}`,
@@ -227,7 +233,8 @@ function BookingRow({ booking, idx, onStatusChange, onDelete, onDownload, onColl
   const email    = d.email    || "";
   const phone    = d.phone    || "";
   const preferred = formatPreferredTime(d.preferredTime || d.eventDate || "—");
-  const price    = d.amount ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—";
+  const isPaid   = !!d.paid;
+  const price    = d.amount > 0 ? `₦${(d.amount / 100).toLocaleString("en-NG")}` : d.amountLabel || "—";
 
   const SKIP = new Set(["fullName", "name", "email", "phone", "preferredTime", "eventDate", "amount", "amountLabel", "paid", "paymentReference", "heldUntil", "createdAt"]);
   const extras = Object.entries(d).filter(([k, v]) => {
@@ -245,8 +252,8 @@ function BookingRow({ booking, idx, onStatusChange, onDelete, onDownload, onColl
   // Core detail fields shown in drawer
   const coreFields = [
     ["Submitted",      formatDateTime(booking.createdAt)],
-    ["Price Paid",     price !== "—" ? price : null],
-    ["Payment",        d.paid != null ? (d.paid ? "Confirmed ✓" : "Not paid") : null],
+    [isPaid ? "Price Paid" : "Price Due", price !== "—" ? price : null],
+    ["Payment",        isPaid ? "Confirmed ✓" : (booking.status === "confirmed" ? "Confirmed ✓" : "Not paid")],
     ["Reference",      d.paymentReference],
     ["Preferred Time", fmtPreferred(d.preferredTime || d.eventDate)],
     ["Hold Expires",   d.heldUntil ? formatDateTime(new Date(d.heldUntil)) : null],
@@ -266,7 +273,7 @@ function BookingRow({ booking, idx, onStatusChange, onDelete, onDownload, onColl
         <TD className="font-mono text-[12px] text-[#1a1706]/60 whitespace-nowrap">{phone || "—"}</TD>
         <TD className="font-mono text-[12px] font-semibold text-[#1a1706]/70 whitespace-nowrap">
           {price}
-          {booking.status === "held" && !d.paid && price !== "—" && (
+          {(booking.status === "new" || booking.status === "held") && !isPaid && price !== "—" && (
             <span className="ml-1.5 text-[9px] tracking-[0.12em] uppercase text-amber-600 font-semibold">due</span>
           )}
         </TD>
@@ -489,6 +496,7 @@ function Toast({ message, type }) {
 
 /* ── Main ─────────────────────────────────────────────────────────────────── */
 export default function AdminBookings() {
+  const { pricing, ratesData } = useData();
   const [bookings, setBookings]             = useState([]);
   const [contacts, setContacts]             = useState([]);
   const [loading, setLoading]               = useState(true);
@@ -546,14 +554,16 @@ export default function AdminBookings() {
 
   const handlePaymentSuccess = async (payment) => {
     const b = paymentBooking;
+    const bookingAmount = b.data?.amount > 0 ? b.data.amount : getFallbackAmount(b.type, pricing, ratesData);
     try {
       await updateBookingStatus(b.id, "confirmed");
       await updateBooking(b.id, {
         "data.paid": true,
         "data.paymentReference": payment.reference,
+        "data.amount": bookingAmount,
       });
       setBookings(prev => prev.map(x => x.id === b.id
-        ? { ...x, status: "confirmed", data: { ...x.data, paid: true, paymentReference: payment.reference } }
+        ? { ...x, status: "confirmed", data: { ...x.data, paid: true, paymentReference: payment.reference, amount: bookingAmount || x.data?.amount } }
         : x
       ));
       sendBookingEmails({
@@ -565,7 +575,7 @@ export default function AdminBookings() {
         phone: b.data.phone,
         preferredTime: b.data.preferredTime,
         reference: payment.reference,
-        amountLabel: b.data.amount ? `₦${(b.data.amount / 100).toLocaleString("en-NG")}` : undefined,
+        amountLabel: bookingAmount ? `₦${(bookingAmount / 100).toLocaleString("en-NG")}` : undefined,
       }).catch(console.error);
       showToast("Booking confirmed & payment recorded");
     } catch {
@@ -658,7 +668,9 @@ export default function AdminBookings() {
       )}
 
       {paymentBooking && (() => {
-        const bookingAmount = paymentBooking.data?.amount || TYPE_AMOUNT[paymentBooking.type] || 0;
+        const bookingAmount = paymentBooking.data?.amount > 0
+          ? paymentBooking.data.amount
+          : getFallbackAmount(paymentBooking.type, pricing, ratesData);
         const serviceLabel = paymentBooking.data?.service || TYPE_META[paymentBooking.type]?.label || paymentBooking.type;
         return (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">

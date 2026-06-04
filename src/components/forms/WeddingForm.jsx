@@ -121,20 +121,20 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     setStep((s) => s - 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!data.confirmAccurate) { setError("Please confirm all details are accurate."); return; }
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
-    saveBooking("wedding", { ...data, preferredTime: data.weddingDate, amount: (amountProp ?? packageAmount) * 100 })
-      .then(id => { bookingIdRef.current = id; })
-      .catch(console.error);
+    const id = await saveBooking("wedding", { ...data, preferredTime: data.weddingDate, amount: (amountProp ?? packageAmount) * 100 }).catch(console.error);
+    if (id) bookingIdRef.current = id;
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
       name: data.fullName,
       phone: data.phone,
       serviceName: "Wedding Styling",
+      amountLabel: `₦${(amountProp ?? packageAmount).toLocaleString("en-NG")}`,
     }).catch(console.error);
     setShowPayment(true);
   };

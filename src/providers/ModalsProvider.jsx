@@ -48,6 +48,9 @@ export function ModalsProvider({ children }) {
 
   const handleDirectPaySuccess = (payment) => {
     const b = directPay;
+    const amountLabel = b.data?.amount > 0
+      ? `₦${(b.data.amount / 100).toLocaleString("en-NG")}`
+      : undefined;
     updateBookingStatus(b.id, "confirmed").catch(console.error);
     updateBooking(b.id, {
       "data.paid": true,
@@ -60,6 +63,7 @@ export function ModalsProvider({ children }) {
       formType: b.type,
       serviceName: TYPE_SERVICE[b.type] || b.type,
       reference: payment.reference,
+      amountLabel,
     }).catch(console.error);
     setDirectPay(null);
   };

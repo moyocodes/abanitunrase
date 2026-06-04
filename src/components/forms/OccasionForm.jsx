@@ -86,20 +86,20 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
     setStep((s) => s - 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmRushFees) { setError("Please acknowledge rush fees policy."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
-    saveBooking("occasion", { ...data, preferredTime: data.eventDate, amount: (amountProp ?? packageAmount) * 100 })
-      .then(id => { bookingIdRef.current = id; })
-      .catch(console.error);
+    const id = await saveBooking("occasion", { ...data, preferredTime: data.eventDate, amount: (amountProp ?? packageAmount) * 100 }).catch(console.error);
+    if (id) bookingIdRef.current = id;
     sendBookingEmails({
       kind: "form_submitted",
       email: data.email,
       name: data.fullName,
       phone: data.phone,
       serviceName: "Occasion Styling",
+      amountLabel: `₦${(amountProp ?? packageAmount).toLocaleString("en-NG")}`,
     }).catch(console.error);
     setShowPayment(true);
   };
