@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
@@ -127,7 +126,7 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     if (!data.confirmTimeline) { setError("Please acknowledge the styling timeline."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
-    saveBooking("wedding", { ...data, preferredTime: data.weddingDate })
+    saveBooking("wedding", { ...data, preferredTime: data.weddingDate, amount: (amountProp ?? packageAmount) * 100 })
       .then(id => { bookingIdRef.current = id; })
       .catch(console.error);
     sendBookingEmails({
@@ -137,17 +136,6 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Wedding Styling",
     }).catch(console.error);
-    submitToGoogleForm({
-      name: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      service: "Bridal Styling",
-      date: data.weddingDate,
-      vision: data.weddingStyle,
-      budget: data.budgetRange,
-      details: data.additionalDetails,
-      notes: [data.venueAndSeason, data.culturalDetails].filter(Boolean).join(" | "),
-    });
     setShowPayment(true);
   };
 

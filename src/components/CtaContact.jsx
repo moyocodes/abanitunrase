@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveContact, saveSettings } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
@@ -51,17 +50,6 @@ export default function CtaContact({ onBookCall }) {
       amountLabel: "",
       reference: "",
     }).catch((err) => console.error("Failed to send enquiry emails:", err));
-    submitToGoogleForm({
-      name: formState.name,
-      email: formState.email,
-      phone: formState.phone,
-      service: formState.service,
-      date: formState.date,
-      vision: formState.message,
-      budget: "",
-      details: formState.message,
-      notes: "General Enquiry via Contact Form",
-    });
     setTimeout(() => {
       setFormSubmitting(false);
       setFormDone(true);

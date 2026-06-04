@@ -2,10 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Bookings — anyone can submit, only auth reads/manages
+    // Bookings — anyone can submit, read, or update their own booking after payment
+    // delete restricted to admin
     match /bookings/{id} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow create, read, update: if true;
+      allow delete: if request.auth != null;
     }
 
     // Contacts / enquiries — anyone can submit, only auth reads

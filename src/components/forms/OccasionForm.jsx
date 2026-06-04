@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
@@ -92,7 +91,7 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
     if (!data.confirmRushFees) { setError("Please acknowledge rush fees policy."); return; }
     if (!data.confirmFees) { setError("Please acknowledge the fee structure."); return; }
     setError("");
-    saveBooking("occasion", { ...data, preferredTime: data.eventDate })
+    saveBooking("occasion", { ...data, preferredTime: data.eventDate, amount: (amountProp ?? packageAmount) * 100 })
       .then(id => { bookingIdRef.current = id; })
       .catch(console.error);
     sendBookingEmails({
@@ -102,17 +101,6 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Occasion Styling",
     }).catch(console.error);
-    submitToGoogleForm({
-      name: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      service: "Occasion Styling",
-      date: data.eventDate,
-      vision: data.personalStyle,
-      budget: data.pricingExpectations,
-      details: data.otherDetails,
-      notes: [data.stylingTypes?.join(", "), data.eventLocation].filter(Boolean).join(" | "),
-    });
     setShowPayment(true);
   };
 

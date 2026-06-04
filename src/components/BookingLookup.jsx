@@ -76,6 +76,12 @@ export default function BookingLookup({ open, onClose, onContinuePayment, onRebo
     b.data?.heldUntil &&
     new Date(b.data.heldUntil) < now;
 
+  const isExpiredNew = (b) => {
+    if (b.status !== "new") return false;
+    if (!b.createdAt) return true;
+    return Date.now() - b.createdAt.seconds * 1000 > 24 * 60 * 60 * 1000;
+  };
+
   const active = bookings;
 
   const fieldBase =
@@ -219,6 +225,26 @@ export default function BookingLookup({ open, onClose, onContinuePayment, onRebo
                             </span>
                           </div>
 
+                          {b.status === "new" && (
+                            <div className="mt-3 pt-3 border-t border-[#1a1706]/8 flex flex-col gap-2.5">
+                              {isExpiredNew(b) ? (
+                                <button
+                                  onClick={() => { handleClose(); onRebook && onRebook(b); }}
+                                  className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border border-[#1a1706]/25 text-[#1a1706]/70 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors cursor-pointer bg-transparent"
+                                >
+                                  Book Again →
+                                </button>
+                              ) : onContinuePayment && (
+                                <button
+                                  onClick={() => { handleClose(); onContinuePayment(b); }}
+                                  className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border-none bg-[#1a1706] text-[#f5f0e6] hover:bg-black transition-colors cursor-pointer"
+                                >
+                                  Complete Payment →
+                                </button>
+                              )}
+                            </div>
+                          )}
+
                           {b.status === "held" && (
                             <div className="mt-3 pt-3 border-t border-[#1a1706]/8 flex flex-col gap-2.5">
                               {b.data?.heldUntil && (
@@ -238,7 +264,7 @@ export default function BookingLookup({ open, onClose, onContinuePayment, onRebo
                                   </button>
                                   {onRebook && (
                                     <button
-                                      onClick={() => { handleClose(); onRebook(); }}
+                                      onClick={() => { handleClose(); onRebook && onRebook(b); }}
                                       className="font-['Outfit'] text-[14px] font-semibold tracking-[0.04em] uppercase w-full sm:w-auto px-5 py-3 border border-[#1a1706]/25 text-[#1a1706]/70 hover:border-[#1a1706]/60 hover:text-[#1a1706] transition-colors cursor-pointer bg-transparent"
                                     >
                                       Book Again →

@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { submitToGoogleForm } from "@/lib/googleForm";
 import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
@@ -83,7 +82,7 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
   const handleSubmit = () => {
     if (!data.acknowledge) { setError("Please acknowledge the terms before submitting."); return; }
     setError("");
-    saveBooking("travel", { ...data, preferredTime: data.travelDates })
+    saveBooking("travel", { ...data, preferredTime: data.travelDates, amount: (amountProp ?? packageAmount) * 100 })
       .then(id => { bookingIdRef.current = id; })
       .catch(console.error);
     sendBookingEmails({
@@ -93,17 +92,6 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Kájáyelo Travel Styling",
     }).catch(console.error);
-    submitToGoogleForm({
-      name: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      service: "Travel Styling — Kájáyelo",
-      date: data.travelDates ? `${data.travelDates}${data.travelDateReturn ? " → " + data.travelDateReturn : ""}` : "",
-      vision: data.personalStyle,
-      budget: data.comfortableFees,
-      details: data.destinations,
-      notes: [data.lengthOfStay, data.plannedActivities].filter(Boolean).join(" | "),
-    });
     setShowPayment(true);
   };
 
