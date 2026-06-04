@@ -1,4 +1,4 @@
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+const PAYSTACKT_SECRET_KEY = process.env.PAYSTACKT_SECRET_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid reference" });
   }
 
-  if (!PAYSTACK_SECRET_KEY) {
+  if (!PAYSTACKT_SECRET_KEY) {
     return res.status(500).json({ error: "Payment service not configured" });
   }
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
       {
         headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${PAYSTACKT_SECRET_KEY}`,
         },
       },
     );
@@ -32,10 +32,19 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.message ?? "Verification failed" });
+      return res
+        .status(response.status)
+        .json({ error: data.message ?? "Verification failed" });
     }
 
-    const { status, amount, currency, reference: ref, customer, paid_at } = data.data ?? {};
+    const {
+      status,
+      amount,
+      currency,
+      reference: ref,
+      customer,
+      paid_at,
+    } = data.data ?? {};
 
     return res.status(200).json({
       verified: status === "success",
