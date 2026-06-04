@@ -100,6 +100,7 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
         if (!data.gender) return "Please select a gender.";
         if (!data.phone.trim()) return "Contact number is required.";
         if (!data.email.trim()) return "Email is required.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) return "Please enter a valid email address.";
         break;
       case 1:
         if (!data.weddingStyle.trim()) return "Please describe your wedding style vision.";

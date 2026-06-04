@@ -64,6 +64,7 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
     if (step === 0) {
       if (!data.fullName.trim()) return "Full name is required.";
       if (!data.email.trim()) return "Email is required.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) return "Please enter a valid email address.";
       if (!data.phone.trim()) return "Phone number is required.";
     }
     return null;

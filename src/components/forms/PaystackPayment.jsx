@@ -65,13 +65,16 @@ export default function PaystackPayment({
   const handlePay = () => {
     setError("");
     if (!email?.trim()) { setError("Please enter your email before payment."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError("Please enter a valid email address before payment."); return; }
     if (!Number.isFinite(amount) || amount <= 0) { setError("Payment amount is invalid. Please contact us directly."); return; }
     if (!scriptReady || !window.PaystackPop) { setError("Payment system is loading. Please try again."); return; }
     if (!PAYSTACK_PUBLIC_KEY) { setError("Paystack is not configured."); return; }
     setLoading(true);
 
     const reference = paymentReference(formType);
-    const handler = window.PaystackPop.setup({
+    let handler;
+    try {
+      handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: email.trim(),
       amount: chargeAmount,
@@ -131,8 +134,18 @@ export default function PaystackPayment({
         setLoading(false);
       },
     });
+    } catch (err) {
+      setLoading(false);
+      setError(err.message || "Payment setup failed. Please check your email address and try again.");
+      return;
+    }
 
-    handler.openIframe();
+    try {
+      handler.openIframe();
+    } catch (err) {
+      setLoading(false);
+      setError("Could not open payment window. Please try again.");
+    }
   };
 
   if (success) {

@@ -73,6 +73,12 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
 
   const handleNext = () => {
     setError("");
+    if (step === 0) {
+      if (!data.fullName.trim()) { setError("Full name is required."); return; }
+      if (!data.email.trim()) { setError("Email is required."); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) { setError("Please enter a valid email address."); return; }
+      if (!data.phone.trim()) { setError("Phone number is required."); return; }
+    }
     setStep((s) => s + 1);
   };
 

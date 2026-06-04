@@ -265,6 +265,8 @@ export default async function handler(req, res) {
   const customerEmail = body.email;
   if (!customerEmail)
     return res.status(400).json({ error: "Missing customer email" });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail))
+    return res.status(400).json({ error: "Invalid customer email" });
 
   const from = process.env.RESEND_FROM_EMAIL || DEFAULT_FROM;
   const adminTo = process.env.RESEND_TO_EMAIL || DEFAULT_TO;
@@ -311,22 +313,27 @@ export default async function handler(req, res) {
     const adminHtml = emailShell(
       tmplAdmin({ title: adminTitle, intro: adminIntro, details }),
     );
-    await Promise.all([
-      sendResendEmail({
-        apiKey,
-        from,
-        to: [customerEmail],
-        subject,
-        html: customerHtml,
-      }),
-      sendResendEmail({
-        apiKey,
-        from,
-        to: [adminTo],
-        subject: adminSubject,
-        html: adminHtml,
-      }),
-    ]);
+    try {
+      await Promise.all([
+        sendResendEmail({
+          apiKey,
+          from,
+          to: [customerEmail],
+          subject,
+          html: customerHtml,
+        }),
+        sendResendEmail({
+          apiKey,
+          from,
+          to: [adminTo],
+          subject: adminSubject,
+          html: adminHtml,
+        }),
+      ]);
+    } catch (err) {
+      console.error("send-email error:", err.message);
+      return res.status(500).json({ error: "Failed to send email", details: err.message });
+    }
     return res.status(200).json({ ok: true });
   }
 
@@ -386,22 +393,27 @@ export default async function handler(req, res) {
     tmplAdmin({ title: adminTitle, intro: adminIntro, details }),
   );
 
-  await Promise.all([
-    sendResendEmail({
-      apiKey,
-      from,
-      to: [customerEmail],
-      subject,
-      html: customerHtml,
-    }),
-    sendResendEmail({
-      apiKey,
-      from,
-      to: [adminTo],
-      subject: adminSubject,
-      html: adminHtml,
-    }),
-  ]);
+  try {
+    await Promise.all([
+      sendResendEmail({
+        apiKey,
+        from,
+        to: [customerEmail],
+        subject,
+        html: customerHtml,
+      }),
+      sendResendEmail({
+        apiKey,
+        from,
+        to: [adminTo],
+        subject: adminSubject,
+        html: adminHtml,
+      }),
+    ]);
+  } catch (err) {
+    console.error("send-email error:", err.message);
+    return res.status(500).json({ error: "Failed to send email", details: err.message });
+  }
 
   return res.status(200).json({ ok: true });
 }
