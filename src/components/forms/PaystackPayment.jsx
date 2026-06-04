@@ -61,7 +61,8 @@ export default function PaystackPayment({
   }, []);
 
   const isTestKey = PAYSTACK_PUBLIC_KEY?.startsWith("pk_test_");
-  const chargeAmount = isTestKey ? 10000 : Math.round(amount * 1.015);
+  const realCharge = Math.round(amount * 1.015);
+  const chargeAmount = isTestKey && amount >= 250000000 ? 10000 : realCharge;
 
   const handlePay = () => {
     setError("");
