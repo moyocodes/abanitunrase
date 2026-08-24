@@ -55,12 +55,15 @@ export async function getBookings() {
 }
 
 export async function getBookingsByEmail(email) {
-  if (!db || !email) return [];
-  const q = query(collection(db, "bookings"), where("data.email", "==", email.trim()));
-  const snap = await getDocs(q);
-  return snap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
+  if (!email) return [];
+  const res = await fetch("/api/track-booking", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email.trim() }),
+  });
+  if (!res.ok) return [];
+  const { bookings } = await res.json();
+  return bookings ?? [];
 }
 
 export async function getContacts() {
@@ -68,6 +71,19 @@ export async function getContacts() {
   const q = query(collection(db, "contacts"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function confirmBookingPayment(bookingId, reference) {
+  const res = await fetch("/api/confirm-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookingId, reference }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to confirm payment");
+  }
+  return res.json();
 }
 
 export async function updateBookingStatus(id, status) {
@@ -175,20 +191,11 @@ export async function removeGalleryItem(id) {
 }
 
 export async function getBookedConsultationTimes() {
-  if (!db) return [];
   try {
-    const now = new Date().toISOString();
-    const q = query(collection(db, "bookings"), where("type", "==", "consultation"));
-    const snap = await getDocs(q);
-    return snap.docs
-      .map((d) => d.data())
-      .filter((b) => {
-        if (b.status === "confirmed") return true;
-        if (b.status === "held" && b.data?.heldUntil > now) return true;
-        return false;
-      })
-      .map((b) => b.data?.preferredTime)
-      .filter(Boolean);
+    const res = await fetch("/api/booked-consultation-times");
+    if (!res.ok) return [];
+    const { times } = await res.json();
+    return times ?? [];
   } catch {
     return [];
   }

@@ -21,7 +21,6 @@ import BookingPolicy from "@/pages/BookingPolicy";
 import FAQPage from "@/pages/FAQPage";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/AdminLogin";
-import AdminRegister from "@/pages/admin/AdminRegister";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminBookings from "@/pages/admin/AdminBookings";
 import AdminEmails from "@/pages/admin/AdminEmails";
@@ -53,7 +52,6 @@ export default function App() {
 
           {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/register" element={<AdminRegister />} />
           <Route
             path="/admin"
             element={

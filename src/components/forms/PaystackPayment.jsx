@@ -24,6 +24,15 @@ const formNames = {
   coupleConsultation: "Couple's Consultation",
 };
 
+// Mirrors Paystack's standard Nigeria card fee: 1.5% + ₦100 (waived under ₦2,500), capped at ₦2,000 total.
+function paystackFeeKobo(amountKobo) {
+  const amountNaira = amountKobo / 100;
+  let feeNaira = amountNaira * 0.015;
+  if (amountNaira >= 2500) feeNaira += 100;
+  feeNaira = Math.min(feeNaira, 2000);
+  return Math.round(feeNaira * 100);
+}
+
 function paymentReference(formType) {
   const service = formType || "consultation";
   const random = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -62,7 +71,7 @@ export default function PaystackPayment({
   }, []);
 
   const isTestKey = PAYSTACK_PUBLIC_KEY?.startsWith("pk_test_");
-  const realCharge = Math.round(amount * 1.015);
+  const realCharge = amount + paystackFeeKobo(amount);
   const chargeAmount = isTestKey && amount >= 250000000 ? 10000 : realCharge;
 
   const handlePay = () => {
