@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import BookCallModal from "@/components/BookCallModal";
 import BookingLookup from "@/components/BookingLookup";
 import PaystackPayment from "@/components/forms/PaystackPayment";
-import { updateBookingStatus, updateBooking } from "@/lib/firestore";
+import { confirmBookingPayment } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 
 const ModalsCtx = createContext(null);
@@ -51,11 +51,7 @@ export function ModalsProvider({ children }) {
     const amountLabel = b.data?.amount > 0
       ? `₦${(b.data.amount / 100).toLocaleString("en-NG")}`
       : undefined;
-    updateBookingStatus(b.id, "confirmed").catch(console.error);
-    updateBooking(b.id, {
-      "data.paid": true,
-      "data.paymentReference": payment.reference,
-    }).catch(console.error);
+    confirmBookingPayment(b.id, payment.reference).catch(console.error);
     sendBookingEmails({
       email: b.data.email,
       name:  b.data.fullName,

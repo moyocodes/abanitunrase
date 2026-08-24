@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers";
 
 export default function AdminLogin() {
@@ -80,15 +80,6 @@ export default function AdminLogin() {
             {loading ? "Signing in…" : "Sign In →"}
           </button>
         </form>
-
-        <p className="text-center mt-8">
-          <Link
-            to="/admin/register"
-            className="font-mono text-[7.5px] tracking-[0.25em] uppercase text-[#1a1706]/30 hover:text-[#1a1706]/60 transition-colors"
-          >
-            Create an account →
-          </Link>
-        </p>
       </div>
     </div>
   );

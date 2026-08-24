@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { saveBooking, updateBookingStatus, updateBooking } from "@/lib/firestore";
+import { saveBooking, confirmBookingPayment } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 import StepIndicator from "./StepIndicator";
@@ -140,24 +140,13 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = (response) => {
-    const amt = (amountProp ?? packageAmount) * 100;
-    const id = bookingIdRef.current;
+  const handlePaymentSuccess = async (response) => {
+    let id = bookingIdRef.current;
+    if (!id) {
+      id = await saveBooking("wedding", { ...data, preferredTime: data.weddingDate }).catch(console.error);
+    }
     if (id) {
-      updateBookingStatus(id, "confirmed").catch(console.error);
-      updateBooking(id, {
-        "data.paid": true,
-        "data.paymentReference": response?.reference || "",
-        "data.amount": amt,
-      }).catch(console.error);
-    } else {
-      saveBooking("wedding", {
-        ...data,
-        preferredTime: data.weddingDate,
-        paid: true,
-        paymentReference: response?.reference || "",
-        amount: amt,
-      }, "confirmed").catch(console.error);
+      await confirmBookingPayment(id, response?.reference).catch(console.error);
     }
     onComplete();
   };

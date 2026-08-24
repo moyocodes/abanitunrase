@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaystackPayment from "@/components/forms/PaystackPayment";
 import ConsultationCalendar from "@/components/ConsultationCalendar";
-import { saveBooking, getConsultationSlots, getBookedConsultationTimes } from "@/lib/firestore";
+import { saveBooking, confirmBookingPayment, getConsultationSlots, getBookedConsultationTimes } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import { useData } from "@/providers";
 
@@ -89,15 +89,15 @@ export default function BookCallModal({ open, onClose, onTrackBooking, prefill, 
     setTimeout(() => { setSubmitting(false); setShowPayment(true); }, 300);
   };
 
-  const handlePaymentSuccess = (payment) => {
-    saveBooking("consultation", {
+  const handlePaymentSuccess = async (payment) => {
+    const id = await saveBooking("consultation", {
       fullName: name, email, phone,
       service: selectedService.label,
       preferredTime: time,
-      amount: selectedService.amount,
-      paymentReference: payment?.reference,
-      paid: true,
-    }, "confirmed");
+    }).catch(console.error);
+    if (id) {
+      await confirmBookingPayment(id, payment?.reference).catch(console.error);
+    }
     setShowPayment(false);
     setDone(true);
   };

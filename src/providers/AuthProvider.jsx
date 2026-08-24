@@ -3,7 +3,6 @@ import { auth } from "@/firebase/config";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut as fbSignOut,
 } from "firebase/auth";
 
@@ -30,18 +29,13 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUp = (email, password) => {
-    if (!auth) return Promise.reject(new Error("Firebase not configured"));
-    return createUserWithEmailAndPassword(auth, email, password);
-  };
-
   const signOut = () => {
     if (!auth) return Promise.resolve();
     return fbSignOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

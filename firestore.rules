@@ -2,11 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Bookings — anyone can submit, read, or update their own booking after payment
-    // delete restricted to admin
+    // Bookings — anyone can submit; reads/updates go through server-side API routes
+    // (api/track-booking.js, api/confirm-payment.js) using the Admin SDK, which bypass
+    // these rules under a service account. Client SDK reads/updates require admin auth.
     match /bookings/{id} {
-      allow create, read, update: if true;
-      allow delete: if request.auth != null;
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
     }
 
     // Contacts / enquiries — anyone can submit, only auth reads
