@@ -74,10 +74,24 @@ export default function LookbookPage() {
   const looks = allLooks ?? [];
   const handleContact = () => navigate("/", { state: { scrollTo: "contact" } });
 
-  /* First native video from any look — used as hero bg */
-  const heroBgVideo = looks.find(
-    l => l.video && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(l.video)
-  )?.video ?? null;
+  /* One hero media item per look — its video if it has one, else its image */
+  const heroMedia = looks
+    .map((l) => {
+      const isVideo = l.video && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(l.video);
+      const src = isVideo ? l.video : (l.thumbs?.[0] ?? l.img);
+      return src ? { src, isVideo } : null;
+    })
+    .filter(Boolean);
+
+  const [heroIdx, setHeroIdx] = useState(0);
+  const current = heroMedia[heroIdx % heroMedia.length] ?? null;
+
+  useEffect(() => {
+    if (heroMedia.length < 2) return;
+    if (current?.isVideo) return; // advance on video's own `onEnded` instead of a timer
+    const t = setTimeout(() => setHeroIdx((i) => (i + 1) % heroMedia.length), 5000);
+    return () => clearTimeout(t);
+  }, [heroIdx, heroMedia.length, current?.isVideo]);
 
   const firstCategoryLook = CATS.reduce((found, cat) => {
     if (found) return found;
@@ -101,28 +115,28 @@ export default function LookbookPage() {
 
       {/* ── Hero — full screen (Nav is fixed so hero fills full viewport) ── */}
       <div className="relative overflow-hidden h-screen bg-[#0e0d08]">
-        {/* Background — full-cover video */}
-        {heroBgVideo ? (
-          <div className="absolute inset-[-8%] pointer-events-none">
-            <video
-              src={heroBgVideo}
-              autoPlay muted loop playsInline
-              className="w-full h-full object-cover opacity-90 saturate-[0.7] brightness-[0.82] select-none"
-              style={{ objectPosition: "40% center" }}
-            />
+        {/* Background — rotates through one clip (or image) per look */}
+        {current && (
+          <div className="absolute inset-0 pointer-events-none">
+            {current.isVideo ? (
+              <video
+                key={current.src}
+                src={current.src}
+                autoPlay muted playsInline
+                onEnded={() => heroMedia.length > 1 && setHeroIdx((i) => (i + 1) % heroMedia.length)}
+                className="w-full h-full object-cover opacity-90 saturate-[0.7] brightness-[0.82] select-none transition-opacity duration-700"
+                style={{ objectPosition: "center 20%" }}
+              />
+            ) : (
+              <img
+                key={current.src}
+                src={current.src}
+                alt=""
+                className="w-full h-full object-cover opacity-90 saturate-[0.7] brightness-[0.82] select-none transition-opacity duration-700"
+                style={{ objectPosition: "center 20%" }}
+              />
+            )}
           </div>
-        ) : (
-          looks.slice(0, 4).map((l, i) => (
-            <div key={i} className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `url(${l.thumbs?.[0] ?? l.img})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center top",
-                opacity: 0.18 + i * 0.06,
-                clipPath: ["polygon(0 0,50% 0,50% 50%,0 50%)","polygon(50% 0,100% 0,100% 50%,50% 50%)","polygon(0 50%,50% 50%,50% 100%,0 100%)","polygon(50% 50%,100% 50%,100% 100%,50% 100%)"][i],
-              }}
-            />
-          ))
         )}
 
         {/* Right panel — solid dark behind text (desktop only) */}
