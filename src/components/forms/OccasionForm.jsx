@@ -100,6 +100,7 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Occasion Styling",
       amountLabel: `₦${(amountProp ?? packageAmount).toLocaleString("en-NG")}`,
+      allFields: data,
     }).catch(console.error);
     setShowPayment(true);
   };
@@ -137,6 +138,7 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
         onSuccess={handlePaymentSuccess}
         onClose={() => setShowPayment(false)}
         formType="occasion"
+        allFields={data}
       />
     );
   }

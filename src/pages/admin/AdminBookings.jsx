@@ -11,6 +11,7 @@ import {
 import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "@/components/forms/PaystackPayment";
 import { useData } from "@/providers";
+import { FIELD_LABELS, SKIP_FIELDS } from "@/lib/fieldLabels";
 
 const STATUS_OPTIONS = ["new", "held", "confirmed", "completed"];
 
@@ -52,92 +53,7 @@ const EMAIL_KIND = {
 const STYLING_TYPES = new Set(["wedding", "occasion", "travel"]);
 const CONSULT_TYPES = new Set(["consultation", "coupleConsultation"]);
 
-const FIELD_LABELS = {
-  fullName: "Full Name",
-  email: "Email",
-  phone: "Phone",
-  contactMethod: "Preferred Contact Method",
-  // occasion
-  stylingTypes: "Type of Styling Required",
-  stylingTypesOther: "Type of Styling — Other (specify)",
-  eventDate: "Event / Shoot Date",
-  eventLocation: "Event / Shoot Location",
-  duration: "Duration",
-  stylingStart: "When would you like styling to begin?",
-  dateConfirmed: "Is your date confirmed?",
-  numberOfLooks: "Estimated Number of Looks Required",
-  onDayStyling: "Will you require on-the-day styling support?",
-  outfitChanges: "Will there be outfit changes?",
-  personalStyle: "How would you describe your personal style?",
-  designerRefs: "Designers, aesthetics, or references you love",
-  avoidStyles: "Styles, colours, or silhouettes to avoid",
-  comfortableFees: "Comfortable with professional styling fees?",
-  pricingExpectations: "Expectations around pricing",
-  workStyle: "How do you prefer to work with a stylist?",
-  creativeImportance: "How important is creative trust?",
-  communicationStyle: "How would you describe your communication style?",
-  collaborators: "Currently working with",
-  otherDetails: "Anything else we should be aware of?",
-  // wedding
-  age: "Age",
-  gender: "Gender",
-  genderOther: "Gender (Other)",
-  weddingStyle: "Overall style vision for your wedding",
-  colourPalette: "Specific themes or colour palettes",
-  hasNecklinePreference: "Has preference for sleeve length / neckline?",
-  necklinePreference: "Neckline / sleeve preference (details)",
-  silhouette: "Silhouette for wedding gown",
-  silhouetteOther: "Silhouette — Other (specify)",
-  necklineDetail: "Sleeve length / neckline details",
-  fabricPreference: "Preferred or disliked fabrics",
-  comfortRequirements: "Comfort requirements for attire",
-  heelPreference: "Heel preference",
-  accessories: "Accessories being considered",
-  accessoriesOther: "Accessories — Other (specify)",
-  noAccessories: "Accessories definitely NOT wanted",
-  venueAndSeason: "Wedding venue and season",
-  climateConsiderations: "Climate considerations for attire",
-  budgetRange: "Budget range for wedding dress and accessories",
-  alterationsIncluded: "Alterations and customisation in budget?",
-  bodyDescription: "Body shape description",
-  elementsPreference: "Specific elements preferred or disliked",
-  skinTone: "Skin Tone",
-  skinToneOther: "Skin Tone — Other (specify)",
-  measurements: "Current and preferred measurements",
-  hasMoodBoard: "Has mood board or photos?",
-  moodBoardLink: "Mood board link",
-  hasCelebInspo: "Celebrity wedding style inspiration?",
-  celebInspoLink: "Celebrity inspiration link",
-  weddingDate: "Wedding date",
-  attireTimeline: "Preferred timeline for selecting bridal attire",
-  dresscode: "Specific dress code for bridal party?",
-  drescodeOther: "Dress Code — Other (specify)",
-  coordinateParty: "Coordinate attire with bridesmaids / groomsmen?",
-  culturalRequirements: "Cultural or traditional requirements?",
-  culturalDetails: "Cultural requirements (details)",
-  hasSymbols: "Traditions or symbols to incorporate?",
-  symbolImages: "Symbol images link",
-  fittingsCount: "Fittings comfortable attending",
-  additionalDetails: "Additional details or concerns",
-  // travel
-  destinations: "Destination(s)",
-  travelDates: "Departure Date",
-  travelDateReturn: "Return Date",
-  lengthOfStay: "Length of Stay",
-  tripNature: "Nature of Trip",
-  tripNatureOther: "Nature of Trip — Other (specify)",
-  plannedActivities: "Planned Activities",
-  inPersonStyling: "Require in-person styling?",
-  stylistWorkStyle: "How you like to work with a stylist",
-  // consultation
-  service: "Service",
-  preferredTime: "Event / Appointment Date",
-};
-
-const SKIP_DOWNLOAD = new Set([
-  "paid", "amount", "amountLabel", "paymentReference", "heldUntil", "createdAt",
-  "confirmTimeline", "confirmRushFees", "confirmFees", "confirmAccurate", "acknowledge",
-]);
+const SKIP_DOWNLOAD = SKIP_FIELDS;
 
 function downloadFormData(booking) {
   const d = booking.data ?? {};

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useData } from "@/providers";
 
 const NAV_VARIANTS = {
   hidden: {
@@ -32,6 +33,9 @@ const STYLING_LINKS = [
 ];
 
 export default function Nav({ onBookCall, hidden, onTrackBooking }) {
+  const { footerData } = useData();
+  const callNumber = footerData?.whatsappNumber || "+234 812 628 6593";
+  const callHref = `tel:${callNumber.replace(/[^\d+]/g, "")}`;
   const [scrolled,     setScrolled]     = useState(false);
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [stylingOpen,  setStylingOpen]  = useState(false);
@@ -157,6 +161,19 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
 
         {/* Desktop CTAs */}
         <div className="hidden sm:flex items-center gap-4">
+          <a
+            href={callHref}
+            aria-label={`Call ${callNumber}`}
+            className={`flex items-center justify-center w-8 h-8 border rounded-full transition-all duration-300 no-underline ${
+              scrolled
+                ? "border-black/20 text-black/70 hover:bg-black/[0.08] hover:text-black"
+                : "border-[#f5f0e6]/30 text-[#f5f0e6]/80 hover:bg-[#f5f0e6]/[0.12] hover:text-[#f5f0e6]"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+            </svg>
+          </a>
           {onTrackBooking && (
             <button
               onClick={onTrackBooking}
@@ -266,6 +283,16 @@ export default function Nav({ onBookCall, hidden, onTrackBooking }) {
             Track My Booking →
           </button>
         )}
+        <a
+          href={callHref}
+          onClick={() => setMenuOpen(false)}
+          className="font-mono text-[11px] tracking-[0.18em] uppercase text-black/45 hover:text-black transition-colors duration-300 no-underline flex items-center gap-2"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+          </svg>
+          Call {callNumber}
+        </a>
         <button
           onClick={() => { onBookCall(); setMenuOpen(false); }}
           className="mt-2 font-mono text-[11px] tracking-[0.18em] uppercase px-5 py-3 border border-black/20 bg-black/[0.06] text-black hover:bg-black/[0.12] transition-all duration-300 cursor-pointer self-start"

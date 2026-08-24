@@ -40,6 +40,7 @@ export default function PaystackPayment({
   phone,
   preferredTime,
   serviceName: serviceNameProp,
+  allFields,
 }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -105,6 +106,7 @@ export default function PaystackPayment({
             amount,
             amountLabel: formatAmount(amount),
             reference: resolvedReference,
+            allFields,
           }).catch((err) => {
             console.error("Failed to send booking emails:", err);
           });

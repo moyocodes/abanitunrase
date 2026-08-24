@@ -91,6 +91,7 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Kájáyelo Travel Styling",
       amountLabel: `₦${(amountProp ?? packageAmount).toLocaleString("en-NG")}`,
+      allFields: data,
     }).catch(console.error);
     setShowPayment(true);
   };
@@ -128,6 +129,7 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
         onSuccess={handlePaymentSuccess}
         onClose={() => setShowPayment(false)}
         formType="travel"
+        allFields={data}
       />
     );
   }

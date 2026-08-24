@@ -135,6 +135,7 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
       phone: data.phone,
       serviceName: "Wedding Styling",
       amountLabel: `₦${(amountProp ?? packageAmount).toLocaleString("en-NG")}`,
+      allFields: data,
     }).catch(console.error);
     setShowPayment(true);
   };
@@ -172,6 +173,7 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
         onSuccess={handlePaymentSuccess}
         onClose={() => setShowPayment(false)}
         formType="wedding"
+        allFields={data}
       />
     );
   }

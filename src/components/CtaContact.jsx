@@ -49,6 +49,7 @@ export default function CtaContact({ onBookCall }) {
       preferredTime: formState.date,
       amountLabel: "",
       reference: "",
+      allFields: formState,
     }).catch((err) => console.error("Failed to send enquiry emails:", err));
     setTimeout(() => {
       setFormSubmitting(false);

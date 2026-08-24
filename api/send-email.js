@@ -1,5 +1,8 @@
+import { labelFor, SKIP_FIELDS } from "../src/lib/fieldLabels.js";
+
 const DEFAULT_FROM = "ABÁNÍTÚNRASE <bookings@abanitunrase.com>";
 const DEFAULT_TO = "officialabanitunrase@gmail.com";
+const CORE_DETAIL_KEYS = new Set(["Service", "Name", "Email", "Phone", "Preferred time", "Amount", "Reference"]);
 
 function escapeHtml(value = "") {
   return String(value)
@@ -230,6 +233,59 @@ function tmplAdmin({ title, intro, details }) {
   };
 }
 
+function fullFieldDetails(allFields = {}, baseDetails = {}) {
+  const details = { ...baseDetails };
+  Object.entries(allFields).forEach(([key, value]) => {
+    if (SKIP_FIELDS.has(key)) return;
+    if (typeof value === "boolean") return;
+    if (value === "" || value === null || value === undefined) return;
+    if (Array.isArray(value) && value.length === 0) return;
+    const label = labelFor(key);
+    if (CORE_DETAIL_KEYS.has(label)) return;
+    details[label] = Array.isArray(value) ? value.join(", ") : String(value);
+  });
+  return details;
+}
+
+function detailsToText(details = {}) {
+  return Object.entries(details)
+    .filter(([, v]) => v !== undefined && v !== null && String(v).trim() !== "")
+    .map(([label, value]) => `*${label}:* ${value}`)
+    .join("\n");
+}
+
+/* ── WhatsApp Cloud API helper ── */
+
+async function sendWhatsAppNotification({ title, details }) {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const to = process.env.WHATSAPP_ADMIN_NUMBER || "2348061953109";
+  if (!token || !phoneNumberId) return; // Not configured yet — skip silently
+
+  const body = `*${title}*\n\n${detailsToText(details)}`.slice(0, 4096);
+
+  const response = await fetch(
+    `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to,
+        type: "text",
+        text: { body, preview_url: false },
+      }),
+    },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("WhatsApp send failed:", response.status, text);
+  }
+}
+
 /* ── Resend helper ── */
 
 async function sendResendEmail({ apiKey, from, to, subject, html }) {
@@ -295,6 +351,9 @@ export default async function handler(req, res) {
     Reference: reference,
   };
 
+  // Admin email/WhatsApp get every field+answer the client submitted, not just the summary above
+  const adminDetails = fullFieldDetails(body.allFields, details);
+
   let customerTmpl, subject, adminSubject, adminTitle, adminIntro;
 
   // Admin-edited custom template overrides hardcoded defaults
@@ -313,7 +372,7 @@ export default async function handler(req, res) {
     adminIntro = `${name || "A client"} (${customerEmail}) received an automated email: "${subject}".`;
     const customerHtml = emailShell({ ...customerTmpl, details });
     const adminHtml = emailShell(
-      tmplAdmin({ title: adminTitle, intro: adminIntro, details }),
+      tmplAdmin({ title: adminTitle, intro: adminIntro, details: adminDetails }),
     );
     try {
       await Promise.all([
@@ -331,6 +390,7 @@ export default async function handler(req, res) {
           subject: adminSubject,
           html: adminHtml,
         }),
+        sendWhatsAppNotification({ title: adminSubject, details: adminDetails }),
       ]);
     } catch (err) {
       console.error("send-email error:", err.message);
@@ -392,7 +452,7 @@ export default async function handler(req, res) {
 
   const customerHtml = emailShell({ ...customerTmpl, details });
   const adminHtml = emailShell(
-    tmplAdmin({ title: adminTitle, intro: adminIntro, details }),
+    tmplAdmin({ title: adminTitle, intro: adminIntro, details: adminDetails }),
   );
 
   try {
@@ -411,6 +471,7 @@ export default async function handler(req, res) {
         subject: adminSubject,
         html: adminHtml,
       }),
+      sendWhatsAppNotification({ title: adminSubject, details: adminDetails }),
     ]);
   } catch (err) {
     console.error("send-email error:", err.message);
