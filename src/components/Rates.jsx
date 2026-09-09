@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { fmt } from "../data.js";
+import { fmt, toPriceNumber } from "../data.js";
 import { useData } from "@/providers";
-import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelSaveBtn } from "@/components/AdminBar";
+import { useEditMode, SectionEditButton, SectionPanel, PanelField, PanelPriceField, PanelSaveBtn } from "@/components/AdminBar";
 import { savePricing, saveSettings } from "@/lib/firestore";
 
 const tabs = [
@@ -25,7 +25,7 @@ function EditablePrice({ value, onSave }) {
 
   const commit = () => {
     setEditing(false);
-    const n = Number(draft.replace(/[^0-9]/g, ""));
+    const n = toPriceNumber(draft);
     if (n !== value) onSave(n);
   };
 
@@ -71,7 +71,11 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     note: "",
     travelNotes: "",
     consultations: [],
-    packages: { bridal: [], occasion: [], travel: [] }
+    packages: { bridal: [], occasion: [], travel: [] },
+    singlePackages: [],
+    otherPackages: [],
+    singlePackagesLabel: "",
+    otherPackagesLabel: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -88,6 +92,10 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
           occasion: (occasion ?? []).map(p => ({ ...p })),
           travel: (travel ?? []).map(p => ({ ...p })),
         },
+        singlePackages: (ratesData.singlePackages ?? []).map(p => ({ ...p })),
+        otherPackages: (ratesData.otherPackages ?? []).map(p => ({ ...p })),
+        singlePackagesLabel: ratesData.singlePackagesLabel ?? "Individual Styling",
+        otherPackagesLabel: ratesData.otherPackagesLabel ?? "Bridal Party",
       });
     }
   }, [activePanel, ratesData, bridal, occasion, travel]);
@@ -100,7 +108,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
   }));
   const addConsult = () => setDraft(d => ({
     ...d,
-    consultations: [...d.consultations, { label: "New Consultation", note: "", price: "₦0" }],
+    consultations: [...d.consultations, { label: "New Consultation", note: "", price: "0" }],
   }));
   const removeConsult = (idx) => setDraft(d => ({
     ...d,
@@ -120,6 +128,20 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
     packages: { ...d.packages, [tab]: d.packages[tab].filter((_, i) => i !== idx) },
   }));
 
+  /* singlePackages / otherPackages — flat "service + price" lists */
+  const setListItem = (key, idx, field, val) => setDraft(d => ({
+    ...d,
+    [key]: d[key].map((p, i) => i === idx ? { ...p, [field]: val } : p),
+  }));
+  const addListItem = (key) => setDraft(d => ({
+    ...d,
+    [key]: [...d[key], { service: "New Service", price: 0 }],
+  }));
+  const removeListItem = (key, idx) => setDraft(d => ({
+    ...d,
+    [key]: d[key].filter((_, i) => i !== idx),
+  }));
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -130,6 +152,10 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
         note: draft.note,
         travelNotes: draft.travelNotes,
         consultations: draft.consultations,
+        singlePackages: draft.singlePackages,
+        otherPackages: draft.otherPackages,
+        singlePackagesLabel: draft.singlePackagesLabel,
+        otherPackagesLabel: draft.otherPackagesLabel,
       });
       await savePricing("bridal", draft.packages.bridal);
       await savePricing("occasion", draft.packages.occasion);
@@ -197,7 +223,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             </div>
             <PanelField label="Label" value={c.label ?? ""} onChange={v => setConsult(i, "label", v)} />
             <PanelField label="Note" value={c.note ?? ""} onChange={v => setConsult(i, "note", v)} />
-            <PanelField label="Price" value={c.price ?? ""} onChange={v => setConsult(i, "price", v)} />
+            <PanelPriceField value={c.price} onChange={v => setConsult(i, "price", v)} />
           </div>
         ))}
         <button onClick={addConsult} className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full">
@@ -216,7 +242,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
                 </div>
                 <PanelField label="Name" value={p.package ?? ""} onChange={v => setPkg(tab, i, "package", v)} />
                 <PanelField label="Tier" value={p.tier ?? ""} onChange={v => setPkg(tab, i, "tier", v)} />
-                <PanelField label="Price (NGN)" value={String(p.price ?? "")} onChange={v => setPkg(tab, i, "price", Number(String(v).replace(/[^0-9]/g, "")) || 0)} />
+                <PanelPriceField value={p.price} onChange={v => setPkg(tab, i, "price", v)} />
                 <PanelField label="Looks count" value={String(p.looks ?? "")} onChange={v => setPkg(tab, i, "looks", Number(v) || 0)} />
                 <PanelField label="Includes (one per line)" value={(p.includes ?? []).join("\n")} onChange={v => setPkg(tab, i, "includes", v.split("\n").filter(Boolean))} multiline />
                 <label className="flex items-center gap-2 font-mono text-[7px] tracking-[0.2em] uppercase text-[#1a1706]/50 cursor-pointer">
@@ -227,6 +253,30 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
             ))}
             <button onClick={() => addPkg(tab)} className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full mt-1">
               + Add Package
+            </button>
+          </div>
+        ))}
+
+        {/* Individual Styling + Bridal Party — flat service lists (bridal tab extras) */}
+        {[
+          { key: "singlePackages", labelKey: "singlePackagesLabel", title: "Individual Styling" },
+          { key: "otherPackages",  labelKey: "otherPackagesLabel",  title: "Bridal Party" },
+        ].map(({ key, labelKey, title }) => (
+          <div key={key}>
+            <p className="font-mono text-[7px] tracking-[0.3em] uppercase text-[#1a1706]/40 pb-1 border-b border-[#1a1706]/10 mt-3">{title}</p>
+            <PanelField label="Column Heading" value={draft[labelKey] ?? ""} onChange={v => set(labelKey, v)} />
+            {(draft[key] ?? []).map((p, i) => (
+              <div key={i} className="flex flex-col gap-1.5 pt-2 pb-2 border-b border-[#1a1706]/6">
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-[7px] tracking-[0.22em] uppercase text-[#1a1706]/30">{p.service || `Item ${i + 1}`}</div>
+                  <button onClick={() => removeListItem(key, i)} className="font-mono text-[7px] text-red-500/50 hover:text-red-500/90 border-none bg-transparent cursor-pointer">✕</button>
+                </div>
+                <PanelField label="Service" value={p.service ?? ""} onChange={v => setListItem(key, i, "service", v)} />
+                <PanelPriceField value={p.price} onChange={v => setListItem(key, i, "price", v)} />
+              </div>
+            ))}
+            <button onClick={() => addListItem(key)} className="font-mono text-[7px] tracking-[0.25em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] border border-[#1a1706]/15 hover:border-[#1a1706]/35 px-3 py-1.5 bg-transparent cursor-pointer transition-colors w-full mt-1">
+              + Add Service
             </button>
           </div>
         ))}
@@ -402,7 +452,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
               <div className="font-mono text-[7px] md:text-[7.5px] tracking-[0.22em] uppercase text-[#1a1706]/50">{c.note}</div>
             </div>
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-              <div className="font-['Cormorant_Garamond'] text-[clamp(18px,2.4vw,36px)] text-[#1a1706]">{c.price}</div>
+              <div className="font-['Cormorant_Garamond'] text-[clamp(18px,2.4vw,36px)] text-[#1a1706]">{fmt(c.price)}</div>
               {!editMode && (
                 <span className="text-[#1a1706]/40 group-hover:text-[#1a1706] group-hover:translate-x-1 transition-all duration-200 text-base md:text-lg">→</span>
               )}
@@ -446,7 +496,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
             {ratesData.singlePackages?.length > 0 && (
               <div className="px-6 md:px-14 py-10 md:py-14">
-                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Individual Styling</div>
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">{ratesData.singlePackagesLabel ?? "Individual Styling"}</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.singlePackages.map((pkg, i) => (
                     <div key={i} onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()} className="flex items-center justify-between py-3.5 gap-4 cursor-pointer group hover:bg-black/[0.02] -mx-2 px-2 transition-colors">
@@ -465,7 +515,7 @@ export default function Rates({ onBookCall, onBook, activeTab: activeTabProp, se
 
             {ratesData.otherPackages?.length > 0 && (
               <div className="px-6 md:px-14 py-10 md:py-14">
-                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">Bridal Party</div>
+                <div className="font-mono text-[7.5px] tracking-[0.38em] uppercase text-[#1a1706]/40 mb-6">{ratesData.otherPackagesLabel ?? "Bridal Party"}</div>
                 <div className="divide-y divide-black/[0.06]">
                   {ratesData.otherPackages.map((pkg, i) => (
                     <div key={i} onClick={() => onBook ? onBook("wedding", pkg.price) : onBookCall?.()} className="flex items-center justify-between py-3.5 gap-4 cursor-pointer group hover:bg-black/[0.02] -mx-2 px-2 transition-colors">
