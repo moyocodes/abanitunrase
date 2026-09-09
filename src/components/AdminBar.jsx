@@ -5,7 +5,7 @@ import { useAuth } from "@/providers";
 import { useData } from "@/providers";
 import { saveLook, deleteLook } from "@/lib/firestore";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { fmt } from "@/data";
+import { fmt, toPriceNumber, CURRENCY_SYMBOL } from "@/data";
 
 /* ── Confirm Modal ──────────────────────────────────────── */
 function ConfirmModal({ message, onConfirm, onCancel }) {
@@ -754,6 +754,30 @@ export function PanelField({ label, value, onChange, multiline = false }) {
           className="w-full bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/40 font-['Georgia,Times_New_Roman,serif'] text-[13px]"
         />
       )}
+    </div>
+  );
+}
+
+/* ── PanelPriceField — numeric price input, one uniform format ── */
+export function PanelPriceField({ label = "Price", value, onChange }) {
+  return (
+    <div>
+      <label className="block font-['Georgia,Times_New_Roman,serif'] text-[11px] font-semibold text-[#1a1706]/55 mb-1.5">
+        {label}
+      </label>
+      <div className="flex items-baseline gap-1.5">
+        {CURRENCY_SYMBOL && (
+          <span className="text-[#1a1706]/40 font-['Georgia,Times_New_Roman,serif'] text-[13px]">{CURRENCY_SYMBOL}</span>
+        )}
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value == null || value === "" ? "" : String(toPriceNumber(value))}
+          onChange={(e) => onChange(toPriceNumber(e.target.value))}
+          placeholder="0"
+          className="w-full bg-transparent border-b border-[#1a1706]/15 py-2 text-[#1a1706]/80 outline-none focus:border-[#1a1706]/40 font-['Georgia,Times_New_Roman,serif'] text-[13px]"
+        />
+      </div>
     </div>
   );
 }

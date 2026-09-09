@@ -46,6 +46,8 @@ const DEFAULT_RATES = {
   note: "",
   consultations: [],
   extrasVisibleOnTabs: ["bridal"],
+  singlePackagesLabel: "Individual Styling",
+  otherPackagesLabel: "Bridal Party",
   singlePackages: [
     { service: "Court Wedding",  price: 700000 },
     { service: "White Wedding",  price: 700000 },
@@ -263,6 +265,8 @@ export function DataProvider({ children }) {
     extrasVisibleOnTabs: settings.rates?.extrasVisibleOnTabs ?? ["bridal"],
     singlePackages: settings.rates?.singlePackages ?? DEFAULT_RATES.singlePackages,
     otherPackages:  settings.rates?.otherPackages  ?? DEFAULT_RATES.otherPackages,
+    singlePackagesLabel: settings.rates?.singlePackagesLabel ?? DEFAULT_RATES.singlePackagesLabel,
+    otherPackagesLabel:  settings.rates?.otherPackagesLabel  ?? DEFAULT_RATES.otherPackagesLabel,
   };
   const lookbookData = {
     ...DEFAULT_LOOKBOOK,

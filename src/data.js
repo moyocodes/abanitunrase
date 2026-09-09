@@ -20,7 +20,14 @@ export const INTRO_TRIGGER = 300;
 export const SHOWCASED = [];
 export const PLACEHOLDER_MEDIA = [];
 
-export const fmt = (n) => "₦" + n.toLocaleString("en-NG");
+/* ── Price formatting ──────────────────────────────────────
+   One uniform format everywhere: currency symbol, no grouping
+   separators. Change here to change every price on the site.   */
+export const CURRENCY_SYMBOL = "";
+export const CURRENCY_SUFFIX = "";
+export const toPriceNumber = (v) => Number(String(v ?? "").replace(/[^0-9]/g, "")) || 0;
+export const fmt = (n) =>
+  CURRENCY_SYMBOL + String(toPriceNumber(n)) + CURRENCY_SUFFIX;
 
 export function ytEmbedUrl(url) {
   if (!url) return "";

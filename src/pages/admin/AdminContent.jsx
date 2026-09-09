@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import { getPricing, savePricing } from "@/lib/firestore";
-import { BRIDAL, OCCASION, TRAVEL, fmt } from "@/data";
+import { BRIDAL, OCCASION, TRAVEL, fmt, toPriceNumber } from "@/data";
 
 const lbl = "block font-mono text-[9px] tracking-[0.32em] uppercase text-[#1a1706]/40 mb-1.5";
 const inp = "w-full bg-[#faf9f6] border border-[#e8e5dc] px-3 py-2 font-mono text-[11px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/35 transition-colors";
@@ -88,7 +88,7 @@ export default function AdminContent() {
           {/* Header */}
           <div className="hidden sm:grid grid-cols-[1fr_160px_1fr_40px] gap-4 px-5 py-3 border-b border-[#e8e5dc] bg-[#faf9f6]">
             <div className={lbl.replace("mb-1.5", "")}>Package</div>
-            <div className={lbl.replace("mb-1.5", "")}>Price (₦)</div>
+            <div className={lbl.replace("mb-1.5", "")}>Price</div>
             <div className={lbl.replace("mb-1.5", "")}>Note</div>
             <div />
           </div>
@@ -114,11 +114,11 @@ export default function AdminContent() {
                 />
               </div>
               <div>
-                <label className="sm:hidden font-mono text-[8px] tracking-[0.2em] uppercase text-[#1a1706]/35 mb-1 block">Price (₦)</label>
+                <label className="sm:hidden font-mono text-[8px] tracking-[0.2em] uppercase text-[#1a1706]/35 mb-1 block">Price</label>
                 <input
                   type="number"
                   value={item.price ?? ""}
-                  onChange={e => updateItem(idx, "price", Number(e.target.value))}
+                  onChange={e => updateItem(idx, "price", toPriceNumber(e.target.value))}
                   className={inp}
                 />
                 <div className="font-mono text-[8px] text-[#1a1706]/35 mt-1">{fmt(item.price ?? 0)}</div>
