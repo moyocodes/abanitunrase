@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import {
+  confirmBookingPayment,
   deleteBooking,
   deleteContact,
   getBookings,
   getContacts,
   saveBooking,
   updateBookingStatus,
-  updateBooking,
 } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "@/components/forms/PaystackPayment";
@@ -629,7 +629,8 @@ function AddBookingModal({ pricing, onClose, onSave }) {
   const [preferredTime, setPreferredTime] = useState("");
   const [note, setNote] = useState("");
 
-  const packages = pricing?.[type] ?? [];
+  const PRICING_KEY = { wedding: "bridal", occasion: "occasion", travel: "travel" };
+  const packages = pricing?.[PRICING_KEY[type]] ?? [];
   const selectedPackage =
     packages.find((item) => (item.package || item.service) === packageName) ||
     packages[0];
@@ -865,17 +866,15 @@ export default function AdminBookings() {
 
   const handlePaymentSuccess = async (payment) => {
     const b = paymentBooking;
-    const bookingAmount =
-      b.data?.amount > 0
-        ? b.data.amount
-        : getFallbackAmount(b.type, pricing, ratesData);
     try {
-      await updateBookingStatus(b.id, "confirmed");
-      await updateBooking(b.id, {
-        "data.paid": true,
-        "data.paymentReference": payment.reference,
-        "data.amount": bookingAmount,
-      });
+      const { amount: confirmedAmount } = await confirmBookingPayment(
+        b.id,
+        payment.reference,
+      );
+      const bookingAmount =
+        confirmedAmount > 0
+          ? confirmedAmount
+          : getFallbackAmount(b.type, pricing, ratesData);
       setBookings((prev) =>
         prev.map((x) =>
           x.id === b.id

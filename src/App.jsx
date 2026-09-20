@@ -25,6 +25,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminBookings from "@/pages/admin/AdminBookings";
 import AdminEmails from "@/pages/admin/AdminEmails";
 import AdminConsultations from "@/pages/admin/AdminConsultations";
+import AdminContent from "@/pages/admin/AdminContent";
 import ContactPage from "@/pages/ContactPage";
 import LookbookPage from "@/pages/LookbookPage";
 import LookPage from "@/pages/LookPage";
@@ -81,6 +82,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminConsultations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/pricing"
+            element={
+              <ProtectedRoute>
+                <AdminContent />
               </ProtectedRoute>
             }
           />
