@@ -10,6 +10,7 @@ import TextArea from "./fields/TextArea";
 import RadioGroup from "./fields/RadioGroup";
 import CheckboxGroup from "./fields/CheckboxGroup";
 import PaystackPayment from "./PaystackPayment";
+import AdminPaymentStep from "./AdminPaymentStep";
 
 const TOTAL_STEPS = 6;
 
@@ -48,7 +49,7 @@ const emptyState = {
   acknowledge: false,
 };
 
-export default function TravelForm({ onComplete, amount: amountProp }) {
+export default function TravelForm({ onComplete, amount: amountProp, isAdmin = false }) {
   const { travel } = useData();
   const packageAmount = (travel?.find(p => p.featured) ?? travel?.[0])?.price ?? 0;
   const [step, setStep] = useState(0);
@@ -101,15 +102,17 @@ export default function TravelForm({ onComplete, amount: amountProp }) {
     if (!id) {
       id = await saveBooking("travel", { ...data, preferredTime: data.travelDates }).catch(console.error);
     }
-    if (id) {
+    if (id && !response?.manual) {
       await confirmBookingPayment(id, response?.reference).catch(console.error);
     }
     onComplete();
   };
 
   if (showPayment) {
+    const PaymentComponent = isAdmin ? AdminPaymentStep : PaystackPayment;
     return (
-      <PaystackPayment
+      <PaymentComponent
+        bookingId={bookingIdRef.current}
         name={data.fullName}
         email={data.email}
         phone={data.phone}

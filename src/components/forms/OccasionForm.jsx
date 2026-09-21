@@ -10,6 +10,7 @@ import TextArea from "./fields/TextArea";
 import RadioGroup from "./fields/RadioGroup";
 import CheckboxGroup from "./fields/CheckboxGroup";
 import PaystackPayment from "./PaystackPayment";
+import AdminPaymentStep from "./AdminPaymentStep";
 
 const TOTAL_STEPS = 8;
 
@@ -59,7 +60,7 @@ const emptyState = {
   confirmFees: false,
 };
 
-export default function OccasionForm({ onComplete, amount: amountProp }) {
+export default function OccasionForm({ onComplete, amount: amountProp, isAdmin = false }) {
   const { occasion } = useData();
   const packageAmount = (occasion?.find(p => p.featured) ?? occasion?.[0])?.price ?? 0;
   const [step, setStep] = useState(0);
@@ -110,15 +111,17 @@ export default function OccasionForm({ onComplete, amount: amountProp }) {
     if (!id) {
       id = await saveBooking("occasion", { ...data, preferredTime: data.eventDate }).catch(console.error);
     }
-    if (id) {
+    if (id && !response?.manual) {
       await confirmBookingPayment(id, response?.reference).catch(console.error);
     }
     onComplete();
   };
 
   if (showPayment) {
+    const PaymentComponent = isAdmin ? AdminPaymentStep : PaystackPayment;
     return (
-      <PaystackPayment
+      <PaymentComponent
+        bookingId={bookingIdRef.current}
         name={data.fullName}
         email={data.email}
         phone={data.phone}
