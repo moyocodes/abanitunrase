@@ -11,6 +11,7 @@ import RadioGroup from "./fields/RadioGroup";
 import CheckboxGroup from "./fields/CheckboxGroup";
 import SelectInput from "./fields/SelectInput";
 import PaystackPayment from "./PaystackPayment";
+import AdminPaymentStep from "./AdminPaymentStep";
 
 const TOTAL_STEPS = 9;
 
@@ -80,7 +81,11 @@ const emptyState = {
   confirmFees: false,
 };
 
-export default function WeddingForm({ onComplete, amount: amountProp }) {
+export default function WeddingForm({
+  onComplete,
+  amount: amountProp,
+  isAdmin = false,
+}) {
   const { bridal } = useData();
   const packageAmount =
     (bridal?.find((p) => p.featured) ?? bridal?.[0])?.price ?? 0;
@@ -165,15 +170,20 @@ export default function WeddingForm({ onComplete, amount: amountProp }) {
         preferredTime: data.weddingDate,
       }).catch(console.error);
     }
-    if (id) {
+    // Admin's manual-reference path already writes paid/confirmed directly
+    // (markBookingPaidManually); only re-verify with Paystack for real
+    // Paystack checkouts (client flow, or admin's "Collect via Paystack").
+    if (id && !response?.manual) {
       await confirmBookingPayment(id, response?.reference).catch(console.error);
     }
     onComplete();
   };
 
   if (showPayment) {
+    const PaymentComponent = isAdmin ? AdminPaymentStep : PaystackPayment;
     return (
-      <PaystackPayment
+      <PaymentComponent
+        bookingId={bookingIdRef.current}
         name={data.fullName}
         email={data.email}
         phone={data.phone}

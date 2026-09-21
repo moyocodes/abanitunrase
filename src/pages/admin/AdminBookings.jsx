@@ -6,11 +6,11 @@ import {
   deleteContact,
   getBookings,
   getContacts,
-  saveBooking,
   updateBookingStatus,
 } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "@/components/forms/PaystackPayment";
+import { WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 import { useData } from "@/providers";
 import { FIELD_LABELS, SKIP_FIELDS } from "@/lib/fieldLabels";
 
@@ -620,48 +620,39 @@ function Toast({ message, type }) {
   );
 }
 
-function AddBookingModal({ pricing, onClose, onSave }) {
+const ADD_BOOKING_FORMS = {
+  wedding: WeddingForm,
+  occasion: OccasionForm,
+  travel: TravelForm,
+};
+
+function AddBookingModal({ pricing, onClose, onComplete }) {
   const [type, setType] = useState("wedding");
-  const [packageName, setPackageName] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [preferredTime, setPreferredTime] = useState("");
-  const [note, setNote] = useState("");
 
   const PRICING_KEY = { wedding: "bridal", occasion: "occasion", travel: "travel" };
   const packages = pricing?.[PRICING_KEY[type]] ?? [];
-  const selectedPackage =
-    packages.find((item) => (item.package || item.service) === packageName) ||
-    packages[0];
+  const featuredAmount =
+    (packages.find((p) => p.featured) ?? packages[0])?.price ?? 0;
 
-  useEffect(() => {
-    setPackageName(selectedPackage?.package || selectedPackage?.service || "");
-  }, [type]);
-
-  const submit = () => {
-    if (!name.trim() || !email.trim() || !selectedPackage) return;
-    onSave({
-      type,
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      preferredTime: preferredTime.trim(),
-      note: note.trim(),
-      service: selectedPackage.package || selectedPackage.service,
-      amount: Number(selectedPackage.price || 0) * 100,
-      amountLabel: selectedPackage.price
-        ? `₦${Number(selectedPackage.price).toLocaleString("en-NG")}`
-        : "Custom quote",
-    });
-  };
+  const FormComponent = ADD_BOOKING_FORMS[type];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-xl border border-[#e8e5dc]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e5dc]">
-          <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/55 font-semibold">
-            Add Booking
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-2xl border border-[#e8e5dc] my-8">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e5dc] sticky top-0 bg-white z-10">
+          <div>
+            <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/55 font-semibold mb-2">
+              Add Booking
+            </div>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="border border-[#e8e5dc] bg-white px-3 py-1.5 font-mono text-[11px] uppercase"
+            >
+              <option value="wedding">Bridal</option>
+              <option value="occasion">Occasion</option>
+              <option value="travel">Travel</option>
+            </select>
           </div>
           <button
             onClick={onClose}
@@ -670,77 +661,13 @@ function AddBookingModal({ pricing, onClose, onSave }) {
             ✕
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6 py-5">
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="border border-[#e8e5dc] bg-white px-3 py-2 font-mono text-[11px] uppercase"
-          >
-            <option value="wedding">Bridal</option>
-            <option value="occasion">Occasion</option>
-            <option value="travel">Travel</option>
-          </select>
-          <select
-            value={packageName}
-            onChange={(e) => setPackageName(e.target.value)}
-            className="border border-[#e8e5dc] bg-white px-3 py-2 font-mono text-[11px] uppercase"
-          >
-            {packages.map((item) => {
-              const label = item.package || item.service;
-              return (
-                <option key={label} value={label}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Client full name"
-            className="border border-[#e8e5dc] px-3 py-2 sm:col-span-2"
+        <div className="px-6 py-5">
+          <FormComponent
+            key={type}
+            isAdmin
+            amount={featuredAmount}
+            onComplete={onComplete}
           />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Client email"
-            className="border border-[#e8e5dc] px-3 py-2"
-          />
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone"
-            className="border border-[#e8e5dc] px-3 py-2"
-          />
-          <input
-            value={preferredTime}
-            onChange={(e) => setPreferredTime(e.target.value)}
-            placeholder="Preferred date or time"
-            className="border border-[#e8e5dc] px-3 py-2 sm:col-span-2"
-          />
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Booking note"
-            rows={3}
-            className="border border-[#e8e5dc] px-3 py-2 sm:col-span-2 resize-none"
-          />
-        </div>
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#e8e5dc]">
-          <button
-            onClick={onClose}
-            className="font-mono text-[11px] uppercase px-4 py-2 border border-[#1a1706]/15 bg-transparent cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={submit}
-            disabled={!name.trim() || !email.trim() || !selectedPackage}
-            className="font-mono text-[11px] uppercase px-4 py-2 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40"
-          >
-            Save Booking
-          </button>
         </div>
       </div>
     </div>
@@ -820,47 +747,17 @@ export default function AdminBookings() {
     }
   };
 
-  const handleAddBooking = async (draft) => {
-    const data = {
-      fullName: draft.name,
-      email: draft.email,
-      phone: draft.phone,
-      service: draft.service,
-      preferredTime: draft.preferredTime,
-      note: draft.note,
-      amount: draft.amount,
-      amountLabel: draft.amountLabel,
-      paid: false,
-    };
-
+  // The full booking form (WeddingForm/OccasionForm/TravelForm, isAdmin mode)
+  // saves the booking and, if admin marks it paid, records the payment
+  // itself — so on completion we just refresh the list from Firestore.
+  const handleAddBookingComplete = async () => {
+    setAddBookingOpen(false);
     try {
-      const id = await saveBooking(draft.type, data, "new");
-      if (!id) throw new Error("Booking was not saved");
-      setBookings((prev) => [
-        {
-          id,
-          type: draft.type,
-          status: "new",
-          data,
-          createdAt: { seconds: Math.floor(Date.now() / 1000) },
-        },
-        ...prev,
-      ]);
-      setAddBookingOpen(false);
-      if (window.confirm("Send the client the booking received email now?")) {
-        sendBookingEmails({
-          kind: "form_submitted",
-          email: draft.email,
-          name: draft.name,
-          serviceName: draft.service,
-          formType: draft.type,
-          phone: draft.phone,
-          preferredTime: draft.preferredTime,
-        }).catch(console.error);
-      }
+      const b = await getBookings();
+      setBookings(b);
       showToast("Booking created");
     } catch {
-      showToast("Failed to create booking", "error");
+      showToast("Booking saved, but the list failed to refresh", "error");
     }
   };
 
@@ -1061,7 +958,7 @@ export default function AdminBookings() {
         <AddBookingModal
           pricing={pricing}
           onClose={() => setAddBookingOpen(false)}
-          onSave={handleAddBooking}
+          onComplete={handleAddBookingComplete}
         />
       )}
 

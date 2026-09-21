@@ -2,48 +2,52 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
     // Bookings — anyone can submit; reads/updates go through server-side API routes
     // (api/track-booking.js, api/confirm-payment.js) using the Admin SDK, which bypass
-    // these rules under a service account. Client SDK reads/updates require admin auth.
+    // these rules under a service account. Client SDK reads/updates require the admin claim.
     match /bookings/{id} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if isAdmin();
     }
 
-    // Contacts / enquiries — anyone can submit, only auth reads
+    // Contacts / enquiries — anyone can submit, only admins read
     match /contacts/{id} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read, update, delete: if isAdmin();
     }
 
-    // Looks — public read for site display, auth writes
+    // Looks — public read for site display, admin writes
     match /looks/{id} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // Pricing — public read for site display, auth writes
+    // Pricing — public read for site display, admin writes
     match /pricing/{id} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // Settings (hero images, categories, site images) — public read, auth writes
+    // Settings (hero images, categories, site images) — public read, admin writes
     match /settings/{id} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // Reviews — anyone can read/create, only auth can delete
+    // Reviews — anyone can read/create, only admins can delete
     match /reviews/{id} {
       allow read, create: if true;
-      allow delete: if request.auth != null;
+      allow delete: if isAdmin();
     }
 
-    // Gallery — public read, auth writes
+    // Gallery — public read, admin writes
     match /gallery/{id} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
   }
 }

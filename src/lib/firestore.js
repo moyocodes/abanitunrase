@@ -91,6 +91,21 @@ export async function updateBookingStatus(id, status) {
   await updateDoc(doc(db, "bookings", id), { status });
 }
 
+// Admin manually records a payment (e.g. bank transfer, cash, or a reference
+// collected outside Paystack). Unlike confirmBookingPayment, this does NOT
+// re-verify against Paystack — it trusts the admin's word, so it must only
+// ever be reachable from the authenticated admin dashboard.
+export async function markBookingPaidManually(id, reference, amount) {
+  guard();
+  const patch = {
+    status: "confirmed",
+    "data.paid": true,
+    "data.paymentReference": reference,
+  };
+  if (amount > 0) patch["data.amount"] = amount;
+  await updateDoc(doc(db, "bookings", id), patch);
+}
+
 export async function updateBooking(id, patch) {
   guard();
   await updateDoc(doc(db, "bookings", id), patch);
