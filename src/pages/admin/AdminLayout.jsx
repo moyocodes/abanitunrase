@@ -31,6 +31,7 @@ const NAV = [
   { label: "Pricing",       to: "/admin/pricing",           icon: "₦" },
   { label: "Emails",        to: "/admin/emails",            icon: "✉" },
   { label: "Consultations", to: "/admin/consultations",     icon: "◷" },
+  { label: "Admin Users",   to: "/admin/users",             icon: "☺" },
 ];
 
 function Sidebar({ onClose }) {

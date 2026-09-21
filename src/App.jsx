@@ -26,6 +26,7 @@ import AdminBookings from "@/pages/admin/AdminBookings";
 import AdminEmails from "@/pages/admin/AdminEmails";
 import AdminConsultations from "@/pages/admin/AdminConsultations";
 import AdminContent from "@/pages/admin/AdminContent";
+import AdminUsers from "@/pages/admin/AdminUsers";
 import ContactPage from "@/pages/ContactPage";
 import LookbookPage from "@/pages/LookbookPage";
 import LookPage from "@/pages/LookPage";
@@ -90,6 +91,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminContent />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />
