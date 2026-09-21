@@ -12,6 +12,8 @@ import CheckboxGroup from "./fields/CheckboxGroup";
 import SelectInput from "./fields/SelectInput";
 import PaystackPayment from "./PaystackPayment";
 import AdminPaymentStep from "./AdminPaymentStep";
+import AdminFillTestData from "./AdminFillTestData";
+import { mockWeddingData } from "./mockFormData";
 
 const TOTAL_STEPS = 9;
 
@@ -89,6 +91,7 @@ export default function WeddingForm({
   const { bridal } = useData();
   const packageAmount =
     (bridal?.find((p) => p.featured) ?? bridal?.[0])?.price ?? 0;
+  const fieldVariant = isAdmin ? "light" : "dark";
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -199,6 +202,11 @@ export default function WeddingForm({
 
   return (
     <div>
+      {isAdmin && (
+        <div className="flex justify-end mb-2">
+          <AdminFillTestData onFill={() => setData({ ...mockWeddingData() })} />
+        </div>
+      )}
       <StepIndicator steps={TOTAL_STEPS} current={step} />
 
       <div className="font-heading text-[#1a1706] text-xl mb-8">
@@ -219,6 +227,7 @@ export default function WeddingForm({
           <SectionHeader>Client Information</SectionHeader>
           <FormField label="Full Name" required>
             <TextInput
+              variant={fieldVariant}
               value={data.fullName}
               onChange={(e) => set("fullName", e.target.value)}
               placeholder="Your full name"
@@ -226,6 +235,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Age" required>
             <TextInput
+              variant={fieldVariant}
               value={data.age}
               onChange={(e) => set("age", e.target.value)}
               placeholder="Your age"
@@ -241,6 +251,7 @@ export default function WeddingForm({
             {data.gender === "Other" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.genderOther}
                   onChange={(e) => set("genderOther", e.target.value)}
                   placeholder="Please specify"
@@ -250,6 +261,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Contact Number / WhatsApp" required>
             <TextInput
+              variant={fieldVariant}
               value={data.phone}
               onChange={(e) => set("phone", e.target.value)}
               placeholder="+234 ..."
@@ -258,6 +270,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Email" required>
             <TextInput
+              variant={fieldVariant}
               value={data.email}
               onChange={(e) => set("email", e.target.value)}
               placeholder="your@email.com"
@@ -276,6 +289,7 @@ export default function WeddingForm({
             required
           >
             <TextArea
+              variant={fieldVariant}
               value={data.weddingStyle}
               onChange={(e) => set("weddingStyle", e.target.value)}
               placeholder="Describe your wedding style vision..."
@@ -283,6 +297,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Are there specific themes or colour palettes you are drawn to?">
             <TextArea
+              variant={fieldVariant}
               value={data.colourPalette}
               onChange={(e) => set("colourPalette", e.target.value)}
               placeholder="Themes, colours, moods..."
@@ -299,6 +314,7 @@ export default function WeddingForm({
             {data.hasNecklinePreference === "Yes" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.necklinePreference}
                   onChange={(e) => set("necklinePreference", e.target.value)}
                   placeholder="Describe your preference..."
@@ -315,6 +331,7 @@ export default function WeddingForm({
           <SectionHeader>Dress Style</SectionHeader>
           <FormField label="What silhouette are you considering for your wedding gown?">
             <SelectInput
+              variant={fieldVariant}
               options={[
                 "Ball gown",
                 "Mermaid",
@@ -330,6 +347,7 @@ export default function WeddingForm({
             {data.silhouette === "Other" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.silhouetteOther}
                   onChange={(e) => set("silhouetteOther", e.target.value)}
                   placeholder="Please specify"
@@ -339,6 +357,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Do you have a preference for sleeve length or neckline style?">
             <TextArea
+              variant={fieldVariant}
               value={data.necklineDetail}
               onChange={(e) => set("necklineDetail", e.target.value)}
               placeholder="Describe your preferences..."
@@ -349,6 +368,7 @@ export default function WeddingForm({
           <SectionHeader>Comfort Level</SectionHeader>
           <FormField label="Are there any fabrics or materials you prefer or dislike?">
             <TextArea
+              variant={fieldVariant}
               value={data.fabricPreference}
               onChange={(e) => set("fabricPreference", e.target.value)}
               placeholder="Fabrics, materials..."
@@ -357,6 +377,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Do you have any specific comfort requirements for your wedding attire?">
             <TextArea
+              variant={fieldVariant}
               value={data.comfortRequirements}
               onChange={(e) => set("comfortRequirements", e.target.value)}
               placeholder="Comfort considerations..."
@@ -397,6 +418,7 @@ export default function WeddingForm({
             {data.accessories.includes("Other") && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.accessoriesOther}
                   onChange={(e) => set("accessoriesOther", e.target.value)}
                   placeholder="Please specify"
@@ -406,6 +428,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Are there any accessories you definitely do NOT want?">
             <TextArea
+              variant={fieldVariant}
               value={data.noAccessories}
               onChange={(e) => set("noAccessories", e.target.value)}
               placeholder="Accessories to avoid..."
@@ -419,6 +442,7 @@ export default function WeddingForm({
             required
           >
             <TextArea
+              variant={fieldVariant}
               value={data.venueAndSeason}
               onChange={(e) => set("venueAndSeason", e.target.value)}
               placeholder="Venue, city, season..."
@@ -427,6 +451,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Are there any climate considerations for your wedding attire?">
             <TextArea
+              variant={fieldVariant}
               value={data.climateConsiderations}
               onChange={(e) => set("climateConsiderations", e.target.value)}
               placeholder="Climate, weather notes..."
@@ -442,6 +467,7 @@ export default function WeddingForm({
           <SectionHeader>Budget</SectionHeader>
           <FormField label="What is your budget range for the wedding dress and accessories?">
             <SelectInput
+              variant={fieldVariant}
               options={[
                 "Under ₦500k",
                 "₦500k–₦1M",
@@ -472,6 +498,7 @@ export default function WeddingForm({
           <SectionHeader>Body Shape and Preferences</SectionHeader>
           <FormField label="How would you describe your body?">
             <TextArea
+              variant={fieldVariant}
               value={data.bodyDescription}
               onChange={(e) => set("bodyDescription", e.target.value)}
               placeholder="Body shape, features..."
@@ -480,6 +507,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Are there any specific elements you prefer or dislike?">
             <TextArea
+              variant={fieldVariant}
               value={data.elementsPreference}
               onChange={(e) => set("elementsPreference", e.target.value)}
               placeholder="Preferences, dislikes..."
@@ -496,6 +524,7 @@ export default function WeddingForm({
             {data.skinTone === "Other" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.skinToneOther}
                   onChange={(e) => set("skinToneOther", e.target.value)}
                   placeholder="Please specify"
@@ -505,6 +534,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="Can you provide your current and preferred measurements for the dress fitting?">
             <TextArea
+              variant={fieldVariant}
               value={data.measurements}
               onChange={(e) => set("measurements", e.target.value)}
               placeholder="Measurements, sizing notes..."
@@ -528,6 +558,7 @@ export default function WeddingForm({
             {data.hasMoodBoard === "Yes" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.moodBoardLink}
                   onChange={(e) => set("moodBoardLink", e.target.value)}
                   placeholder="Link to folder/board"
@@ -545,6 +576,7 @@ export default function WeddingForm({
             {data.hasCelebInspo === "Yes" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.celebInspoLink}
                   onChange={(e) => set("celebInspoLink", e.target.value)}
                   placeholder="Link to photos"
@@ -561,6 +593,7 @@ export default function WeddingForm({
           <SectionHeader>Timeline</SectionHeader>
           <FormField label="When is your wedding date?">
             <TextInput
+              variant={fieldVariant}
               type="date"
               value={data.weddingDate}
               onChange={(e) => set("weddingDate", e.target.value)}
@@ -569,6 +602,7 @@ export default function WeddingForm({
           </FormField>
           <FormField label="What is your preferred timeline for selecting and finalising your bridal attire?">
             <SelectInput
+              variant={fieldVariant}
               options={[
                 "6+ months",
                 "3–6 months",
@@ -592,6 +626,7 @@ export default function WeddingForm({
             {data.dresscode === "Other" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.drescodeOther}
                   onChange={(e) => set("drescodeOther", e.target.value)}
                   placeholder="Please specify"
@@ -624,6 +659,7 @@ export default function WeddingForm({
             {data.culturalRequirements === "Yes" && (
               <div className="mt-3">
                 <TextArea
+              variant={fieldVariant}
                   value={data.culturalDetails}
                   onChange={(e) => set("culturalDetails", e.target.value)}
                   placeholder="Please share considerations..."
@@ -642,6 +678,7 @@ export default function WeddingForm({
             {data.hasSymbols === "Yes" && (
               <div className="mt-3">
                 <TextInput
+              variant={fieldVariant}
                   value={data.symbolImages}
                   onChange={(e) => set("symbolImages", e.target.value)}
                   placeholder="Link to images"
@@ -663,6 +700,7 @@ export default function WeddingForm({
           <SectionHeader>Additional Details</SectionHeader>
           <FormField label="Is there anything else you'd like to share or specific concerns about your wedding attire?">
             <TextArea
+              variant={fieldVariant}
               value={data.additionalDetails}
               onChange={(e) => set("additionalDetails", e.target.value)}
               placeholder="Any other details..."

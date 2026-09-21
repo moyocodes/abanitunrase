@@ -1,9 +1,9 @@
-import { adminDb } from "./_firebaseAdmin.js";
+const { adminDb } = require("./_firebaseAdmin.cjs");
 
 const PAYSTACK_SECRET_KEY =
   process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACKT_SECRET_KEY;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
@@ -63,4 +63,4 @@ export default async function handler(req, res) {
     console.error("confirm-payment error:", err.message);
     return res.status(500).json({ error: "Failed to confirm payment" });
   }
-}
+};

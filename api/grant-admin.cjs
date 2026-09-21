@@ -1,8 +1,8 @@
-import { adminAuth } from "./_firebaseAdmin.js";
+const { adminAuth } = require("./_firebaseAdmin.cjs");
 
 // One-off setup endpoint: grants the `admin` custom claim used by firestore.rules'
 // isAdmin() check. Call once per admin account, then rotate/remove SETUP_SECRET.
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
@@ -40,4 +40,4 @@ export default async function handler(req, res) {
     console.error("grant-admin error:", err.message);
     return res.status(500).json({ error: "Failed to grant admin claim" });
   }
-}
+};

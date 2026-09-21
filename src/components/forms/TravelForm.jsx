@@ -11,6 +11,8 @@ import RadioGroup from "./fields/RadioGroup";
 import CheckboxGroup from "./fields/CheckboxGroup";
 import PaystackPayment from "./PaystackPayment";
 import AdminPaymentStep from "./AdminPaymentStep";
+import AdminFillTestData from "./AdminFillTestData";
+import { mockTravelData } from "./mockFormData";
 
 const TOTAL_STEPS = 6;
 
@@ -52,6 +54,7 @@ const emptyState = {
 export default function TravelForm({ onComplete, amount: amountProp, isAdmin = false }) {
   const { travel } = useData();
   const packageAmount = (travel?.find(p => p.featured) ?? travel?.[0])?.price ?? 0;
+  const fieldVariant = isAdmin ? "light" : "dark";
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -128,6 +131,11 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
 
   return (
     <div>
+      {isAdmin && (
+        <div className="flex justify-end mb-2">
+          <AdminFillTestData onFill={() => setData({ ...mockTravelData() })} />
+        </div>
+      )}
       <StepIndicator steps={TOTAL_STEPS} current={step} />
 
       <div className="font-heading text-[#1a1706] text-xl mb-8">
@@ -144,13 +152,13 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
         <div>
           <SectionHeader>Client Details</SectionHeader>
           <FormField label="Full Name" required>
-            <TextInput value={data.fullName} onChange={(e) => set("fullName", e.target.value)} placeholder="Your full name" />
+            <TextInput variant={fieldVariant} value={data.fullName} onChange={(e) => set("fullName", e.target.value)} placeholder="Your full name" />
           </FormField>
           <FormField label="Email" required>
-            <TextInput value={data.email} onChange={(e) => set("email", e.target.value)} placeholder="your@email.com" type="email" />
+            <TextInput variant={fieldVariant} value={data.email} onChange={(e) => set("email", e.target.value)} placeholder="your@email.com" type="email" />
           </FormField>
           <FormField label="Phone Number" required>
-            <TextInput value={data.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+234 ..." type="tel" />
+            <TextInput variant={fieldVariant} value={data.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+234 ..." type="tel" />
           </FormField>
         </div>
       )}
@@ -160,16 +168,16 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
         <div>
           <SectionHeader>Travel Information</SectionHeader>
           <FormField label="Destination(s)">
-            <TextInput value={data.destinations} onChange={(e) => set("destinations", e.target.value)} placeholder="Where are you travelling to?" />
+            <TextInput variant={fieldVariant} value={data.destinations} onChange={(e) => set("destinations", e.target.value)} placeholder="Where are you travelling to?" />
           </FormField>
           <FormField label="Departure Date">
-            <TextInput type="date" value={data.travelDates} onChange={(e) => set("travelDates", e.target.value)} />
+            <TextInput variant={fieldVariant} type="date" value={data.travelDates} onChange={(e) => set("travelDates", e.target.value)} />
           </FormField>
           <FormField label="Return Date">
-            <TextInput type="date" value={data.travelDateReturn} onChange={(e) => set("travelDateReturn", e.target.value)} />
+            <TextInput variant={fieldVariant} type="date" value={data.travelDateReturn} onChange={(e) => set("travelDateReturn", e.target.value)} />
           </FormField>
           <FormField label="Length of Stay">
-            <TextInput value={data.lengthOfStay} onChange={(e) => set("lengthOfStay", e.target.value)} placeholder="e.g. 7 days" />
+            <TextInput variant={fieldVariant} value={data.lengthOfStay} onChange={(e) => set("lengthOfStay", e.target.value)} placeholder="e.g. 7 days" />
           </FormField>
         </div>
       )}
@@ -187,12 +195,12 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
             />
             {data.tripNature.includes("Other") && (
               <div className="mt-3">
-                <TextInput value={data.tripNatureOther} onChange={(e) => set("tripNatureOther", e.target.value)} placeholder="Please specify" />
+                <TextInput variant={fieldVariant} value={data.tripNatureOther} onChange={(e) => set("tripNatureOther", e.target.value)} placeholder="Please specify" />
               </div>
             )}
           </FormField>
           <FormField label="Planned Activities" hint="Dinners, excursions, events, etc.">
-            <TextArea value={data.plannedActivities} onChange={(e) => set("plannedActivities", e.target.value)} placeholder="Describe your planned activities..." rows={4} />
+            <TextArea variant={fieldVariant} value={data.plannedActivities} onChange={(e) => set("plannedActivities", e.target.value)} placeholder="Describe your planned activities..." rows={4} />
           </FormField>
         </div>
       )}
@@ -202,7 +210,7 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
         <div>
           <SectionHeader>Styling Scope</SectionHeader>
           <FormField label="Estimated Number of Looks Required">
-            <TextInput value={data.numberOfLooks} onChange={(e) => set("numberOfLooks", e.target.value)} placeholder="e.g. 5 looks" />
+            <TextInput variant={fieldVariant} value={data.numberOfLooks} onChange={(e) => set("numberOfLooks", e.target.value)} placeholder="e.g. 5 looks" />
           </FormField>
           <FormField label="Will you require in-person styling?">
             <RadioGroup
@@ -215,13 +223,13 @@ export default function TravelForm({ onComplete, amount: amountProp, isAdmin = f
 
           <SectionHeader>Style Direction</SectionHeader>
           <FormField label="How would you describe your personal style?">
-            <TextArea value={data.personalStyle} onChange={(e) => set("personalStyle", e.target.value)} placeholder="Your style aesthetic..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.personalStyle} onChange={(e) => set("personalStyle", e.target.value)} placeholder="Your style aesthetic..." rows={3} />
           </FormField>
           <FormField label="Are there silhouettes, colours, or styles you prefer to avoid?">
-            <TextArea value={data.avoidStyles} onChange={(e) => set("avoidStyles", e.target.value)} placeholder="What to avoid..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.avoidStyles} onChange={(e) => set("avoidStyles", e.target.value)} placeholder="What to avoid..." rows={3} />
           </FormField>
           <FormField label="Any designers or references you love?">
-            <TextArea value={data.designerRefs} onChange={(e) => set("designerRefs", e.target.value)} placeholder="Designers, inspo references..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.designerRefs} onChange={(e) => set("designerRefs", e.target.value)} placeholder="Designers, inspo references..." rows={3} />
           </FormField>
         </div>
       )}

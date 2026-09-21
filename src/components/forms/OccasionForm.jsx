@@ -11,6 +11,8 @@ import RadioGroup from "./fields/RadioGroup";
 import CheckboxGroup from "./fields/CheckboxGroup";
 import PaystackPayment from "./PaystackPayment";
 import AdminPaymentStep from "./AdminPaymentStep";
+import AdminFillTestData from "./AdminFillTestData";
+import { mockOccasionData } from "./mockFormData";
 
 const TOTAL_STEPS = 8;
 
@@ -63,6 +65,7 @@ const emptyState = {
 export default function OccasionForm({ onComplete, amount: amountProp, isAdmin = false }) {
   const { occasion } = useData();
   const packageAmount = (occasion?.find(p => p.featured) ?? occasion?.[0])?.price ?? 0;
+  const fieldVariant = isAdmin ? "light" : "dark";
   const [step, setStep] = useState(0);
   const [data, setData] = useState(emptyState);
   const [showPayment, setShowPayment] = useState(false);
@@ -137,6 +140,11 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
 
   return (
     <div>
+      {isAdmin && (
+        <div className="flex justify-end mb-2">
+          <AdminFillTestData onFill={() => setData({ ...mockOccasionData() })} />
+        </div>
+      )}
       <StepIndicator steps={TOTAL_STEPS} current={step} />
 
       <div className="font-heading text-[#1a1706] text-xl mb-8">
@@ -155,13 +163,13 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
         <div>
           <SectionHeader>Client Information</SectionHeader>
           <FormField label="Full Name" required>
-            <TextInput value={data.fullName} onChange={(e) => set("fullName", e.target.value)} placeholder="Your full name" />
+            <TextInput variant={fieldVariant} value={data.fullName} onChange={(e) => set("fullName", e.target.value)} placeholder="Your full name" />
           </FormField>
           <FormField label="Email" required>
-            <TextInput value={data.email} onChange={(e) => set("email", e.target.value)} placeholder="your@email.com" type="email" />
+            <TextInput variant={fieldVariant} value={data.email} onChange={(e) => set("email", e.target.value)} placeholder="your@email.com" type="email" />
           </FormField>
           <FormField label="Phone" required>
-            <TextInput value={data.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+234 ..." type="tel" />
+            <TextInput variant={fieldVariant} value={data.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+234 ..." type="tel" />
           </FormField>
           <FormField label="Preferred Contact Method">
             <RadioGroup
@@ -187,15 +195,15 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
             />
             {data.stylingTypes.includes("Other") && (
               <div className="mt-3">
-                <TextInput value={data.stylingTypesOther} onChange={(e) => set("stylingTypesOther", e.target.value)} placeholder="Please specify" />
+                <TextInput variant={fieldVariant} value={data.stylingTypesOther} onChange={(e) => set("stylingTypesOther", e.target.value)} placeholder="Please specify" />
               </div>
             )}
           </FormField>
           <FormField label="Event / Shoot Date">
-            <TextInput type="date" value={data.eventDate} onChange={(e) => set("eventDate", e.target.value)} placeholder="DD / MM / YYYY" />
+            <TextInput variant={fieldVariant} type="date" value={data.eventDate} onChange={(e) => set("eventDate", e.target.value)} placeholder="DD / MM / YYYY" />
           </FormField>
           <FormField label="Event / Shoot Location">
-            <TextInput value={data.eventLocation} onChange={(e) => set("eventLocation", e.target.value)} placeholder="City, venue..." />
+            <TextInput variant={fieldVariant} value={data.eventLocation} onChange={(e) => set("eventLocation", e.target.value)} placeholder="City, venue..." />
           </FormField>
           <FormField label="Duration">
             <RadioGroup
@@ -236,7 +244,7 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
         <div>
           <SectionHeader>Styling Scope</SectionHeader>
           <FormField label="Estimated Number of Looks Required">
-            <TextInput value={data.numberOfLooks} onChange={(e) => set("numberOfLooks", e.target.value)} placeholder="e.g. 3" />
+            <TextInput variant={fieldVariant} value={data.numberOfLooks} onChange={(e) => set("numberOfLooks", e.target.value)} placeholder="e.g. 3" />
           </FormField>
           <FormField label="Will you require on-the-day styling support?">
             <RadioGroup
@@ -262,13 +270,13 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
         <div>
           <SectionHeader>Style Direction</SectionHeader>
           <FormField label="How would you describe your personal style?">
-            <TextArea value={data.personalStyle} onChange={(e) => set("personalStyle", e.target.value)} placeholder="Describe your style..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.personalStyle} onChange={(e) => set("personalStyle", e.target.value)} placeholder="Describe your style..." rows={3} />
           </FormField>
           <FormField label="Are there designers, aesthetics, or references you love?">
-            <TextArea value={data.designerRefs} onChange={(e) => set("designerRefs", e.target.value)} placeholder="Designers, aesthetics, references..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.designerRefs} onChange={(e) => set("designerRefs", e.target.value)} placeholder="Designers, aesthetics, references..." rows={3} />
           </FormField>
           <FormField label="Are there any styles, colours, or silhouettes you prefer to avoid?">
-            <TextArea value={data.avoidStyles} onChange={(e) => set("avoidStyles", e.target.value)} placeholder="What to avoid..." rows={3} />
+            <TextArea variant={fieldVariant} value={data.avoidStyles} onChange={(e) => set("avoidStyles", e.target.value)} placeholder="What to avoid..." rows={3} />
           </FormField>
         </div>
       )}
@@ -352,7 +360,7 @@ export default function OccasionForm({ onComplete, amount: amountProp, isAdmin =
             />
           </FormField>
           <FormField label="Is there anything else we should be aware of?">
-            <TextArea value={data.otherDetails} onChange={(e) => set("otherDetails", e.target.value)} placeholder="Any other details..." rows={4} />
+            <TextArea variant={fieldVariant} value={data.otherDetails} onChange={(e) => set("otherDetails", e.target.value)} placeholder="Any other details..." rows={4} />
           </FormField>
 
           <SectionHeader>Acknowledgement</SectionHeader>

@@ -1,6 +1,6 @@
-import { adminDb } from "./_firebaseAdmin.js";
+const { adminDb } = require("./_firebaseAdmin.cjs");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
@@ -39,4 +39,4 @@ export default async function handler(req, res) {
     console.error("track-booking error:", err.message);
     return res.status(500).json({ error: "Failed to look up bookings" });
   }
-}
+};
