@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "@/firebase/config";
+import { auth, db } from "@/firebase/config";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as fbSignOut,
 } from "firebase/auth";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { logActivity } from "@/lib/activityLog";
 
 const AuthContext = createContext(null);
 
@@ -24,9 +26,17 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  const signIn = (email, password) => {
+  const signIn = async (email, password) => {
     if (!auth) return Promise.reject(new Error("Firebase not configured"));
-    return signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    // Best-effort — a non-admin account has no write access to /admins and
+    // this should just silently no-op for them, not block sign-in.
+    const emailLower = email.trim().toLowerCase();
+    if (db) {
+      updateDoc(doc(db, "admins", emailLower), { lastLogin: serverTimestamp() }).catch(() => {});
+    }
+    logActivity("login", {}, emailLower).catch(() => {});
+    return result;
   };
 
   const signOut = () => {

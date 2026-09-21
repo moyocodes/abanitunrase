@@ -62,5 +62,13 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Activity log — an audit trail of key admin actions (who did what,
+    // when). Admins can read it and append to it; nothing is ever updated
+    // or deleted, so entries can't be edited after the fact.
+    match /activityLog/{id} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
   }
 }

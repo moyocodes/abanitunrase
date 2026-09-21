@@ -115,8 +115,8 @@ export default function AdminConsultations() {
           </div>
 
           {/* Global on/off */}
-          <div className="border border-[#1a1706]/10 bg-white p-5 mb-4 flex items-center justify-between gap-6">
-            <div>
+          <div className="border border-[#1a1706]/10 bg-white p-5 mb-4 flex items-center justify-between gap-4 sm:gap-6">
+            <div className="min-w-0">
               <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#1a1706]/65 font-bold mb-0.5">
                 Consultation Bookings
               </div>
@@ -130,8 +130,8 @@ export default function AdminConsultations() {
           </div>
 
           {/* Current-week-only restriction */}
-          <div className={`border border-[#1a1706]/10 bg-white p-5 mb-4 flex items-center justify-between gap-6 transition-opacity ${!slots.enabled ? "opacity-40 pointer-events-none" : ""}`}>
-            <div>
+          <div className={`border border-[#1a1706]/10 bg-white p-5 mb-4 flex items-center justify-between gap-4 sm:gap-6 transition-opacity ${!slots.enabled ? "opacity-40 pointer-events-none" : ""}`}>
+            <div className="min-w-0">
               <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#1a1706]/65 font-bold mb-0.5">
                 Restrict to Current Week Only
               </div>
@@ -160,18 +160,18 @@ export default function AdminConsultations() {
               return (
                 <div
                   key={key}
-                  className={`px-5 py-4 flex items-center gap-4 transition-opacity ${
+                  className={`px-5 py-4 flex items-center gap-3 sm:gap-4 flex-wrap transition-opacity ${
                     !slots.enabled ? "opacity-40 pointer-events-none" : ""
                   }`}
                 >
                   <Toggle on={day.open} onToggle={() => toggleDay(key)} />
 
-                  <div className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#1a1706]/60 w-24 flex-shrink-0">
+                  <div className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#1a1706]/60 w-20 sm:w-24 flex-shrink-0">
                     {label}
                   </div>
 
                   {day.open ? (
-                    <div className="flex items-center gap-2 flex-1 flex-wrap">
+                    <div className="flex items-center gap-2 flex-1 flex-wrap min-w-0">
                       <input
                         type="time"
                         value={day.start}

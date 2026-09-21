@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { useAuth } from "@/providers";
-import { listAdmins, grantAdmin, revokeAdmin } from "@/lib/admins";
+import { listAdmins, grantAdmin, revokeAdmin, createAdmin } from "@/lib/admins";
+import { logActivity } from "@/lib/activityLog";
 
 function Toast({ message, type }) {
   return (
@@ -14,13 +15,37 @@ function Toast({ message, type }) {
   );
 }
 
+function generatePassword() {
+  // Readable-ish temp password: an admin will hand this to the new person
+  // once, who should change it after first login.
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  let out = "";
+  for (let i = 0; i < 12; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
+function formatDate(val) {
+  if (!val) return "—";
+  const d = val?.seconds ? new Date(val.seconds * 1000) : new Date(val);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export default function AdminUsers() {
   const { user } = useAuth();
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+
   const [email, setEmail] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [password, setPassword] = useState(generatePassword());
+  const [creating, setCreating] = useState(false);
+  const [createdCreds, setCreatedCreds] = useState(null);
+
+  const [existingEmail, setExistingEmail] = useState("");
+  const [granting, setGranting] = useState(false);
+  const [showExistingForm, setShowExistingForm] = useState(false);
+
   const [toast, setToast] = useState(null);
 
   function showToast(message, type = "success") {
@@ -41,20 +66,41 @@ export default function AdminUsers() {
     load();
   }, []);
 
-  const handleGrant = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     const trimmed = email.trim();
+    if (!trimmed || !password) return;
+    setCreating(true);
+    try {
+      await createAdmin(trimmed, password);
+      logActivity("admin_created", { target: trimmed }, user?.email).catch(() => {});
+      setCreatedCreds({ email: trimmed, password });
+      setEmail("");
+      setPassword(generatePassword());
+      showToast(`Admin account created for ${trimmed}`);
+      load();
+    } catch (err) {
+      showToast(err.message || "Failed to create admin account", "error");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleGrantExisting = async (e) => {
+    e.preventDefault();
+    const trimmed = existingEmail.trim();
     if (!trimmed) return;
-    setSaving(true);
+    setGranting(true);
     try {
       await grantAdmin(trimmed);
-      setEmail("");
+      logActivity("admin_granted", { target: trimmed }, user?.email).catch(() => {});
+      setExistingEmail("");
       showToast(`Admin access granted to ${trimmed}`);
       load();
     } catch (err) {
       showToast(err.message || "Failed to grant admin access", "error");
     } finally {
-      setSaving(false);
+      setGranting(false);
     }
   };
 
@@ -65,6 +111,7 @@ export default function AdminUsers() {
       return;
     try {
       await revokeAdmin(targetEmail);
+      logActivity("admin_revoked", { target: targetEmail }, user?.email).catch(() => {});
       showToast(`Admin access removed for ${targetEmail}`);
       load();
     } catch (err) {
@@ -78,11 +125,10 @@ export default function AdminUsers() {
 
       <div className="max-w-xl">
         <p className="font-['Outfit'] text-[13px] text-[#1a1706]/55 mb-6 leading-relaxed">
-          People listed here can access <code>/admin</code>. A signed-in
-          Firebase account with no entry here will be blocked from every
-          admin page and Firestore write, even with the right password —
-          this list is the actual gate. Changes apply immediately, on this
-          person's very next action — no sign-out/sign-in required.
+          Only people listed below can access <code>/admin</code>. Only an
+          existing admin can create a new one — there's no public sign-up.
+          Access applies immediately on their very next action, no
+          sign-out/sign-in required on either side.
         </p>
 
         {loadError && (
@@ -91,33 +137,99 @@ export default function AdminUsers() {
           </div>
         )}
 
-        <form onSubmit={handleGrant} className="flex gap-2 mb-6">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="new-admin@example.com"
-            required
-            className="flex-1 border border-[#e8e5dc] bg-white px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors"
-          />
+        {/* Create new admin — primary flow */}
+        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#1a1706]/55 font-semibold mb-3">
+          + Create New Admin
+        </p>
+        <form onSubmit={handleCreate} className="border border-[#e8e5dc] bg-white p-4 mb-3 space-y-3">
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-[#1a1706]/40 mb-1.5">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="new-admin@example.com"
+              required
+              className="w-full border border-[#e8e5dc] px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-[#1a1706]/40 mb-1.5">
+              Temporary Password
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="flex-1 border border-[#e8e5dc] px-3 py-2 font-mono text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setPassword(generatePassword())}
+                className="font-mono text-[10px] tracking-[0.14em] uppercase px-3 py-2 border border-[#e8e5dc] text-[#1a1706]/55 hover:border-[#1a1706]/30 transition-colors bg-transparent cursor-pointer"
+              >
+                Regenerate
+              </button>
+            </div>
+          </div>
           <button
             type="submit"
-            disabled={saving}
-            className="font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40"
+            disabled={creating}
+            className="w-full font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2.5 bg-[#1a1706] text-[#f5f0e6] border-none cursor-pointer disabled:opacity-40"
           >
-            {saving ? "Granting…" : "+ Grant Access"}
+            {creating ? "Creating…" : "Create Admin Account"}
           </button>
         </form>
 
-        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-2 font-semibold">
-          Note for a brand-new admin
-        </p>
-        <p className="font-['Outfit'] text-[12px] text-[#1a1706]/45 mb-8 leading-relaxed">
-          The email must already exist as a Firebase Auth user (sign up
-          normally, or create it in Firebase Console → Authentication) before
-          you can grant it admin access here. The document id this creates is
-          the lowercased email — matched exactly by{" "}
-          <code>firestore.rules</code>.
+        {createdCreds && (
+          <div className="border border-emerald-200 bg-emerald-50 px-4 py-3 mb-6 font-mono text-[11px] text-emerald-800 leading-relaxed">
+            <div className="font-semibold mb-1">
+              Share these with {createdCreds.email} now — shown only once:
+            </div>
+            <div>Email: {createdCreds.email}</div>
+            <div>Password: {createdCreds.password}</div>
+            <div className="mt-1 text-emerald-700/70">
+              They should change this password after first login.
+            </div>
+          </div>
+        )}
+
+        {/* Grant existing account — secondary, collapsed by default */}
+        <button
+          type="button"
+          onClick={() => setShowExistingForm((v) => !v)}
+          className="font-mono text-[10px] tracking-[0.14em] uppercase text-[#1a1706]/40 hover:text-[#1a1706]/70 transition-colors bg-transparent border-none cursor-pointer mb-6"
+        >
+          {showExistingForm ? "− Hide" : "+"} Grant access to an existing Firebase account instead
+        </button>
+
+        {showExistingForm && (
+          <form onSubmit={handleGrantExisting} className="flex flex-col sm:flex-row gap-2 mb-6">
+            <input
+              type="email"
+              value={existingEmail}
+              onChange={(e) => setExistingEmail(e.target.value)}
+              placeholder="already-has-a-login@example.com"
+              required
+              className="flex-1 min-w-0 border border-[#e8e5dc] bg-white px-3 py-2 font-['Outfit'] text-[13px] text-[#1a1706]/80 outline-none focus:border-[#1a1706]/30 transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={granting}
+              className="font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2 border border-[#1a1706]/20 text-[#1a1706] hover:bg-[#1a1706]/5 transition-colors bg-transparent cursor-pointer disabled:opacity-40 whitespace-nowrap"
+            >
+              {granting ? "Granting…" : "Grant Access"}
+            </button>
+          </form>
+        )}
+
+        <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-2 font-semibold mt-2">
+          Current Admins
         </p>
 
         {loading ? (
@@ -135,20 +247,30 @@ export default function AdminUsers() {
             {admins.map((a) => (
               <div
                 key={a.email}
-                className="flex items-center justify-between px-4 py-3 bg-white"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3 bg-white"
               >
-                <span className="font-['Outfit'] text-[13px] text-[#1a1706]">
-                  {a.email}
-                  {a.email === user?.email && (
-                    <span className="ml-2 font-mono text-[9px] tracking-[0.14em] uppercase text-[#1a1706]/35">
-                      (you)
+                <div className="min-w-0">
+                  <div className="font-['Outfit'] text-[13px] text-[#1a1706] break-all sm:break-normal">
+                    {a.email}
+                    {a.email === user?.email && (
+                      <span className="ml-2 font-mono text-[9px] tracking-[0.14em] uppercase text-[#1a1706]/35">
+                        (you)
+                      </span>
+                    )}
+                    <span className="ml-2 font-mono text-[9px] tracking-[0.14em] uppercase text-[#1a1706]/35 border border-[#e8e5dc] px-1.5 py-0.5 whitespace-nowrap">
+                      Admin
                     </span>
-                  )}
-                </span>
+                  </div>
+                  <div className="font-mono text-[10px] text-[#1a1706]/35 mt-0.5">
+                    Added {formatDate(a.addedAt)}
+                    {a.addedBy ? ` by ${a.addedBy}` : ""}
+                    {" · "}Last login {a.lastLogin ? formatDate(a.lastLogin) : "never"}
+                  </div>
+                </div>
                 {a.email !== user?.email && (
                   <button
                     onClick={() => handleRevoke(a.email)}
-                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 transition-colors bg-transparent cursor-pointer"
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 transition-colors bg-transparent cursor-pointer self-start sm:self-auto flex-shrink-0"
                   >
                     Remove Access
                   </button>
@@ -160,8 +282,8 @@ export default function AdminUsers() {
 
         <p className="font-mono text-[10px] text-[#1a1706]/35 mt-6 leading-relaxed">
           You can also add or remove admins directly in Firebase Console →
-          Firestore Database → the <code>admins</code> collection, if this
-          page is ever unreachable.
+          Firestore Database → the <code>admins</code> collection (top level,
+          not nested under anything else), if this page is ever unreachable.
         </p>
       </div>
     </AdminLayout>

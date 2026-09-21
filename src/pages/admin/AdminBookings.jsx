@@ -11,8 +11,9 @@ import {
 import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "@/components/forms/PaystackPayment";
 import { WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
-import { useData } from "@/providers";
+import { useData, useAuth } from "@/providers";
 import { FIELD_LABELS, SKIP_FIELDS } from "@/lib/fieldLabels";
+import { logActivity } from "@/lib/activityLog";
 
 const STATUS_OPTIONS = ["new", "held", "confirmed", "completed"];
 
@@ -677,6 +678,7 @@ function AddBookingModal({ pricing, onClose, onComplete }) {
 /* ── Main ─────────────────────────────────────────────────────────────────── */
 export default function AdminBookings() {
   const { pricing, ratesData } = useData();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -745,6 +747,11 @@ export default function AdminBookings() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status } : b)),
       );
+      logActivity(
+        "booking_status_changed",
+        { bookingId: id, client: booking?.data?.fullName || booking?.data?.name, status },
+        user?.email,
+      ).catch(() => {});
       const kind = EMAIL_KIND[status];
       if (
         kind &&
@@ -772,6 +779,7 @@ export default function AdminBookings() {
   // itself — so on completion we just refresh the list from Firestore.
   const handleAddBookingComplete = async () => {
     setAddBookingOpen(false);
+    logActivity("booking_created_by_admin", {}, user?.email).catch(() => {});
     try {
       const b = await getBookings();
       setBookings(b);
@@ -822,6 +830,11 @@ export default function AdminBookings() {
           ? `₦${(bookingAmount / 100).toLocaleString("en-NG")}`
           : undefined,
       }).catch(console.error);
+      logActivity(
+        "payment_confirmed",
+        { bookingId: b.id, client: b.data.fullName || b.data.name, reference: payment.reference },
+        user?.email,
+      ).catch(() => {});
       showToast("Booking confirmed & payment recorded");
     } catch {
       showToast("Payment recorded but status update failed", "error");
@@ -839,6 +852,11 @@ export default function AdminBookings() {
         await deleteContact(deleteTarget.id);
         setContacts((prev) => prev.filter((c) => c.id !== deleteTarget.id));
       }
+      logActivity(
+        deleteTarget.type === "booking" ? "booking_deleted" : "contact_deleted",
+        { id: deleteTarget.id, name: deleteTarget.name },
+        user?.email,
+      ).catch(() => {});
       showToast("Deleted successfully");
     } catch {
       showToast("Delete failed", "error");
@@ -984,7 +1002,7 @@ export default function AdminBookings() {
       )}
 
       {/* Tab bar */}
-      <div className="flex items-center gap-1 mb-5 border-b border-[#e8e5dc]">
+      <div className="flex items-center gap-1 mb-5 border-b border-[#e8e5dc] overflow-x-auto">
         {[
           { key: "bookings", label: "Styling Bookings", count: stylingCount },
           { key: "consultations", label: "Consultations", count: consultCount },
@@ -1077,8 +1095,8 @@ export default function AdminBookings() {
               </p>
             </div>
           ) : (
-            <div className="border border-[#e8e5dc]">
-              <table className="w-full border-collapse">
+            <div className="border border-[#e8e5dc] overflow-x-auto">
+              <table className="w-full border-collapse min-w-[720px]">
                 <thead>
                   <tr>
                     <TH>#</TH>
@@ -1209,8 +1227,8 @@ export default function AdminBookings() {
               </p>
             </div>
           ) : (
-            <div className="border border-[#e8e5dc]">
-              <table className="w-full border-collapse">
+            <div className="border border-[#e8e5dc] overflow-x-auto">
+              <table className="w-full border-collapse min-w-[900px]">
                 <thead>
                   <tr>
                     <TH>#</TH>
