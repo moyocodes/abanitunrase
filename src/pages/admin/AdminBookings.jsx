@@ -9,13 +9,14 @@ import {
   updateBookingStatus,
 } from "@/lib/firestore";
 import { sendBookingEmails } from "@/lib/email";
-import PaystackPayment from "@/components/forms/PaystackPayment";
+import AdminPaymentStep from "@/components/forms/AdminPaymentStep";
 import { WeddingForm, OccasionForm, TravelForm } from "@/components/forms";
 import { useData, useAuth } from "@/providers";
 import { FIELD_LABELS, SKIP_FIELDS } from "@/lib/fieldLabels";
 import { logActivity } from "@/lib/activityLog";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
-const STATUS_OPTIONS = ["new", "held", "confirmed", "completed"];
+const STATUS_OPTIONS = ["new", "held", "confirmed", "fitting", "completed"];
 
 const STATUS_META = {
   new: {
@@ -32,6 +33,11 @@ const STATUS_META = {
     label: "Confirmed",
     badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
     bar: "bg-emerald-400",
+  },
+  fitting: {
+    label: "Fitting In Progress",
+    badge: "bg-violet-50 text-violet-700 border-violet-200",
+    bar: "bg-violet-400",
   },
   completed: {
     label: "Completed",
@@ -94,6 +100,7 @@ const EMAIL_KIND = {
   new: "form_submitted",
   held: "hold",
   confirmed: undefined,
+  fitting: "fitting",
   completed: "completed",
 };
 
@@ -200,9 +207,10 @@ const TH = ({ children, className = "" }) => (
   </th>
 );
 
-const TD = ({ children, className = "" }) => (
+const TD = ({ children, className = "", ...rest }) => (
   <td
     className={`px-3 py-3 border-b border-r border-[#e8e5dc] last:border-r-0 align-middle ${className}`}
+    {...rest}
   >
     {children}
   </td>
@@ -574,41 +582,6 @@ function ContactRow({ contact, idx, onDelete }) {
   );
 }
 
-/* ── Delete confirm modal ─────────────────────────────────────────────────── */
-function DeleteModal({ name, onConfirm, onCancel }) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-sm border border-[#e8e5dc]">
-        <div className="px-6 py-5 border-b border-[#e8e5dc]">
-          <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/45 font-semibold mb-1">
-            Confirm Delete
-          </div>
-          <div className="font-['Outfit'] text-[15px] text-[#1a1706] font-medium">
-            Delete <span className="font-bold">{name}</span>?
-          </div>
-          <div className="font-mono text-[11px] text-[#1a1706]/45 mt-1">
-            This action cannot be undone.
-          </div>
-        </div>
-        <div className="px-6 py-4 flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            className="font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2 border border-[#1a1706]/15 text-[#1a1706]/55 hover:border-[#1a1706]/35 hover:text-[#1a1706]/80 transition-colors font-semibold bg-transparent cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="font-mono text-[11px] tracking-[0.14em] uppercase px-5 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors font-semibold border-none cursor-pointer"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Toast ────────────────────────────────────────────────────────────────── */
 function Toast({ message, type }) {
   return (
@@ -694,6 +667,7 @@ export default function AdminBookings() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [addBookingOpen, setAddBookingOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [emailPrompt, setEmailPrompt] = useState(null); // { kind, booking } | null
   const [loadError, setLoadError] = useState(null);
 
   function showToast(message, type = "success") {
@@ -753,25 +727,28 @@ export default function AdminBookings() {
         user?.email,
       ).catch(() => {});
       const kind = EMAIL_KIND[status];
-      if (
-        kind &&
-        booking?.data?.email &&
-        window.confirm("Send the client an email for this stage?")
-      ) {
-        sendBookingEmails({
-          kind,
-          email: booking.data.email,
-          name: booking.data.fullName || booking.data.name,
-          serviceName: booking.data.service,
-          formType: booking.type,
-          phone: booking.data.phone,
-          preferredTime: booking.data.preferredTime,
-        }).catch(console.error);
+      if (kind && booking?.data?.email) {
+        // Ask via an in-page modal instead of window.confirm() — the
+        // status change itself has already been applied above either way.
+        setEmailPrompt({ kind, booking });
+      } else {
+        showToast("Status updated");
       }
-      showToast("Status updated");
     } catch {
       showToast("Failed to update status", "error");
     }
+  };
+
+  const sendStageEmail = (kind, booking) => {
+    sendBookingEmails({
+      kind,
+      email: booking.data.email,
+      name: booking.data.fullName || booking.data.name,
+      serviceName: booking.data.service,
+      formType: booking.type,
+      phone: booking.data.phone,
+      preferredTime: booking.data.preferredTime,
+    }).catch(console.error);
   };
 
   // The full booking form (WeddingForm/OccasionForm/TravelForm, isAdmin mode)
@@ -793,14 +770,17 @@ export default function AdminBookings() {
   const handlePaymentSuccess = async (payment) => {
     const b = paymentBooking;
     try {
-      const { amount: confirmedAmount } = await confirmBookingPayment(
-        b.id,
-        payment.reference,
-      );
-      const bookingAmount =
-        confirmedAmount > 0
-          ? confirmedAmount
-          : getFallbackAmount(b.type, pricing, ratesData);
+      // A manual reference (admin's "Already Paid" path) already wrote
+      // paid/confirmed directly via markBookingPaidManually — only
+      // re-verify with Paystack for a real Paystack checkout.
+      let bookingAmount = b.data?.amount > 0 ? b.data.amount : getFallbackAmount(b.type, pricing, ratesData);
+      if (!payment.manual) {
+        const { amount: confirmedAmount } = await confirmBookingPayment(
+          b.id,
+          payment.reference,
+        );
+        bookingAmount = confirmedAmount > 0 ? confirmedAmount : bookingAmount;
+      }
       setBookings((prev) =>
         prev.map((x) =>
           x.id === b.id
@@ -932,10 +912,41 @@ export default function AdminBookings() {
       {toast && <Toast message={toast.message} type={toast.type} />}
 
       {deleteTarget && (
-        <DeleteModal
-          name={deleteTarget.name}
+        <ConfirmModal
+          title="Confirm Delete"
+          message={
+            <>
+              Delete <span className="font-bold">{deleteTarget.name}</span>?
+            </>
+          }
+          detail="This action cannot be undone."
+          confirmLabel="Delete"
+          danger
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {emailPrompt && (
+        <ConfirmModal
+          title="Status Updated"
+          message="Send the client an email for this stage?"
+          detail={
+            emailPrompt.booking?.data?.fullName ||
+            emailPrompt.booking?.data?.name ||
+            undefined
+          }
+          confirmLabel="Send Email"
+          cancelLabel="Skip"
+          onConfirm={() => {
+            sendStageEmail(emailPrompt.kind, emailPrompt.booking);
+            setEmailPrompt(null);
+            showToast("Status updated");
+          }}
+          onCancel={() => {
+            setEmailPrompt(null);
+            showToast("Status updated");
+          }}
         />
       )}
 
@@ -974,7 +985,8 @@ export default function AdminBookings() {
                   </button>
                 </div>
                 <div className="px-6">
-                  <PaystackPayment
+                  <AdminPaymentStep
+                    bookingId={paymentBooking.id}
                     email={paymentBooking.data?.email}
                     amount={bookingAmount}
                     name={
@@ -984,6 +996,7 @@ export default function AdminBookings() {
                     preferredTime={paymentBooking.data?.preferredTime}
                     formType={paymentBooking.type}
                     serviceName={serviceLabel}
+                    allFields={paymentBooking.data}
                     onSuccess={handlePaymentSuccess}
                     onClose={() => setPaymentBooking(null)}
                   />

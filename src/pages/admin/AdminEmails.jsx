@@ -118,6 +118,49 @@ Creative Director, Abanitunrase`,
     },
   },
   {
+    key: "fitting",
+    label: "Fitting In Progress",
+    description: "Sent when admin marks a non-bridal booking as Fitting In Progress",
+    placeholders: ["{name}", "{serviceName}"],
+    defaults: {
+      eyebrow: "Fitting In Progress",
+      subject: "Your ABÁNÍTÚNRASE fitting is underway",
+      title: "Your fitting is underway, {name}.",
+      body: `Dear {name},
+
+Your {serviceName} with ABÁNÍTÚNRASE is now in the fitting stage — we're actively working on bringing your look to life.
+
+We'll be in touch with details on scheduling and next steps. If you have any questions in the meantime, feel free to reach out.
+
+Thank you for your patience as we perfect every detail.
+
+With all our love,
+Abanitunrase`,
+    },
+  },
+  {
+    key: "fitting_bridal",
+    label: "Fitting In Progress — Bridal",
+    description: "Sent when admin marks a Wedding / Bridal booking as Fitting In Progress",
+    placeholders: ["{name}"],
+    defaults: {
+      eyebrow: "Fitting In Progress · Bridal",
+      subject: "Your bridal fitting is underway, {name}",
+      title: "Your bridal fitting is underway, {name}.",
+      body: `Dear {name},
+
+Your bridal styling with ABÁNÍTÚNRASE has moved into the fitting stage — we're carefully working on every detail of your look for your big day.
+
+We'll be in touch to schedule your fitting sessions and walk through next steps. Please don't hesitate to reach out if you have any questions.
+
+Thank you for trusting us with this special part of your journey.
+
+With all my love,
+Fiponmileoluwa
+Creative Director, Abanitunrase`,
+    },
+  },
+  {
     key: "completed",
     label: "Booking Completed",
     description: "Sent when admin marks a non-bridal booking as Completed",

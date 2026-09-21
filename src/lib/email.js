@@ -7,6 +7,7 @@ function substitute(text = "", vars = {}) {
 function templateKeyFor(kind, formType) {
   if (kind === "form_submitted") return "form_submitted";
   if (kind === "hold") return "hold";
+  if (kind === "fitting") return formType === "wedding" ? "fitting_bridal" : "fitting";
   if (kind === "completed") return formType === "wedding" ? "completed_bridal" : "completed";
   if (kind === "enquiry") return "enquiry";
   // payment_confirmed — pick by formType

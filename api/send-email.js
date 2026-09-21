@@ -113,6 +113,42 @@ function tmplHold({ name, heldUntil }) {
   };
 }
 
+function tmplFitting({ name, serviceName }) {
+  return {
+    eyebrow: "Fitting In Progress",
+    title: `Your fitting is underway, ${name || "Iyawo"}.`,
+    bodyHtml: [
+      para(`Dear ${name || "Iyawo"},`),
+      para(
+        `Your ${serviceName || "styling"} with ABÁNÍTÚNRASE is now in the fitting stage — we're actively working on bringing your look to life.`,
+      ),
+      para(
+        `We'll be in touch with details on scheduling and next steps. If you have any questions in the meantime, feel free to reach out.`,
+      ),
+      para(`Thank you for your patience as we perfect every detail.`),
+      sig("Abanitunrase"),
+    ].join(""),
+  };
+}
+
+function tmplFittingBridal({ name }) {
+  return {
+    eyebrow: "Fitting In Progress · Bridal",
+    title: `Your bridal fitting is underway, ${name || "Iyawo"}.`,
+    bodyHtml: [
+      para(`Dear ${name || "Iyawo"},`),
+      para(
+        `Your bridal styling with ABÁNÍTÚNRASE has moved into the fitting stage — we're carefully working on every detail of your look for your big day.`,
+      ),
+      para(
+        `We'll be in touch to schedule your fitting sessions and walk through next steps. Please don't hesitate to reach out if you have any questions.`,
+      ),
+      para(`Thank you for trusting us with this special part of your journey.`),
+      sig("Fiponmileoluwa\nCreative Director, Abanitunrase"),
+    ].join(""),
+  };
+}
+
 function tmplPaymentConsultation({ name }) {
   return {
     eyebrow: "Payment Received · Consultation",
@@ -423,6 +459,17 @@ export default async function handler(req, res) {
     adminSubject = `Hold request: ${name || "A client"}`;
     adminTitle = "A 24-hour hold was requested.";
     adminIntro = `${name || "A client"} (${customerEmail}) requested a hold. Expires: ${heldUntil || "24h from now"}.`;
+  } else if (kind === "fitting") {
+    const isWedding = formType === "wedding";
+    customerTmpl = isWedding
+      ? tmplFittingBridal({ name })
+      : tmplFitting({ name, serviceName });
+    subject = isWedding
+      ? `Your bridal fitting is underway, ${name || "Iyawo"}`
+      : `Your ABÁNÍTÚNRASE fitting is underway`;
+    adminSubject = `Fitting in progress: ${name || "Client"}`;
+    adminTitle = "A booking moved to fitting.";
+    adminIntro = `${name || "A client"}'s ${serviceName || "styling"} has moved into the fitting stage.`;
   } else if (kind === "completed") {
     const isWedding = formType === "wedding";
     customerTmpl = isWedding

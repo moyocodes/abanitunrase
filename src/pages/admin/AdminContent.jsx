@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
-import { savePricing } from "@/lib/firestore";
+import { savePricing, saveSettings } from "@/lib/firestore";
 import { fmt, toPriceNumber } from "@/data";
 import { useAuth, useData } from "@/providers";
 import { logActivity } from "@/lib/activityLog";
@@ -18,11 +18,25 @@ export default function AdminContent() {
   // (Firestore pricing, falling back to the real default packages) that the
   // public /rates page's own inline editor reads and writes — editing here
   // and there both save to the same place, so they never drift apart.
-  const { bridal, occasion, travel, loading: dataLoading, refetch } = useData();
+  const { bridal, occasion, travel, ratesData, loading: dataLoading, refetch } = useData();
   const [tab, setTab] = useState("bridal");
   const [items, setItems] = useState({ bridal: [], occasion: [], travel: [] });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+
+  // Individual Styling / Bridal Party — the flat "service + price" lists
+  // shown on the Rates page's Bridal tab. These live under settings/rates
+  // (singlePackages / otherPackages), NOT the pricing collection — a
+  // completely separate document from the bridal/occasion/travel packages
+  // above, which is why they never showed up here before.
+  const [extraLists, setExtraLists] = useState({
+    singlePackages: [],
+    otherPackages: [],
+    singlePackagesLabel: "Individual Styling",
+    otherPackagesLabel: "Bridal Party",
+  });
+  const [savingExtras, setSavingExtras] = useState(false);
+  const [extrasMsg, setExtrasMsg] = useState("");
 
   useEffect(() => {
     if (dataLoading) return;
@@ -30,6 +44,12 @@ export default function AdminContent() {
       bridal: (bridal ?? []).map((p) => ({ ...p })),
       occasion: (occasion ?? []).map((p) => ({ ...p })),
       travel: (travel ?? []).map((p) => ({ ...p })),
+    });
+    setExtraLists({
+      singlePackages: (ratesData?.singlePackages ?? []).map((p) => ({ ...p })),
+      otherPackages: (ratesData?.otherPackages ?? []).map((p) => ({ ...p })),
+      singlePackagesLabel: ratesData?.singlePackagesLabel ?? "Individual Styling",
+      otherPackagesLabel: ratesData?.otherPackagesLabel ?? "Bridal Party",
     });
     // Only re-sync from the source data on initial load, not on every
     // parent re-render — otherwise unsaved edits would get clobbered.
@@ -48,6 +68,42 @@ export default function AdminContent() {
       setMsg("Save failed.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const updateExtraItem = (key, idx, field, value) =>
+    setExtraLists((prev) => ({
+      ...prev,
+      [key]: prev[key].map((item, i) => (i === idx ? { ...item, [field]: value } : item)),
+    }));
+
+  const addExtraItem = (key) =>
+    setExtraLists((prev) => ({
+      ...prev,
+      [key]: [...prev[key], { service: "New Service", price: 0 }],
+    }));
+
+  const removeExtraItem = (key, idx) =>
+    setExtraLists((prev) => ({ ...prev, [key]: prev[key].filter((_, i) => i !== idx) }));
+
+  const handleSaveExtras = async () => {
+    setSavingExtras(true);
+    try {
+      await saveSettings("rates", {
+        ...ratesData,
+        singlePackages: extraLists.singlePackages,
+        otherPackages: extraLists.otherPackages,
+        singlePackagesLabel: extraLists.singlePackagesLabel,
+        otherPackagesLabel: extraLists.otherPackagesLabel,
+      });
+      logActivity("pricing_updated", { category: "rates_extras" }, user?.email).catch(() => {});
+      await refetch();
+      setExtrasMsg("Saved ✓");
+      setTimeout(() => setExtrasMsg(""), 2500);
+    } catch {
+      setExtrasMsg("Save failed.");
+    } finally {
+      setSavingExtras(false);
     }
   };
 
@@ -202,6 +258,96 @@ export default function AdminContent() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Individual Styling / Bridal Party — only shown for the bridal tab,
+          matching where they appear on the public Rates page */}
+      {!loading && tab === "bridal" && (
+        <div className="mt-10">
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <h2 className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#1a1706]/60 font-bold">
+              Individual Styling &amp; Bridal Party
+            </h2>
+            <div className="flex items-center gap-3">
+              {extrasMsg && (
+                <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-emerald-700/70">
+                  {extrasMsg}
+                </span>
+              )}
+              <button onClick={handleSaveExtras} disabled={savingExtras} className={btnPrimary}>
+                {savingExtras ? "Saving…" : "Save →"}
+              </button>
+            </div>
+          </div>
+          <p className="font-mono text-[10px] text-[#1a1706]/35 mb-5 leading-relaxed">
+            These flat service lists appear on the Bridal tab of the live{" "}
+            <a href="/rates" target="_blank" rel="noreferrer" className="underline hover:text-[#1a1706]/60">
+              Rates page
+            </a>
+            , separate from the packages above.
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[
+              { key: "singlePackages", labelKey: "singlePackagesLabel" },
+              { key: "otherPackages", labelKey: "otherPackagesLabel" },
+            ].map(({ key, labelKey }) => (
+              <div key={key} className="bg-white border border-[#e8e5dc]">
+                <div className="px-4 sm:px-5 py-3 border-b border-[#e8e5dc] bg-[#faf9f6]">
+                  <input
+                    value={extraLists[labelKey] ?? ""}
+                    onChange={(e) =>
+                      setExtraLists((prev) => ({ ...prev, [labelKey]: e.target.value }))
+                    }
+                    placeholder="Section heading…"
+                    className="w-full bg-transparent border-none outline-none font-mono text-[10px] tracking-[0.2em] uppercase text-[#1a1706]/70 font-bold"
+                  />
+                </div>
+
+                {(extraLists[key] ?? []).length === 0 && (
+                  <div className="px-5 py-8 text-center font-mono text-[9px] tracking-[0.25em] uppercase text-[#1a1706]/25">
+                    No services — add one below
+                  </div>
+                )}
+
+                {(extraLists[key] ?? []).map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-[#e8e5dc] last:border-0"
+                  >
+                    <input
+                      value={p.service ?? ""}
+                      onChange={(e) => updateExtraItem(key, idx, "service", e.target.value)}
+                      placeholder="Service name…"
+                      className={`${inp} flex-1`}
+                    />
+                    <input
+                      type="number"
+                      value={p.price ?? ""}
+                      onChange={(e) =>
+                        updateExtraItem(key, idx, "price", toPriceNumber(e.target.value))
+                      }
+                      className={`${inp} w-28 sm:w-32 flex-shrink-0`}
+                    />
+                    <button
+                      onClick={() => removeExtraItem(key, idx)}
+                      className="font-mono text-[9px] text-red-400/70 hover:text-red-600 bg-transparent border-none cursor-pointer px-1 flex-shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => addExtraItem(key)}
+                  className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#1a1706]/50 hover:text-[#1a1706] px-4 sm:px-5 py-3 bg-transparent border-none cursor-pointer w-full text-left"
+                >
+                  + Add Service
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </AdminLayout>

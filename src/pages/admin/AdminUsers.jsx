@@ -3,6 +3,7 @@ import AdminLayout from "./AdminLayout";
 import { useAuth } from "@/providers";
 import { listAdmins, grantAdmin, revokeAdmin, createAdmin } from "@/lib/admins";
 import { logActivity } from "@/lib/activityLog";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
 function Toast({ message, type }) {
   return (
@@ -46,6 +47,7 @@ export default function AdminUsers() {
   const [granting, setGranting] = useState(false);
   const [showExistingForm, setShowExistingForm] = useState(false);
 
+  const [revokeTarget, setRevokeTarget] = useState(null);
   const [toast, setToast] = useState(null);
 
   function showToast(message, type = "success") {
@@ -104,11 +106,10 @@ export default function AdminUsers() {
     }
   };
 
-  const handleRevoke = async (targetEmail) => {
-    if (
-      !window.confirm(`Remove admin access for ${targetEmail}? This takes effect immediately, even if they're mid-session.`)
-    )
-      return;
+  const confirmRevoke = async () => {
+    const targetEmail = revokeTarget;
+    setRevokeTarget(null);
+    if (!targetEmail) return;
     try {
       await revokeAdmin(targetEmail);
       logActivity("admin_revoked", { target: targetEmail }, user?.email).catch(() => {});
@@ -122,6 +123,22 @@ export default function AdminUsers() {
   return (
     <AdminLayout title="Admin Users">
       {toast && <Toast message={toast.message} type={toast.type} />}
+
+      {revokeTarget && (
+        <ConfirmModal
+          title="Remove Admin Access"
+          message={
+            <>
+              Remove admin access for <span className="font-bold">{revokeTarget}</span>?
+            </>
+          }
+          detail="This takes effect immediately, even if they're mid-session."
+          confirmLabel="Remove Access"
+          danger
+          onConfirm={confirmRevoke}
+          onCancel={() => setRevokeTarget(null)}
+        />
+      )}
 
       <div className="max-w-xl">
         <p className="font-['Outfit'] text-[13px] text-[#1a1706]/55 mb-6 leading-relaxed">
@@ -269,7 +286,7 @@ export default function AdminUsers() {
                 </div>
                 {a.email !== user?.email && (
                   <button
-                    onClick={() => handleRevoke(a.email)}
+                    onClick={() => setRevokeTarget(a.email)}
                     className="font-mono text-[10px] tracking-[0.14em] uppercase px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 transition-colors bg-transparent cursor-pointer self-start sm:self-auto flex-shrink-0"
                   >
                     Remove Access
