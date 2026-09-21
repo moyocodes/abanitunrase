@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers";
 
 export default function AdminLogin() {
@@ -10,6 +10,8 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loggedOutForTheDay = location.state?.reason === "daily-logout";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +37,12 @@ export default function AdminLogin() {
         <h1 className="font-heading italic text-[#1a1706] text-[clamp(28px,4vw,40px)] mb-10 text-center">
           Sign In
         </h1>
+
+        {loggedOutForTheDay && (
+          <p className="font-mono text-[8px] tracking-[0.2em] uppercase text-[#1a1706]/45 text-center mb-8 -mt-4">
+            You were signed out for the day. Please sign in again.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-7">
           <div>

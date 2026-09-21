@@ -692,20 +692,40 @@ export default function AdminBookings() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [addBookingOpen, setAddBookingOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   function showToast(message, type = "success") {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   }
 
-  useEffect(() => {
-    Promise.all([getBookings(), getContacts()])
+  function loadBookings() {
+    setLoading(true);
+    setLoadError(null);
+    return Promise.all([getBookings(), getContacts()])
       .then(([b, c]) => {
         setBookings(b);
         setContacts(c);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        // A permission-denied here almost always means the admin's session
+        // lost (or never had) the `admin` custom claim — surface that
+        // clearly instead of silently rendering an empty "0 bookings" list.
+        const isPermissionError =
+          err?.code === "permission-denied" ||
+          /permission/i.test(err?.message ?? "");
+        setLoadError(
+          isPermissionError
+            ? "Couldn't load bookings — your session is missing admin access. Try signing out and back in."
+            : "Couldn't load bookings. Please refresh the page.",
+        );
+      })
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    loadBookings();
   }, []);
 
   useEffect(() => {
@@ -755,6 +775,7 @@ export default function AdminBookings() {
     try {
       const b = await getBookings();
       setBookings(b);
+      setLoadError(null);
       showToast("Booking created");
     } catch {
       showToast("Booking saved, but the list failed to refresh", "error");
@@ -998,6 +1019,12 @@ export default function AdminBookings() {
           + Add Booking
         </button>
       </div>
+
+      {loadError && (
+        <div className="border border-red-200 bg-red-50 text-red-700 px-4 py-3 mb-4 font-mono text-[12px]">
+          {loadError}
+        </div>
+      )}
 
       {loading ? (
         <p className="font-mono text-[12px] tracking-[0.28em] uppercase text-[#1a1706]/40 py-10 font-semibold">
