@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { markBookingPaidManually } from "@/lib/firestore";
+import { sendBookingEmails } from "@/lib/email";
 import PaystackPayment from "./PaystackPayment";
 
 function formatAmount(kobo) {
@@ -48,6 +49,21 @@ export default function AdminPaymentStep({
     setError("");
     try {
       await markBookingPaidManually(bookingId, reference.trim(), amount);
+      // Same confirmation email the client Paystack flow sends on success,
+      // so a manually-recorded payment doesn't leave the client unnotified.
+      sendBookingEmails({
+        kind: undefined,
+        email,
+        name,
+        phone,
+        preferredTime,
+        formType,
+        serviceName: allFields?.service,
+        amount,
+        amountLabel: amountLabel ?? undefined,
+        reference: reference.trim(),
+        allFields,
+      }).catch(console.error);
       onSuccess({ reference: reference.trim(), manual: true });
     } catch (err) {
       setError(err.message || "Failed to record payment.");
