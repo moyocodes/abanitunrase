@@ -12,11 +12,10 @@ Firebase Admin).
   `settings`, `gallery`, `reviews` collections). Client SDK reads/writes
   directly from the browser for public data; admin-only collections are
   gated by `firestore.rules` (see below).
-- **Auth**: Firebase Auth (email/password), one admin account. Admin access
-  is gated by a custom claim (`admin: true`), not just "signed in" — see
-  `firestore.rules`.
+- **Auth**: Firebase Auth (email/password) for login. Admin *authorization*
+  is separate from login — it's a Firestore `admins` collection (doc id =
+  lowercased email), not a custom claim. See "Admin access setup" below.
 - **API routes** (`api/*`, deployed as Vercel Functions):
-  - `grant-admin.cjs` — one-off endpoint to grant the `admin` custom claim.
   - `confirm-payment.cjs` — re-verifies a Paystack reference server-side
     before marking a booking paid (never trust the client's claim of a
     successful payment).
@@ -66,22 +65,33 @@ safe for Firebase web apps, it's not a secret.
 
 ## Admin access setup
 
-Admin access requires the `admin` custom claim on the Firebase Auth user,
-not just being signed in — `firestore.rules` checks
-`request.auth.token.admin == true` for every admin-only collection.
+Admin access requires a document in the Firestore `admins` collection whose
+**id is the person's lowercased email** — not just being signed in, and not
+a Firebase Auth custom claim (that approach was tried and scrapped; see the
+git history around this README's rewrite if you want the story). This
+avoids the "must sign out and back in for it to apply" problem custom
+claims have, since `firestore.rules`' `isAdmin()` does a live lookup on
+every request instead of reading a cached token claim:
 
-To grant it to an account:
-
-```bash
-curl -X POST https://abanitunrase.com/api/grant-admin \
-  -H "Authorization: Bearer $SETUP_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@abanitunrase.com"}'
+```
+firestore.rules:
+  function isAdmin() {
+    return request.auth != null &&
+      exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));
+  }
 ```
 
-`SETUP_SECRET` is set in Vercel's env vars. After a successful grant, the
-admin **must sign out and back in** — the claim only lands in a fresh ID
-token, an already-open session keeps the old one until it re-authenticates.
+**Managing admins day-to-day**: use the dashboard's **Admin Users** page
+(`/admin/users`) — list, grant, and revoke access by email, changes apply
+immediately (no re-login needed). Backed by `src/lib/admins.js`, plain
+client-side Firestore reads/writes, no API endpoint involved.
+
+**Bootstrapping the very first admin** (chicken-and-egg: `isAdmin()`
+requires an existing `admins` doc to grant a new one, so nobody can grant
+the first one through the app): create it directly in **Firebase Console →
+Firestore Database → `admins` collection → Add document**, with the
+document id set to the person's lowercased email, and any field (e.g.
+`addedAt`) inside it.
 
 `firestore.rules` changes are **not** deployed by pushing to GitHub/Vercel —
 that's a separate step (`firebase deploy --only firestore:rules`, or paste
@@ -89,7 +99,9 @@ that's a separate step (`firebase deploy --only firestore:rules`, or paste
 
 Admin sessions also force-sign-out once per local calendar day (midnight,
 admin's own browser timezone) — see `useMidnightLogout` in
-`src/components/ProtectedRoute.jsx`.
+`src/components/ProtectedRoute.jsx`. This is unrelated to the admin-access
+check above; it's just a standing "don't leave a tab logged in forever"
+policy.
 
 ## Known gotchas (read before debugging "it broke in prod but not locally")
 
@@ -124,3 +136,11 @@ admin's own browser timezone) — see `useMidnightLogout` in
   `index.html` coming back from a POST to `/api/whatever` means the request
   never reached the function at all (routing/CDN layer) — no amount of
   fixing the function's own code will change that.
+- **Admin access was originally a Firebase Auth custom claim** (`admin:
+  true`, granted via `api/grant-admin.cjs`). That approach was abandoned —
+  granting it required a Bearer-token API call from outside the app
+  (Postman/curl) with no in-app UI, changes needed a full sign-out/sign-in
+  to take effect, and a suspected Cloudflare-caching interaction made that
+  API call unreliable to even verify. Don't reintroduce a custom-claim
+  check in `firestore.rules` — admin status is a plain Firestore lookup now
+  (see "Admin access setup" above), which sidesteps all of that.

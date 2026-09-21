@@ -2,8 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Admin status lives in the `admins` collection (doc id = lowercased
+    // email), not a custom claim — editable directly in Firebase Console or
+    // via the dashboard's Admin Users page, takes effect immediately (no
+    // re-login needed, since it's a live Firestore read, not a token claim).
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));
+    }
+
+    // The admins collection itself: an admin can read the roster and manage
+    // other admins; nobody else can read or write it directly (all access
+    // for a non-admin's own bootstrap case goes through nothing — the very
+    // first admin must be added directly in Firebase Console).
+    match /admins/{email} {
+      allow read, write: if isAdmin();
     }
 
     // Bookings — anyone can submit; reads/updates go through server-side API routes

@@ -709,15 +709,15 @@ export default function AdminBookings() {
       })
       .catch((err) => {
         console.error(err);
-        // A permission-denied here almost always means the admin's session
-        // lost (or never had) the `admin` custom claim — surface that
-        // clearly instead of silently rendering an empty "0 bookings" list.
+        // A permission-denied here almost always means this account isn't
+        // in the `admins` Firestore collection — surface that clearly
+        // instead of silently rendering an empty "0 bookings" list.
         const isPermissionError =
           err?.code === "permission-denied" ||
           /permission/i.test(err?.message ?? "");
         setLoadError(
           isPermissionError
-            ? "Couldn't load bookings — your session is missing admin access. Try signing out and back in."
+            ? "Couldn't load bookings — this account doesn't have admin access. Check /admin/users or the Firestore admins collection."
             : "Couldn't load bookings. Please refresh the page.",
         );
       })

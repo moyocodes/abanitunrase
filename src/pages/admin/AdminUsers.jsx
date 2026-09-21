@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { useAuth } from "@/providers";
-import { listAdmins, grantAdmin, revokeAdmin } from "@/lib/adminUsers";
+import { listAdmins, grantAdmin, revokeAdmin } from "@/lib/admins";
 
 function Toast({ message, type }) {
   return (
@@ -60,7 +60,7 @@ export default function AdminUsers() {
 
   const handleRevoke = async (targetEmail) => {
     if (
-      !window.confirm(`Remove admin access for ${targetEmail}? They'll need to be re-granted to sign back into the admin console.`)
+      !window.confirm(`Remove admin access for ${targetEmail}? This takes effect immediately, even if they're mid-session.`)
     )
       return;
     try {
@@ -78,10 +78,11 @@ export default function AdminUsers() {
 
       <div className="max-w-xl">
         <p className="font-['Outfit'] text-[13px] text-[#1a1706]/55 mb-6 leading-relaxed">
-          People listed here can sign into <code>/admin</code>. A signed-in
-          Firebase account with no admin access here will be blocked from
-          every admin page and Firestore write, even with the right
-          password — this list is the actual gate.
+          People listed here can access <code>/admin</code>. A signed-in
+          Firebase account with no entry here will be blocked from every
+          admin page and Firestore write, even with the right password —
+          this list is the actual gate. Changes apply immediately, on this
+          person's very next action — no sign-out/sign-in required.
         </p>
 
         {loadError && (
@@ -109,12 +110,14 @@ export default function AdminUsers() {
         </form>
 
         <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#1a1706]/40 mb-2 font-semibold">
-          Note for a brand-new account
+          Note for a brand-new admin
         </p>
         <p className="font-['Outfit'] text-[12px] text-[#1a1706]/45 mb-8 leading-relaxed">
           The email must already exist as a Firebase Auth user (sign up
           normally, or create it in Firebase Console → Authentication) before
-          you can grant it admin access here.
+          you can grant it admin access here. The document id this creates is
+          the lowercased email — matched exactly by{" "}
+          <code>firestore.rules</code>.
         </p>
 
         {loading ? (
@@ -131,7 +134,7 @@ export default function AdminUsers() {
           <div className="border border-[#e8e5dc] divide-y divide-[#e8e5dc]">
             {admins.map((a) => (
               <div
-                key={a.uid}
+                key={a.email}
                 className="flex items-center justify-between px-4 py-3 bg-white"
               >
                 <span className="font-['Outfit'] text-[13px] text-[#1a1706]">
@@ -156,9 +159,9 @@ export default function AdminUsers() {
         )}
 
         <p className="font-mono text-[10px] text-[#1a1706]/35 mt-6 leading-relaxed">
-          After a grant or removal, that person must sign out and back into{" "}
-          <code>/admin/login</code> for it to take effect — the change only
-          lands in a fresh session, not one already open.
+          You can also add or remove admins directly in Firebase Console →
+          Firestore Database → the <code>admins</code> collection, if this
+          page is ever unreachable.
         </p>
       </div>
     </AdminLayout>

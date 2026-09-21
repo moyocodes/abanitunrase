@@ -1,29 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers";
-
-// TEMPORARY DEBUG — remove once the admin-claim issue is confirmed fixed.
-// Shows the real custom claims on the current session's ID token, so we can
-// tell "claim never granted" apart from "claim granted but token stale"
-// apart from "rules problem" without guessing.
-function ClaimsDebugBanner() {
-  const { user } = useAuth();
-  const [info, setInfo] = useState("checking…");
-
-  useEffect(() => {
-    if (!user) return;
-    user
-      .getIdTokenResult(true)
-      .then((r) => setInfo(JSON.stringify(r.claims)))
-      .catch((e) => setInfo("ERROR: " + e.message));
-  }, [user]);
-
-  return (
-    <div className="bg-amber-50 border-b border-amber-200 px-5 py-2 font-mono text-[10px] text-amber-800">
-      DEBUG token claims: {info} — user: {user?.email}
-    </div>
-  );
-}
 
 const NAV = [
   { label: "Dashboard",     to: "/admin",                  icon: "▦" },
@@ -127,8 +104,6 @@ export default function AdminLayout({ children, title }) {
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-
-        <ClaimsDebugBanner />
 
         {/* Top bar */}
         <header className="h-12 bg-white border-b border-[#e8e5dc] flex items-center px-5 gap-4 flex-shrink-0">
