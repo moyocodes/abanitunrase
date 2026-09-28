@@ -15,7 +15,10 @@ Firebase Admin).
 - **Auth**: Firebase Auth (email/password) for login. Admin *authorization*
   is separate from login — it's a Firestore `admins` collection (doc id =
   lowercased email), not a custom claim. See "Admin access setup" below.
-- **API routes** (`api/*`, deployed as Vercel Functions):
+- **API routes** (`api/*`) — plain **Node.js serverless functions** on
+  Vercel. No Next.js and no Express: each file exports a single
+  `handler(req, res)` and Vercel deploys it as its own function at
+  `/api/<filename>`, based purely on the file path. Routes:
   - `confirm-payment.cjs` — re-verifies a Paystack reference server-side
     before marking a booking paid (never trust the client's claim of a
     successful payment).
